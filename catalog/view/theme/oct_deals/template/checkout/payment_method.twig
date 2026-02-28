@@ -1,0 +1,47 @@
+{% if error_warning %}
+<script>
+scNotify('warning', '{{ error_warning }}');
+</script>
+{% endif %}
+{% if payment_methods %}
+<div class="secondary-text">{{ text_payment_method }}</div>
+<div class="form-checkbox-group mt-2">
+	{% for payment_method in payment_methods %}
+	<div class="form-check d-flex align-items-center mb-2 ps-3">
+		<label class="form-check-label d-flex align-items-center" for="payment_method{{ payment_method.code }}">
+	  	{% if payment_method.code == code or not code %}
+	    {% set code = payment_method.code %}
+	    <input type="radio" id="payment_method{{ payment_method.code }}" name="payment_method" value="{{ payment_method.code }}" checked="checked" class="form-check-input" />
+	    {% else %}
+	    <input type="radio" id="payment_method{{ payment_method.code }}" name="payment_method" value="{{ payment_method.code }}" class="form-check-input" />
+	    {% endif %}
+	    <span class="radio-box"></span>
+	    {{ payment_method.title }}
+	    {% if payment_method.terms %}
+	    ({{ payment_method.terms }})
+	    {% endif %} </label>
+	</div>
+	{% endfor %}
+</div>
+{% endif %}
+<div class="dark-text fsz-14 fw-500 mt-4">{{ text_comments }}</div>
+<div class="form-group mb-2">
+	<textarea name="comment" rows="8" class="form-control">{{ comment }}</textarea>
+</div>
+{% if text_agree %}
+<div class="form-checkbox-group">
+	<div class="form-check d-flex align-items-center">
+		<label class="form-check-label d-flex align-items-center">
+			{% if agree %}
+			<input id="payment_scales" type="checkbox" class="form-check-input" name="agree" value="1" checked="checked" />
+			{% else %}
+			<input id="payment_scales" type="checkbox" class="form-check-input" name="agree" value="1" />
+			{% endif %}
+			{{ text_agree }}
+		</label>
+	</div>
+</div>
+{% endif %}
+<div class="buttons my-3">
+    <button type="button" id="button-payment-method" data-loading-text="{{ text_loading }}" class="button button-primary br-7">{{ button_continue }}</button>
+</div>

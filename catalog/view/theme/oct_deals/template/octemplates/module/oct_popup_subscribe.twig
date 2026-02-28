@@ -1,0 +1,94 @@
+<div class="modal fade" id="subscribeModal" tabindex="-1" aria-labelledby="subscribeModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+	    <div class="modal-content">
+			<div class="modal-header p-0 pb-4">
+	            <h5 class="modal-title fsz-20 fw-700 d-flex align-items-center justify-content-between" id="subscribeModalLabel">{{ heading_title }}</h5>
+	            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="13" viewBox="0 0 12 13" fill="none">
+                        <path d="M11.8029 11.5725C12.0633 11.8329 12.0633 12.2551 11.8029 12.5155C11.6731 12.6453 11.5025 12.7111 11.3319 12.7111C11.1612 12.7111 10.9906 12.6462 10.8608 12.5155L5.99911 7.65384L1.13743 12.5155C1.00766 12.6453 0.837017 12.7111 0.666369 12.7111C0.495722 12.7111 0.325075 12.6462 0.195312 12.5155C-0.0651039 12.2551 -0.0651039 11.8329 0.195312 11.5725L5.057 6.71085L0.195312 1.8492C-0.0651039 1.58878 -0.0651039 1.16657 0.195312 0.906158C0.455727 0.645742 0.877907 0.645742 1.13832 0.906158L6.00001 5.76787L10.8617 0.906158C11.1221 0.645742 11.5443 0.645742 11.8047 0.906158C12.0651 1.16657 12.0651 1.58878 11.8047 1.8492L6.943 6.71085L11.8029 11.5725Z" fill="#00A8E8" />
+                    </svg>
+                </button>
+	        </div>
+	        <div id="subscribe-main-block" class="modal-body p-0 pt-4">
+	            <div class="subscribe-text">
+	            	{{ promo_text }}
+	            </div>
+				{% if thumb %}
+	            	<div class="d-flex align-items-center justify-content-center my-5">
+						<img src="image/{{ thumb }}" alt="subscribe-img" width="100" height="100">
+					</div>
+				{% endif %}
+	            <div class="input-group">
+					<span class="input-group-text" id="emailSubscribeIcon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 16 15" fill="none">
+							<path
+								d="M12.9231 14.4517H3.07692C1.09292 14.4517 0 13.3588 0 11.3748V3.99019C0 2.00619 1.09292 0.913269 3.07692 0.913269H12.9231C14.9071 0.913269 16 2.00619 16 3.99019V11.3748C16 13.3588 14.9071 14.4517 12.9231 14.4517ZM3.07692 2.14404C1.78297 2.14404 1.23077 2.69624 1.23077 3.99019V11.3748C1.23077 12.6688 1.78297 13.221 3.07692 13.221H12.9231C14.217 13.221 14.7692 12.6688 14.7692 11.3748V3.99019C14.7692 2.69624 14.217 2.14404 12.9231 2.14404H3.07692ZM8.84435 8.23963L12.8746 5.30875C13.1495 5.10937 13.2102 4.72374 13.01 4.44886C12.8106 4.17481 12.4268 4.11245 12.1502 4.31347L8.11979 7.24435C8.04759 7.29686 7.95161 7.29686 7.87941 7.24435L3.84896 4.31347C3.57162 4.11245 3.18857 4.17563 2.98918 4.44886C2.78898 4.72374 2.84973 5.10855 3.1246 5.30875L7.15485 8.24044C7.40757 8.42424 7.70381 8.51532 7.9992 8.51532C8.29458 8.51532 8.59245 8.42342 8.84435 8.23963Z"
+								fill="#00171F"></path>
+						</svg>
+					</span>
+					<input type="email" name="email" value="{{ email }}" class="form-control" id="inputEmailSubscribe" placeholder="{{ enter_email }}" inputmode="email" aria-label="email" aria-describedby="emailSubscribeIcon">
+				</div>
+				{% if text_terms %}
+					<div class="form-check py-3">
+						<input id="agreeSubscribeCheck" type="checkbox" class="form-check-input" name="agree">
+						<label class="form-check-label" for="agreeSubscribeCheck">
+							{{ text_terms }}
+						</label>
+					</div>
+				{% endif %}
+				<button type="submit" id="make_subscribe" class="button button-primary br-7 w-100"><span class="button-text">{{ button_subscribe }}</span></button>
+				<div class="ds-popup-successs d-none flex-column align-items-center">
+                    <img src="catalog/view/theme/oct_deals/images/success.svg" alt="" width="80" height="82">
+                    <div id="popupSuccessSubscribeText" class="my-4 text-center secondary-text fw-300"></div>
+                    <button type="button" class="button button-primary br-7 w-100" data-bs-dismiss="modal">{{ oct_info_bar_close }}</button>
+                </div>
+			</div>
+	    </div>
+	</div>
+<script>
+$("#inputEmailSubscribe, #agreeSubscribeCheck").on("change paste keyup", function() {
+	$(this).removeClass('error_style');
+});
+$('#make_subscribe').on('click', function() {
+	$.ajax({
+		type: 'post',
+		url:  'index.php?route=octemplates/module/oct_subscribe/makeSubscribe',
+		dataType: 'json',
+		cache: false,
+		data: $('#subscribeModal input[type=\'email\'], #subscribeModal input[type=\'checkbox\']').serialize(),
+		beforeSend: function() {
+			masked('body', true);
+
+			$('#make_subscribe').data('original-content', $('#make_subscribe').html());
+			$('#make_subscribe').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>').prop('disabled', true);
+		},
+		complete: function() {
+			masked('body', false);
+
+			setTimeout(function () {
+				$('#make_subscribe').html($('#make_subscribe').data('original-content')).prop('disabled', false);
+			}, 600);
+		},
+		success: function(json) {
+			if (json['error']) {
+				$('#subscribeModal .text-danger').remove();
+				let errorOption = '';
+
+				$.each(json['error'], function(i, val) {
+					$('#subscribeModal [name="' + i + '"]').addClass('error_style');
+					errorOption += '<div class="alert-text-item">' + val + '</div>';
+				});
+
+				scNotify('danger', errorOption);
+			} else {
+				if (json['output']) {
+					$('#popupSuccessSubscribeText').html(json['output']);
+					$("#subscribe-main-block").html($(".ds-popup-successs"));
+					$(".ds-popup-successs").removeClass("d-none").addClass("d-flex");
+				}
+			}
+		}
+	});
+});
+</script>
+</div>

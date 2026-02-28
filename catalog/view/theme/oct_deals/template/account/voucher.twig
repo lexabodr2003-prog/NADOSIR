@@ -1,0 +1,138 @@
+{{ header }}
+<div id="account-voucher" class="container-fluid container-xl flex-grow-1">
+	<nav aria-label="breadcrumb">
+        <ul class="breadcrumb ds-breadcrumb fsz-12">
+        {% for breadcrumb in breadcrumbs %}
+            {% if loop.last %}
+                <li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+            {% else %}
+                <li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </nav>
+	<main>
+		<div class="row">
+			<div class="col-12 ds-page-title pb-3">
+				<h1>{{ heading_title }}</h1>
+			</div>
+		</div>
+		<div class="content-top-box">{{ content_top }}</div>
+		{% if error_warning %}
+			<script>
+				scNotify('warning', '{{ error_warning }}');
+			</script>
+		{% endif %}
+		<div class="ds-account row g-3">
+			{{ column_left }}
+		    {% if column_left and column_right %}
+                {% set class = 'col-xl-6' %}
+            {% elseif column_left or column_right %}
+                {% set class = 'col-xl-9' %}
+            {% else %}
+                {% set class = 'col-xl-12' %}
+            {% endif %}
+		    <div id="content" class="{{ class }}">
+			    <div class="content-block h-100">
+			      	<div class="h3 mt-0 mb-3">{{ text_description }}</div>
+					<form action="{{ action }}" method="post" enctype="multipart/form-data" class="form-horizontal">
+						<fieldset class="p-0">
+							<div class="form-group mb-3">
+								<label class="dark-text fsz-14 fw-500 mb-1" for="input-to-name"><span class="required">*</span> {{ entry_to_name }}</label>
+								{% if error_to_name %}
+									<script>
+										scNotify('warning', '{{ error_to_name }}');
+									</script>
+								{% endif %}
+								<input type="text" name="to_name" value="{{ to_name }}" id="input-to-name" class="form-control" />
+							</div>
+							<div class="form-group mb-3">
+								<label class="dark-text fsz-14 fw-500 mb-1" for="input-to-email"><span class="required">*</span> {{ entry_to_email }}</label>
+								{% if error_to_email %}
+									<script>
+										scNotify('warning', '{{ error_to_email }}');
+									</script>
+								{% endif %}
+								<input type="email" name="to_email" value="{{ to_email }}" id="input-to-email" class="form-control" inputmode="email">
+							</div>
+							<div class="form-group mb-3">
+								<label class="dark-text fsz-14 fw-500 mb-1" for="input-from-name"><span class="required">*</span> {{ entry_from_name }}</label>
+								{% if error_from_name %}
+									<script>
+										scNotify('warning', '{{ error_from_name }}');
+									</script>
+								{% endif %}
+								<input type="text" name="from_name" value="{{ from_name }}" id="input-from-name" class="form-control" />
+							</div>
+							<div class="form-group mb-3">
+								<label class="dark-text fsz-14 fw-500 mb-1" for="input-from-email"><span class="required">*</span> {{ entry_from_email }}</label>
+								{% if error_from_email %}
+									<script>
+										scNotify('warning', '{{ error_from_email }}');
+									</script>
+								{% endif %}
+								<input type="email" name="from_email" value="{{ from_email }}" id="input-from-email" class="form-control" inputmode="email">
+							</div>
+							<div class="form-group mb-3">
+								<label class="dark-text fsz-14 fw-500 mb-1"><span class="required">*</span> {{ entry_theme }}</label>
+								{% if error_theme %}
+									<script>
+										scNotify('warning', '{{ error_theme }}');
+									</script>
+								{% endif %}
+								{% for voucher_theme in voucher_themes %}
+									{% if voucher_theme.voucher_theme_id == voucher_theme_id %}
+										<div class="form-check d-flex align-items-center mb-0">
+											<label class="form-check-label d-flex align-items-center">
+												<input type="radio" id="voucher_theme_id{{ voucher_theme.voucher_theme_id }}" class="form-check-input" name="voucher_theme_id" value="{{ voucher_theme.voucher_theme_id }}" checked="checked" />
+												{{ voucher_theme.name }}
+											</label>
+										</div>
+									{% else %}
+										<div class="form-check d-flex align-items-center mb-0">
+											<label class="form-check-labe d-flex align-items-center">
+												<input type="radio" id="voucher_theme_id{{ voucher_theme.voucher_theme_id }}" class="form-check-input" name="voucher_theme_id" value="{{ voucher_theme.voucher_theme_id }}" />
+												{{ voucher_theme.name }}
+											</label>
+										</div>
+									{% endif %}
+								{% endfor %}
+							</div>
+							<div class="form-group mb-3">
+								<label class="dark-text fsz-14 fw-500 mb-1" for="input-message"><span data-toggle="tooltip" title="{{ help_message }}">{{ entry_message }}</span></label>
+								<textarea name="message" cols="40" rows="5" id="input-message" class="form-control">{{ message }}</textarea>
+							</div>
+							<div class="form-group mb-3">
+								<label class="dark-text fsz-14 fw-500 mb-1" for="input-amount"><span data-toggle="tooltip" title="{{ help_amount }}">{{ entry_amount }}</span></label>
+								{% if error_amount %}
+									<script>
+										scNotify('warning', '{{ error_amount }}');
+									</script>
+								{% endif %}
+								<input type="text" name="amount" value="{{ amount }}" id="input-amount" class="form-control" size="5" />
+							</div>
+							{% if text_agree %}
+							<div class="form-checkbox-group mb-3">
+								<div class="form-check d-flex align-items-center mb-0">
+									<label class="form-check-label d-flex align-items-center">
+										{% if agree %}
+											<input type="checkbox" id="scales" class="form-check-input" name="agree" value="1" checked="checked" />
+										{% else %}
+											<input type="checkbox" id="scales" class="form-check-input" name="agree" value="1" />
+										{% endif %}
+										{{ text_agree }}
+									</label>
+								</div>
+							</div>
+							{% endif %}
+							<button type="submit" name="button" class="button button-primary br-7 ds-account-login-button">{{ button_continue }}</button>
+						</fieldset>
+					</form>
+			    </div>
+		    </div>
+		    {{ column_right }}
+		</div>
+		{{ content_bottom }}
+	</main>
+</div>
+{{ footer }}

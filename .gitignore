@@ -1,0 +1,24 @@
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# Временные архивы внутри проекта (не исходный код)
+Archive.tar
+deleted-files.zip
+kamtek.zip
+kamtek_project.zip
+
+# Конфиги с паролями (хранить отдельно, добавлять вручную)
+# config.php
+# admin/config.php
+
+# Логи
+*.log
+storage/logs/
+
+# Кэш и сессии (генерируются при работе CMS)
+storage/cache/
+system/storage/cache/
+system/storage/logs/
+system/storage/session/
+system/storage/upload/

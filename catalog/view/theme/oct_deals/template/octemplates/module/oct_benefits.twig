@@ -1,0 +1,34 @@
+{% if oct_benefits %}
+<div id="ds-shop-advantages-{{ module }}" class="row pt-3 g-2 g-md-3 ds-advantages">
+	{% set key = 0 %}
+	{% for oct_benefit in oct_benefits %}
+	{% set key = key + 1 %}
+		{% if oct_benefit.title[language_id] is defined and oct_benefit.title[language_id] %}
+			<div class="ds-advantages-item">
+				<div id="block{{ module }}-{{ key }}" class="content-block d-flex flex-row flex-xl-column align-items-center text-xl-center h-100 px-2 px-md-3">
+					<img src="{{ oct_benefit.icon }}" alt="{{ oct_benefit.title[language_id] }}" width="40" height="40" loading="lazy">
+					<div class="ds-advantages-item-text d-flex flex-column align-items-start align-items-xl-center ms-2 ms-md-3 ms-xl-0">
+						{% if oct_benefit.link[language_id] is defined and oct_benefit.link[language_id] %}
+							<a href="{{ oct_benefit.link[language_id] }}" class="ds-advantages-item-title mt-xl-3 mb-2 fsz-16 fw-500 dark-text">{{ oct_benefit.title[language_id] }}</a>
+						{% else %}
+							<span class="ds-advantages-item-title mt-xl-3 mb-2 fsz-16 fw-500 dark-text">{{ oct_benefit.title[language_id] }}</span>
+						{% endif %}
+						{% if oct_benefit.text[language_id] is defined and oct_benefit.text[language_id] %}
+							<span class="ds-advantages-item-text fsz-14 light-text">{{ oct_benefit.text[language_id] }}</span>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			<style>
+				{% if oct_benefit.color_title %}
+				#block{{ module }}-{{ key }} .ds-advantages-item-title {color: {{ oct_benefit.color_title }};}
+				{% endif %}
+
+				{% if oct_benefit.color_text %}
+				#block{{ module }}-{{ key }} .ds-advantages-item-text {color: {{ oct_benefit.color_text }};}
+				{% endif %}
+			</style>
+		{% endif %}
+	{% endfor %}
+</div>
+{% endif %}

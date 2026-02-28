@@ -1,0 +1,96 @@
+{% if query_corrected %}
+	<p class="mb-2 dark-text fw-400 fsz-14">{{ text_corrected_search }}</p>
+{% endif %}
+
+{% if manufacturers is not empty %}
+	<p class="fsz-16 fw-500 dark-text">{{ founded_manufacturers }}</p>
+	<div class="ds-livesearch-items-box row mb-3 g-2">
+		{% for category in manufacturers %}
+			<div class="ds-livesearch-categories-item">
+				<a class="content-block d-flex flex-column align-items-center justify-content-center p-2 h-100" href="{{ category.href }}">
+					{% if manufacturer_image %}
+						<img src="{{ category.image }}" alt="{{ category.name }}" width="60" height="60" />
+						<span class="ds-subcategories-title dark-text fw-500 fsz-12 text-center lh-sm mt-2">{{ category.name }}</span>
+					{% else %}
+						<span class="ds-subcategories-title dark-text fw-500 fsz-12 text-center lh-sm">{{ category.name }}</span>
+					{% endif %}
+				</a>
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}
+
+{% if direct_categories is not empty %}
+	<p class="fsz-16 fw-500 dark-text">{{ founded_categories }}</p>
+	<div class="ds-livesearch-items-box row mb-3 g-2">
+		{% for category in direct_categories %}
+			<div class="ds-livesearch-categories-item">
+				<a class="content-block d-flex flex-column align-items-center justify-content-center p-2 h-100" href="{{ category.href }}">
+					{% if category_image %}
+						<img src="{{ category.image }}" alt="{{ category.name }}" width="60" height="60" />
+						<span class="ds-subcategories-title dark-text fw-500 fsz-12 text-center lh-sm mt-2">{{ category.name }}</span>
+					{% else %}
+						<span class="ds-subcategories-title dark-text fw-500 fsz-12 text-center lh-sm">{{ category.name }}</span>
+					{% endif %}
+				</a>
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}
+
+{% if product_categories is not empty %}
+	<p class="fsz-16 fw-500 dark-text">{{ founded_in_categories }}</p>
+	<div class="ds-livesearch-items-box row mb-3 g-2">
+		{% for category in product_categories %}
+			<div class="ds-livesearch-categories-item">
+				<a class="content-block d-flex flex-column align-items-center justify-content-center p-2 h-100" href="{{ category.href }}">
+					{% if category_image %}
+						<img src="{{ category.image }}" alt="{{ category.name }}" width="60" height="60" />
+						<span class="ds-subcategories-title dark-text fw-500 fsz-12 text-center lh-sm mt-2">{{ category.name }}</span>
+					{% else %}
+						<span class="ds-subcategories-title dark-text fw-500 fsz-12 text-center lh-sm">{{ category.name }}</span>
+					{% endif %}
+				</a>
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}
+
+{% if products is not empty %}
+	<p class="fsz-16 fw-500 dark-text">{{ founded_products }}</p>
+	{% for product in products %}
+		<div class="ds-livesearch-item p-3 d-flex br-4 content-border">
+				<div class="ds-livesearch-item-img d-flex flex-column align-items-center justify-content-between pe-3 align-self-stretch">
+					<a href="{{ product.href }}"><img src="{{ product.image }}" alt="{{ product.name }}" width="62" height="62" /></a>
+					<div class="ds-livesearch-item-sticker p-1 w-100 fsz-10 mt-auto d-flex align-items-center justify-content-center {% if product.quantity <= 0 %}red{% else %}green{% endif %}-bg">{{ product.stock }}</div>
+				</div>
+				<div class="ds-livesearch-item-info d-flex flex-column justify-content-between">
+					<div class="ds-livesearch-item-info-top mb-3">
+						<a href="{{ product.href }}" class="ds-livesearch-item-title fsz-14 dark-text fw-500 d-inline-block mb-2">{{ product.name }}</a>
+						{% if model_setting and product.model %}
+							<div class="ds-livesearch-item-code light-text fsz-12"><span>{{ oct_live_search_model }}</span>{{ product.model }}</div>
+						{% endif %}
+						{% if sku_setting and product.sku %}
+							<div class="ds-livesearch-item-code light-text fsz-12"><span>{{ oct_live_search_sku }}</span>{{ product.sku }}</div>
+						{% endif %}
+					</div>
+					{% if price_setting %}
+					<div class="ds-livesearch-item-price mt-auto">
+						{% if product.special %}
+							<div class="ds-price-old light-text text-decoration-line-through fsz-14 mb-1">{{ product.price }}</div>
+							<div class="ds-price-new dark-text fw-700 fsz-18">{{ product.special }}</div>
+						{% else %}
+							<div class="ds-price-new dark-text fw-700 fsz-18">{{ product.price }}</div>
+						{% endif %}
+					</div>
+					{% endif %}
+				</div>
+		</div>
+	{% endfor %}
+{% endif %}
+
+{% if direct_categories is empty and product_categories is empty and manufacturers is empty and products is empty %}
+	<div class="dark-text fw-500 fsz-14">
+		{{ oct_live_search_result_empty }}
+	</div>
+{% endif %}

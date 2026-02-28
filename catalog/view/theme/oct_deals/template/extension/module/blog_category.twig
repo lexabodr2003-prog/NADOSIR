@@ -1,0 +1,32 @@
+<div class="content-block p-0 overflow-hidden">
+	<ul class="list-unstyled ds-column-categories fw-500 fsz-14 p-0">
+		{% for category in categories %}
+			<li class="ds-column-categories-item{% if category.blog_category_id == blog_category_id %} active{% endif %}">
+				<span class="d-flex justify-content-between">
+					<a href="{{ category.href }}">{{ category.name }}</a>
+					{% if category.children %}
+						<button type="button" class="ds-column-categories-toggle ds-btn ds-btn-secondary ds-btn-with-icon br-4 p-0 d-flex align-items-center justify-content-center" aria-label="Expand">
+							<span class="ds-btn-icon ds-btn-icon-chevron"></span>
+						</button>
+					{% endif %}
+				</span>
+				{% if category.children %}
+					<ul class="ds-column-categories-children ds-categories-2 list-unstyled ps-0">
+						{% for child in category.children %}
+							<li class="ds-column-categories-item{% if child.blog_category_id == child_id %} active{% endif %}">
+								<span class="d-flex justify-content-between">
+									<a href="{{ child.href }}">{{ child.name }}</a>
+								</span>
+							</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			</li>
+		{% endfor %}
+	</ul>
+</div>
+<script>
+	window.addEventListener('DOMContentLoaded', () => {
+		toggleColumnCategories();
+	});
+</script>

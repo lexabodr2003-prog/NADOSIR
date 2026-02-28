@@ -1,0 +1,128 @@
+{{ header }}
+<div id="account-return" class="container-fluid container-xl flex-grow-1">
+	<nav aria-label="breadcrumb">
+        <ul class="breadcrumb ds-breadcrumb fsz-12">
+        {% for breadcrumb in breadcrumbs %}
+            {% if loop.last %}
+                <li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+            {% else %}
+                <li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </nav>
+	<main>
+		<div class="row">
+            <div class="col-12 ds-page-title pb-3">
+                <h1>{{ heading_title }}</h1>
+            </div>
+        </div>
+		<div class="content-top-box">{{ content_top }}</div>
+        <div class="ds-account row g-3">
+			{{ column_left }}
+		    {% if column_left and column_right %}
+                {% set class = 'col-xl-6' %}
+            {% elseif column_left or column_right %}
+                {% set class = 'col-xl-9' %}
+            {% else %}
+                {% set class = 'col-xl-12' %}
+            {% endif %}
+		    <div id="content" class="{{ class }}">
+                <div class="content-block h-100">
+					<div class="h3 mt-0 mb-1">{{ text_return_detail }}</div>
+					<div class="ds-account-order">
+						<div class="ds-account-text-order">{{ text_return_id }}<span class="dark-text"> #{{ return_id }}</span></div>
+						<div class="ds-account-text-order">{{ text_date_added }}<span class="dark-text"> {{ date_added }}</span></div>
+						<div class="ds-account-text-order">{{ text_order_id }}<span class="dark-text"> #{{ order_id }}</span></div>
+						<div class="ds-account-text-order">{{ text_date_ordered }}<span class="dark-text"> {{ date_ordered }}</span></div>
+					</div>
+					<div class="h3 mt-3 mb-1">{{ text_product }}</div>
+				    <div class="table-responsive fsz-14 fw-300">
+				        <table class="table table-hover">
+				          <thead class="thead-dark">
+				            <tr>
+				              <th style="width: 33.3%;">{{ column_product }}</th>
+				              <th style="width: 33.3%;">{{ column_model }}</th>
+				              <th style="width: 33.3%;">{{ column_quantity }}</th>
+				            </tr>
+				          </thead>
+				          <tbody>
+				            <tr>
+				              <td>{{ product }}</td>
+				              <td>{{ model }}</td>
+				              <td>{{ quantity }}</td>
+				            </tr>
+				          </tbody>
+				        </table>
+				    </div>
+					<div class="h3 mt-3 mb-1">{{ text_reason }}</div>
+				    <div class="table-responsive fsz-14 fw-300">
+				        <table class="table table-hover">
+				          <thead class="thead-dark">
+				            <tr>
+				              <th style="width: 33.3%;">{{ column_reason }}</th>
+				              <th style="width: 33.3%;">{{ column_opened }}</th>
+				              <th style="width: 33.3%;">{{ column_action }}</th>
+				            </tr>
+				          </thead>
+				          <tbody>
+				            <tr>
+				              <td>{{ reason }}</td>
+				              <td>{{ opened }}</td>
+				              <td>{{ action }}</td>
+				            </tr>
+				          </tbody>
+				        </table>
+				    </div>
+					{% if comment %}
+				    <div class="table-responsive fsz-14 fw-300">
+				        <table class="table table-hover">
+				          <thead class="thead-dark">
+				            <tr>
+				              <th>{{ text_comment }}</th>
+				            </tr>
+				          </thead>
+				          <tbody>
+				            <tr>
+				              <td>{{ comment }}</td>
+				            </tr>
+				          </tbody>
+				        </table>
+				    </div>
+				    {% endif %}
+					<div class="h3 mt-3 mb-1">{{ text_history }}</div>
+				    <div class="table-responsive fsz-14 fw-300 mb-4">
+				        <table class="table table-hover">
+				          <thead class="thead-dark">
+				            <tr>
+				              <th style="width: 33.3%;">{{ column_date_added }}</th>
+				              <th style="width: 33.3%;">{{ column_status }}</th>
+				              <th style="width: 33.3%;">{{ column_comment }}</th>
+				            </tr>
+				          </thead>
+				          <tbody>
+				          {% if histories %}
+				          {% for history in histories %}
+				          <tr>
+				            <td>{{ history.date_added }}</td>
+				            <td>{{ history.status }}</td>
+				            <td>{{ history.comment }}</td>
+				          </tr>
+				          {% endfor %}
+				          {% else %}
+				          <tr>
+				            <td colspan="3">{{ text_no_results }}</td>
+				          </tr>
+				          {% endif %}
+				            </tbody>
+				        </table>
+				    </div>
+			        <a href="{{ continue }}" class="button button-primary br-7 ds-account-login-button">{{ button_continue }}</a>
+			    </div>
+		    </div>
+		    {{ column_right }}
+		</div>
+		{{ content_bottom }}
+	</mai>
+</div>
+{{ footer }}

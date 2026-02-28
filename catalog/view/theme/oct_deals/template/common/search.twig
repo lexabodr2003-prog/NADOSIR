@@ -1,0 +1,111 @@
+<form id="search" class="ds-header-search align-items-center ps-0 ps-md-3">
+	<button type="button" class="ds-header-search-close button button-transparent d-md-none" aria-label="Close search">
+		<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M1 1L13 13M1 13L13 1" stroke="#D84040" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+		</svg>
+	</button>
+	<input id="searchInput" type="text" name="search" value="{{ search }}" placeholder="{{ search_input_header_text }}" class="form-control fsz-12 br-7">
+	<button type="button" aria-label="Search" id="ds-search-button" class="ds-header-search-button button button-transparent">
+		<svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+			xmlns="http://www.w3.org/2000/svg">
+			<path
+				d="M19.2802 18.47L15.4392 14.629C16.7232 13.106 17.5002 11.143 17.5002 9C17.5002 4.175 13.5752 0.25 8.75021 0.25C3.92521 0.25 0.000213623 4.175 0.000213623 9C0.000213623 13.825 3.92521 17.75 8.75021 17.75C10.8932 17.75 12.8562 16.973 14.3792 15.689L18.2202 19.53C18.3662 19.676 18.5582 19.75 18.7502 19.75C18.9422 19.75 19.1342 19.677 19.2802 19.53C19.5732 19.238 19.5732 18.763 19.2802 18.47ZM1.50021 9C1.50021 5.002 4.75221 1.75 8.75021 1.75C12.7482 1.75 16.0002 5.002 16.0002 9C16.0002 12.998 12.7482 16.25 8.75021 16.25C4.75221 16.25 1.50021 12.998 1.50021 9Z"
+				fill="#00171F" />
+		</svg>
+	</button>
+	{% if oct_live_search_status %}
+		<div id="ds_livesearch" class="ds-livesearch">
+			<div class="ds-livesearch-inner"></div>
+		</div>
+	{% endif %}
+</form>
+
+{% if oct_live_search_status %}
+	<script>
+		function clearLiveSearch() {
+			$('#overlay').removeClass('active');
+			$('#overlay').removeClass('transparent');
+			$('#ds_livesearch').removeClass('expanded');
+			$('.ds-livesearch-inner').html('');
+			$('#searchInput').val('').removeClass('active');
+			$('body').removeClass('no-scroll');
+		}
+
+		$(document).ready(function() {
+			openMobileSearch();
+
+			let timer, delay = {{ delay_setting }};
+
+			$('#searchInput').keyup(function(event) {
+				switch(event.keyCode) {
+					case 37:
+					case 39:
+					case 38:
+					case 40:
+						return;
+					case 27:
+						clearLiveSearch();
+						return;
+				}
+
+				clearTimeout(timer);
+
+				timer = setTimeout(function() {
+					let value = $('#search input[name=\'search\']').val();
+					const overlay = document.getElementById('overlay');
+
+					if (value.length >= {{ count_symbol }}) {
+						let key = encodeURIComponent(value);
+						octsearch.search(key, 'desktop');
+					} else if (value.length === 0) {
+						clearLiveSearch();
+					}
+
+					overlay.addEventListener('click', (e) => {
+						const target = e.target;
+						target.classList.remove('active');
+						clearLiveSearch();
+					});
+
+				}, delay );
+			});
+		});
+
+		var octsearch = {
+			'search': function(key, type) {
+				$.ajax({
+					url: 'index.php?route=octemplates/module/oct_live_search',
+					type: 'post',
+					data: 'key=' + key,
+					dataType: 'html',
+					cache: false,
+					beforeSend: function() {
+
+						$('#ds_livesearch').addClass('expanded');
+						let loader = document.createElement('div');
+
+						loader.classList.add('spinner-border');
+						loader.setAttribute('role', 'status');
+						loader.innerHTML = '<span class="visually-hidden">Loading...</span>';
+						$('#search').append(loader);
+						$('body').addClass('no-scroll');
+					},
+					success: function(data) {
+						$('.ds-livesearch-inner').html(data);
+						$('#searchInput, #overlay').addClass('active');
+						$('#overlay').addClass('transparent');
+					},
+					complete: function() {
+						$('#search .spinner-border').remove();
+					}
+				});
+			}
+		}
+	</script>
+{% else %}
+	<script>
+		$(document).ready(function() {
+			openMobileSearch();
+		});
+	</script>
+{% endif %}

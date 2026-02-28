@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+	<code>oct_deals_use_option_image</code>
+	<name>Octemplates - Product main image option</name>
+	<version>1.0.0</version>
+	<author>Octemplates</author>
+	<link>https://octemplates.net/</link>
+
+	<file path="admin/controller/catalog/product.php">
+    	<operation error="skip">
+			<search><![CDATA[protected function getForm() {]]></search>
+			<add position="after"><![CDATA[
+	        $data['oct_product_main_image_option_status'] = $oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA[foreach ($product_images as $product_image) {]]></search>
+			<add position="after"><![CDATA[
+			if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
+				@$image_by_option = $this->model_catalog_product->getProductOptionsToImage($this->request->get['product_id'], $product_image['product_image_id']);
+			} else {
+				$image_by_option = [];
+			}
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA[$data['product_options'] = array();]]></search>
+			<add position="before"><![CDATA[
+	        $this->load->model('tool/image');
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA[if (isset($this->request->get['filter_name']) || isset($this->request->get['filter_model'])) {]]></search>
+			<add position="before"><![CDATA[
+	        $this->load->model('tool/image');
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA['thumb'      => $this->model_tool_image->resize($thumb, 100, 100),]]></search>
+			<add position="after"><![CDATA[
+	        'image_by_option' => $image_by_option,
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA[$product_option_value_data[] = array(]]></search>
+			<add position="after"><![CDATA[
+	        'image' => (isset($product_option_value['image'])) ? $product_option_value['image'] : '',
+	        'thumb' => (isset($product_option_value['image']) && is_file(DIR_IMAGE.$product_option_value['image'])) ? $this->model_tool_image->resize($product_option_value['image'], 100, 100) : $this->model_tool_image->resize('no_image.png', 100, 100),
+			]]></add>
+    	</operation>
+	</file>
+
+	<file path="admin/model/catalog/product.php">
+		<operation error="skip">
+			<search index="0"><![CDATA[$this->db->query("DELETE FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "'");]]></search>
+			<add position="after"><![CDATA[
+	        $oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
+	        if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
+	          $this->db->query("DELETE FROM " . DB_PREFIX . "oct_product_image_by_option WHERE product_id = '" . (int)$product_id . "'");
+	        }
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search index="1"><![CDATA[$this->db->query("INSERT INTO " . DB_PREFIX . "product_image SET product_id = '" . (int)$product_id . "', image = '" . $this->db->escape($product_image['image']) . "', sort_order = '" . (int)$product_image['sort_order'] . "'");]]></search>
+			<add position="after"><![CDATA[
+			if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
+				$product_image_id = $this->db->getLastId();
+				
+				if (isset($product_image['image_by_option'])) {
+					foreach ($product_image['image_by_option'] as $option_value_id) {
+						$this->db->query("INSERT INTO " . DB_PREFIX . "oct_product_image_by_option SET product_id = '" . (int)$product_id . "', product_image_id = '" . (int)$product_image_id . "', option_value_id = '" . (int)$option_value_id . "'");
+					}
+				}
+			}
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search index="1"><![CDATA[$this->db->query("DELETE FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "'");]]></search>
+			<add position="after"><![CDATA[
+			$oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
+			if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
+				$this->db->query("DELETE FROM " . DB_PREFIX . "oct_product_image_by_option WHERE product_id = '" . (int)$product_id . "'");
+			}
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA[public function copyProduct($product_id) {]]></search>
+			<add position="before"><![CDATA[
+			public function getProductOptionsToImage($product_id, $product_image_id) {
+				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "oct_product_image_by_option WHERE product_id = '" . (int)$product_id . "' AND product_image_id = '" . (int)$product_image_id . "'");
+				$option_value_id_data = array();
+          
+				if ($query->rows) {
+					foreach ($query->rows as $row) {
+						$option_value_id_data[] = $row['option_value_id'];
+					}
+				}
+          
+				return $option_value_id_data;
+			}
+			]]></add>
+    	</operation>
+	</file>
+	
+	<file path="admin/view/template/catalog/product_form.twig">
+		<operation error="skip">
+			<search><![CDATA[<td class="text-left">{{ entry_additional_image }}</td>]]></search>
+			<add position="after"><![CDATA[
+					{% if oct_product_main_image_option_status is defined and oct_product_main_image_option_status %}
+                      <td class="text-left">{{ entry_option_value }}</td>
+					{% endif %}
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA[<td class="text-left"><button type="button" onclick="addImage();" data-toggle="tooltip" title="{{ button_image_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>]]></search>
+			<add position="before"><![CDATA[
+			<td></td>
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA[<td class="text-left"><button type="button" onclick="$('#image-row{{ image_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>]]></search>
+			<add position="before" offset="1"><![CDATA[
+	        {% if oct_product_main_image_option_status is defined and oct_product_main_image_option_status %}
+	          <td class="text-right">
+            {% for product_option in product_options %}
+                {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' %}
+	                <div class="col-sm-6 col-md-6 col-lg-6">
+	                  <div class="well well-sm" style="height: 130px; overflow: auto;text-align:left;margin-bottom:4px;">
+	                    {% if option_values[product_option.option_id] %}
+                        {% for option_value in option_values[product_option.option_id] %}
+	                        <label>
+						  	{% if option_value.option_value_id in product_image.image_by_option %}
+	                          <input type="checkbox" name="product_image[{{ image_row }}][image_by_option][]" value="{{ option_value.option_value_id }}" checked="checked"/> {{ product_option.name }} > {{ option_value.name }}</label>
+	                        {% else %}
+	                          <input type="checkbox" name="product_image[{{ image_row }}][image_by_option][]" value="{{ option_value.option_value_id }}" /> {{ product_option.name }} > {{ option_value.name }}</label>
+	                        {% endif %}
+	                        <br/>
+                        {% endfor %}
+	                    {% endif %}
+	                  </div>
+	                </div>
+	              {% endif %}
+	            {% endfor %}
+	          </td>
+	        {% endif %}
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA[html += '  <td class="text-right"><input type="text" name="product_image[' + image_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';]]></search>
+			<add position="before"><![CDATA[
+				html += '{% if oct_product_main_image_option_status is defined and oct_product_main_image_option_status %}';
+				html += '  <td class="text-right">';
+				html += '  {% for product_option in product_options %}';
+				html += '  {% if product_option.type == "select" or product_option.type == "radio" or product_option.type == "checkbox" %}';
+				html += '    <div class="col-sm-6 col-md-6 col-lg-6">';
+				html += '      <div class="well well-sm" style="height: 130px; overflow: auto;text-align:left;margin-bottom:4px;">';
+				html += '            {% if option_values[product_option.option_id] %}';
+				html += '              {% for option_value in option_values[product_option.option_id] %}';
+				html += '            <label><input type="checkbox" name="product_image[' + image_row + '][image_by_option][]" value="{{ option_value.option_value_id }}" /> {{ product_option.name|e('js') }} &gt; {{ option_value.name|e('js') }}</label><br/>';
+				html += '            {% endfor %}';
+				html += '          {% endif %}';
+				html += '      </div>';
+				html += '    </div>';
+				html += '    {% endif %}';
+				html += '  {% endfor %}';
+				html += '  </td>';
+				html += '{% endif %}';
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/controller/product/product.php">
+		<operation error="skip">
+			<search><![CDATA[public function index() {]]></search>
+			<add position="after"><![CDATA[
+			$data['oct_product_main_image_option_status'] = $oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
+	        
+			$data['oct_allow_autoselect_option'] = false;
+
+			$oct_product_main_image_option_data = $this->config->get('oct_product_main_image_option_data');
+
+		    if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status && isset($oct_product_main_image_option_data['allow_autoselect_option']) && $oct_product_main_image_option_data['allow_autoselect_option']) {
+
+				$data['oct_allow_autoselect_option'] = $oct_product_main_image_option_data['allow_autoselect_option'];
+
+				$allowed_options_ids = [];
+
+				if (isset($oct_product_main_image_option_data['allowed_options']) && !empty($oct_product_main_image_option_data['allowed_options'])) {
+
+					foreach ($oct_product_main_image_option_data['allowed_options'] as $allowed_option) {
+						array_push($allowed_options_ids, $allowed_option);
+					}
+				}
+
+				$data['allowed_options_ids'] = $allowed_options_ids;
+
+	        }
+			]]></add>
+    	</operation>
+		<operation error="skip">
+			<search><![CDATA[public function index() {]]></search>
+			<add position="before"><![CDATA[
+			public function getPImages() {
+            	$json = array();
+				$this->load->model('catalog/product');
+				$this->load->model('tool/image');
+				
+				if (isset($this->request->get['product_id'])) {
+					$product_id = (int)$this->request->get['product_id'];
+				} else {
+					$product_id = 0;
+				}
+				
+				$product_info = $this->model_catalog_product->getProduct($product_id);
+
+				if (isset($this->request->post['option'])) {
+					$opt_array = array();
+					
+					foreach ($this->request->post['option'] as $value) {
+						if (is_array($value)) {
+							foreach ($value as $val) {
+								if ($val) {
+									$opt_array[] = $this->model_catalog_product->getProductOptionValueId($this->request->get['product_id'], $val);
+								}
+							}
+						} else {
+							if ($value) {
+								$opt_array[] = $this->model_catalog_product->getProductOptionValueId($this->request->get['product_id'], $value);
+							}
+						}
+					}
+
+					$results = $this->model_catalog_product->getProductImagesByOptionValueId($this->request->get['product_id'], $opt_array);
+
+					foreach ($results as $result) {
+						$json['images'][] = array(
+							'popup' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')),
+							'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')),
+							'thumb_slider' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height')),
+							'width' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'),
+							'height' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'),
+							'thumb_height' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height'),
+							'thumb_width' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width')
+						);
+					}
+
+				} else {
+					$results = false;
+				}
+
+				if (!$results) {
+					$results = $this->model_catalog_product->getProductImages( $this->request->get['product_id'] );
+
+					$json['images'][] = array(
+		                'popup' => $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')),
+		                'thumb' => $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')),
+		                'thumb_slider' => $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height')),
+						'width' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'),
+						'height' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'),
+						'thumb_height' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height'),
+						'thumb_width' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width')
+					);
+					
+					foreach ($results as $result) {
+						$json['images'][] = array(
+							'popup' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')),
+		                    'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')),
+		                    'thumb_slider' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height')),
+							'width' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'),
+							'height' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'),
+							'thumb_height' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height'),
+							'thumb_width' => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width')
+						);
+					}
+				}
+
+	            $this->response->addHeader('Content-Type: application/json');
+	            $this->response->setOutput(json_encode($json));
+			}
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/model/catalog/product.php">
+    	<operation error="skip">
+			<search><![CDATA[public function getProductImages($product_id) {]]></search>
+			<add position="before"><![CDATA[
+			public function getProductImagesByOptionValueId($product_id, $options) {
+				$sql = "SELECT * FROM " . DB_PREFIX . "product_image pi LEFT JOIN " . DB_PREFIX . "oct_product_image_by_option pito ON (pi.product_image_id = pito.product_image_id) WHERE pi.product_id = '" . (int)$product_id . "'";
+				
+				$implode = array();
+				
+				foreach ($options as $option) {
+					if ($option) {
+						$implode[] = (int)$option;
+					}
+				}
+				
+				if (!empty($implode)) {
+					$sql .= " AND pito.option_value_id IN (" . implode(',', $implode) . ") GROUP BY pi.image ORDER BY pi.sort_order ASC";
+				} else {
+					$sql .= " GROUP BY pi.image ORDER BY pi.sort_order ASC";
+				}
+
+				$query = $this->db->query($sql);
+          
+				return $query->rows;
+			}
+        
+			public function getProductOptionValueId($product_id, $product_option_value_id) {
+				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . (int)$product_id . "' AND product_option_value_id = '" . (int)$product_option_value_id . "'");
+				
+				if ($query->row) {
+					return $query->row['option_value_id'];
+				}
+			}
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/controller/checkout/cart.php">
+    <operation error="skip">
+      <search><![CDATA[
+$option_data = array();
+	  ]]></search>
+      <add position="after"><![CDATA[
+				$this->load->model('catalog/product');
+
+				$options_arr = [];
+
+				foreach ($product['option'] as $value_opt) {
+					array_push($options_arr, $value_opt['product_option_value_id']);
+				}
+
+				if ($options_arr) {
+					$opt_array = [];
+					
+					foreach ($options_arr as $value) {
+						if (is_array($value)) {
+							foreach ($value as $val) {
+								if ($val) {
+									$opt_array[] = $this->model_catalog_product->getProductOptionValueId($product['product_id'], $val);
+								}
+							}
+						} else {
+							if ($value) {
+								$opt_array[] = $this->model_catalog_product->getProductOptionValueId($product['product_id'], $value);
+							}
+						}
+					}
+
+					$results_opts = $this->model_catalog_product->getProductImagesByOptionValueId($product['product_id'], $opt_array);
+
+					if (isset($results_opts[0]['image']) AND $results_opts[0]['image']) {
+						$image = $this->model_tool_image->resize($results_opts[0]['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_height'));
+					}
+				}
+	  ]]></add>
+    </operation>
+	</file>
+	
+</modification>

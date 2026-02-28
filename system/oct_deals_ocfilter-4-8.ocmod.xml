@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+	<name>UsedealsMobileFilterButton</name>
+	<code>button_001</code>
+	<version>1.0</version>
+	<date>24.12.2022</date>
+	<author>Octemplates</author>
+	<link>https://octemplates.net/</link>
+
+	<file path="catalog/view/theme/oct_deals/template/product/{category,special,search}.twig">
+		
+		<operation error="skip">
+			<search><![CDATA[
+			<div class="ocf-btn-mobile-static ocf-mobile">
+			]]></search>
+			<add position="replace"><![CDATA[
+			<div class="d-xl-none ds-filter-btn sticky-top">
+			]]></add>
+		</operation>		
+		
+		<operation error="skip">
+			<search><![CDATA[
+			<div class="ocf-btn-mobile-static ocf-mobile" style="display: none;">
+			]]></search>
+			<add position="replace"><![CDATA[
+			<div class="ocf-btn-mobile-static ocf-mobile d-xl-none ds-filter-btn sticky-top ds-sticky-column" style="display: none;">
+			]]></add>
+		</operation>
+
+		<operation>
+			<search><![CDATA[
+				<button type="button" class="ocf-btn ocf-btn-default" data-ocf="mobile"><span class="ocf-btn-name">{{ button_ocfilter_mobile }}</span> <i class="ocf-icon ocf-icon-16 ocf-brand ocf-sliders"></i></button>
+			]]></search>
+			<add position="replace"><![CDATA[
+				<button type="button" class="button button-primary br-7" data-ocf="mobile">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20" viewBox="0 0 19 20" fill="none">
+					<path d="M11.5 19.5C11.341 19.5 11.183 19.449 11.05 19.35L7.05005 16.35C6.86205 16.208 6.75 15.986 6.75 15.75V11.75C6.75 11.55 6.67203 11.361 6.53003 11.219L1.40906 6.09799C0.984058 5.67199 0.75 5.10799 0.75 4.50699V2.25C0.75 1.009 1.76 0 3 0H16C17.24 0 18.25 1.009 18.25 2.25V4.50699C18.25 5.10799 18.0159 5.67299 17.5909 6.09799L12.47 11.219C12.328 11.361 12.25 11.549 12.25 11.75V18.75C12.25 19.034 12.09 19.294 11.835 19.421C11.729 19.474 11.614 19.5 11.5 19.5ZM8.25 15.375L10.75 17.25V11.75C10.75 11.149 10.9841 10.584 11.4091 10.159L16.53 5.03799C16.672 4.89599 16.75 4.70799 16.75 4.50699V2.25C16.75 1.836 16.413 1.5 16 1.5H3C2.587 1.5 2.25 1.836 2.25 2.25V4.50699C2.25 4.70699 2.32797 4.89599 2.46997 5.03799L7.59094 10.159C8.01594 10.585 8.25 11.149 8.25 11.75V15.375Z" fill="white"/>
+					</svg>
+                    <span class="ds-btn-text">{{ button_ocfilter_mobile }}</span>
+                </button>
+				<script>
+					window.addEventListener('DOMContentLoaded', function() {
+						stickyColumn();
+					});
+				</script>
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/oct_deals/template/product/manufacturer_info.twig">
+		<operation>
+		  <search index="0"><![CDATA[{% if products %}]]></search>
+		  <add position="after" offset="1"><![CDATA[
+		  <!-- OCFilter Start -->      
+		  {% if ocfilter_mobile_button %}
+		  <div class="ocf-btn-mobile-static ocf-mobile d-xl-none ds-filter-btn sticky-top ds-sticky-column">
+				<button type="button" class="button button-primary br-7" data-ocf="mobile">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20" viewBox="0 0 19 20" fill="none">
+					<path d="M11.5 19.5C11.341 19.5 11.183 19.449 11.05 19.35L7.05005 16.35C6.86205 16.208 6.75 15.986 6.75 15.75V11.75C6.75 11.55 6.67203 11.361 6.53003 11.219L1.40906 6.09799C0.984058 5.67199 0.75 5.10799 0.75 4.50699V2.25C0.75 1.009 1.76 0 3 0H16C17.24 0 18.25 1.009 18.25 2.25V4.50699C18.25 5.10799 18.0159 5.67299 17.5909 6.09799L12.47 11.219C12.328 11.361 12.25 11.549 12.25 11.75V18.75C12.25 19.034 12.09 19.294 11.835 19.421C11.729 19.474 11.614 19.5 11.5 19.5ZM8.25 15.375L10.75 17.25V11.75C10.75 11.149 10.9841 10.584 11.4091 10.159L16.53 5.03799C16.672 4.89599 16.75 4.70799 16.75 4.50699V2.25C16.75 1.836 16.413 1.5 16 1.5H3C2.587 1.5 2.25 1.836 2.25 2.25V4.50699C2.25 4.70699 2.32797 4.89599 2.46997 5.03799L7.59094 10.159C8.01594 10.585 8.25 11.149 8.25 11.75V15.375Z" fill="white"/>
+					</svg>
+                    <span class="ds-btn-text">{{ button_ocfilter_mobile }}</span>
+                </button>
+		  </div>
+		  <script>
+		  	window.addEventListener('DOMContentLoaded', function() {
+				stickyColumn();
+			});
+		  </script>
+		  {% endif %}   
+		  <!-- /OCFilter End -->
+		  ]]></add>
+		</operation> 
+	</file>
+
+</modification>

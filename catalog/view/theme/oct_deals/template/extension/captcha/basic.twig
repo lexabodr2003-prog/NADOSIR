@@ -1,0 +1,19 @@
+<fieldset class="p-0">
+    <legend class="h4 mb-0">{{ text_captcha }}</legend>
+    <div class="form-group mb-3">
+        {% if route|slice(0, 9) == 'checkout/' %}
+            <label class="dark-text fsz-14 fw-500 mb-1" for="input-payment-captcha"><span class="required">* </span> {{ entry_captcha }}</label>
+            <input type="text" name="captcha" id="input-payment-captcha" class="form-control" autocomplete="off" />
+            <img src="index.php?route=extension/captcha/basic/captcha" alt="" />
+        {% else %}
+            <label class="dark-text fsz-14 fw-500 mb-1" for="input-captcha"><span class="required">* </span>{{ entry_captcha }}</label>
+            <input type="text" name="captcha" id="input-captcha" class="form-control mb-3" />
+            <img src="index.php?route=extension/captcha/basic/captcha" alt="" />
+            {% if error_captcha %}
+                <script>
+                    scNotify('danger', '{{ error_captcha }}');
+                </script>
+            {% endif %}
+        {% endif %}
+    </div>
+</fieldset>

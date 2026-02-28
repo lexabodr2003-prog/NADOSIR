@@ -1,0 +1,167 @@
+.cookie-notice {
+    position: fixed;
+    z-index: 9999;
+    padding: 15px;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: #000000d1;
+    color: #fff;
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.cookie-notice-bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+}
+
+.cookie-notice-left {
+    left: 20px;
+    bottom: 20px;
+    max-width: 350px;
+    border-radius: 8px;
+}
+
+.cookie-notice-right {
+    right: 20px;
+    bottom: 20px;
+    max-width: 350px;
+    border-radius: 8px;
+}
+
+.cookie-notice-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1140px;
+    margin: 0 auto;
+    gap: 15px;
+}
+
+.cookie-notice-message {
+    flex: 1;
+    min-width: 250px;
+}
+
+.cookie-notice-actions {
+    flex-shrink: 0;
+}
+
+.cookie-notice-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    background: #2198c6;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+}
+
+.cookie-notice-button:hover {
+    opacity: 0.9;
+}
+
+.cookie-notice-message a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.cookie-notice-actions {
+  flex-shrink: 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .cookie-notice {
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .cookie-notice-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .cookie-notice-message {
+        margin-right: 0;
+        min-width: auto;
+    }
+    
+    .cookie-notice-left,
+    .cookie-notice-right {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        bottom: 10px;
+    }
+    
+    .cookie-notice-button {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cookie-notice {
+        padding: 10px;
+        font-size: 12px;
+    }
+    
+    .cookie-notice-button {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
+
+/* Анимация появления */
+.cookie-notice.show {
+    display: block;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.cookie-notice-left.show,
+.cookie-notice-right.show {
+    animation: slideInSide 0.3s ease-out;
+}
+
+@keyframes slideInSide {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.cookie-notice-right.show {
+    animation: slideInSideRight 0.3s ease-out;
+}
+
+@keyframes slideInSideRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

@@ -1,0 +1,591 @@
+<div class="modal fade" id="quickOrderModal" tabindex="-1" aria-labelledby="quickOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered wide">
+        <div class="modal-content">
+            <div class="modal-header p-0 pb-4">
+                <h5 class="modal-title fsz-20 fw-700 d-flex align-items-center justify-content-between" id="quickOrderModalLabel">{{ heading_title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="13" viewBox="0 0 12 13" fill="none">
+                        <path d="M11.8029 11.5725C12.0633 11.8329 12.0633 12.2551 11.8029 12.5155C11.6731 12.6453 11.5025 12.7111 11.3319 12.7111C11.1612 12.7111 10.9906 12.6462 10.8608 12.5155L5.99911 7.65384L1.13743 12.5155C1.00766 12.6453 0.837017 12.7111 0.666369 12.7111C0.495722 12.7111 0.325075 12.6462 0.195312 12.5155C-0.0651039 12.2551 -0.0651039 11.8329 0.195312 11.5725L5.057 6.71085L0.195312 1.8492C-0.0651039 1.58878 -0.0651039 1.16657 0.195312 0.906158C0.455727 0.645742 0.877907 0.645742 1.13832 0.906158L6.00001 5.76787L10.8617 0.906158C11.1221 0.645742 11.5443 0.645742 11.8047 0.906158C12.0651 1.16657 12.0651 1.58878 11.8047 1.8492L6.943 6.71085L11.8029 11.5725Z" fill="#00A8E8" />
+                    </svg>
+                </button>
+            </div>
+            <div id="one-click-main-block" class="modal-body p-0 pt-4">
+                <form action="javascript:;" class="modal-body-form d-flex flex-column flex-md-row" id="oct_purchase_form" method="post">
+                    <div class="modal-body-product pe-md-4 me-md-4 flex-grow-1 mb-4">
+                        <div class="d-flex">
+                            {% if thumb is defined %}
+                                <div class="modal-body-product-img p-2 br-7 overflow-hidden me-1">
+                                    <img src="{{ thumb }}"  width="150" height="150" alt="{{ heading_title_product }}">
+                                </div>
+                            {% endif %}
+                            <div class="modal-body-product-info ps-3 dark-text flex-grow-1 d-flex flex-column">
+                                <div class="modal-body-product-title fw-500 fsz-14 mb-3">{{ product_name }}</div>
+                                {% if price %}
+                                    {% if not special %}
+                                        <div class="ds-price-new fsz-20 fw-500 dark-text pb-3">{{ price }}</div>
+                                    {% else %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="ds-price-old light-text text-decoration-line-through fw-500">{{ price }}</div>
+                                            {% if oct_sticker_you_save %}
+                                                <div class="ds-module-sticker br-12 fw-500 red-bg ms-2">{{ you_save }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="ds-price-new fsz-24 fw-700 red-text">{{ special }}</div>
+                                        <div class="ds-product-price-discount fsz-12 mt-1 mb-3 light-text">{{ oct_product_you_save }} <span id="popup-quickorder-product-you-save">{{ you_save_price }}</span></div>
+                                    {% endif %}
+                                    {% if oct_popup_purchase_data.quantity is defined %}
+                                        <div class="ds-module-quantity d-inline-flex align-items-center justify-content-start br-8 mt-auto align-self-start">
+                                            <button type="button" aria-label="Minus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="updatePurchaseValue(true, false, false);">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <g>
+                                                        <path d="M3.33333 7.5L12.6667 7.5C12.9427 7.5 13.1667 7.724 13.1667 8C13.1667 8.276 12.9427 8.5 12.6667 8.5L3.33333 8.5C3.05733 8.5 2.83333 8.276 2.83333 8C2.83333 7.724 3.05733 7.5 3.33333 7.5Z" fill="#25314C"></path>
+                                                    </g>
+                                                </svg>
+                                            </button>
+                                            <input type="text" id="popup-purchase-input-quantity" class="form-control" name="quantity" value="{{ minimum }}" inputmode="numeric" aria-label="Quantity">
+                                            <button type="button"  aria-label="Plus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="updatePurchaseValue(false, true, false);">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <g>
+                                                        <path d="M2.83341 8.00009C2.83341 7.72409 3.05741 7.50009 3.33341 7.50009L7.50008 7.50009L7.50008 3.33342C7.50008 3.05742 7.72408 2.83342 8.00008 2.83342C8.27608 2.83342 8.50008 3.05742 8.50008 3.33342L8.50008 7.50009L12.6667 7.50008C12.9427 7.50008 13.1667 7.72408 13.1667 8.00008C13.1667 8.27608 12.9427 8.50008 12.6667 8.50008L8.50008 8.50009L8.50008 12.6668C8.50008 12.9428 8.27608 13.1668 8.00008 13.1668C7.72408 13.1668 7.50008 12.9428 7.50008 12.6668L7.50008 8.50009L3.33342 8.50009C3.05742 8.50009 2.83342 8.27609 2.83341 8.00009Z" fill="#25314C"></path>
+                                                    </g>
+                                                </svg>
+                                            </button>
+                                            <input type="hidden" id="popup-purchase-min-quantity" value="{{ minimum }}" name="min_quantity">
+                                            <input type="hidden" id="popup-purchase-max-quantity" value="{{ max_quantity }}" name="max_quantity">
+                                        </div>
+                                    {% else %}
+                                        <input type="hidden" id="popup-purchase-input-quantity" name="quantity" value="{{ minimum }}" />
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if price %}
+                            {% if options %}
+                                <div class="ds-product-options modal-body-options mt-3" id="ds-purchase-options-box">
+                                    {% for option in options %}
+                                        {% if option.type == 'select' %}
+                                            <div class="form-group">
+                                                <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                    {% if option.required %}
+                                                        <span class="required"> *</span>
+                                                    {% endif %}
+                                                </label>
+                                                <select name="option[{{ option.product_option_id }}]" id="input-option{{ option.product_option_id }}" class="form-select form-control">
+                                                    <option value="">{{ text_select }}</option>
+                                                    {% for option_value in option.product_option_value %}
+                                                        <option value="{{ option_value.product_option_value_id }}">{{ option_value.name }}
+                                                            {% if option_value.price %}
+                                                                ({{ option_value.price_prefix }}{{ option_value.price }})
+                                                            {% endif %}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        {% endif %}
+                                        {% if option.type == 'radio' %}
+                                            <div class="form-group">
+                                                <label class="ds-control-label fw-500 dark-text fsz-14 mb-2">{{ option.name }}
+                                                    {% if option.required %}
+                                                        <span class="required"> *</span>{% endif %}
+                                                </label>
+                                                <div id="input-option{{ option.product_option_id }}" class="options-box d-flex flex-wrap">
+                                                    {% for option_value in option.product_option_value %}
+                                                        <div class="radio">
+                                                            <label data-bs-toggle="tooltip" data-bs-placement="top" class="option optid-{{ option.product_option_id }} not-selected {% if option_value.image %} radio-img{% else %}ds-radio{% endif %}" title="{{ option_value.name }} {% if option_value.price %}{{ option_value.price_prefix }}{{ option_value.price }}{% endif %}">
+                                                                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" class="input-radio"/>
+                                                                {% if option_value.image %}
+                                                                    <img src="{{ option_value.image }}" alt="{{ option_value.name }} {% if option_value.price %} {{ option_value.price_prefix }} {{ option_value.price }} {% endif %}" width="50" height="50" />
+                                                                {% else %}
+                                                                    {{ option_value.name }}
+                                                                {% endif %}
+                                                            </label>
+                                                            <script>
+                                                                $(document).ready(function() {
+                                                                    $(document).on('touchstart click', 'label.optid-{{ option.product_option_id }}', function(event) {
+                                                                        $('label.optid-{{ option.product_option_id }}').removeClass('selected').addClass('not-selected');
+                                                                        $(this).removeClass('not-selected').addClass('selected');
+                                                                    });
+                                                                });
+                                                            </script>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        {% if option.type == 'checkbox' %}
+                                            <div class="form-group">
+                                                <div class="ds-control-label fw-500 dark-text fsz-14 mb-2">{{ option.name }}
+                                                    {% if option.required %}
+                                                        <span class="required"> *</span>{% endif %}
+                                                </div>
+                                                <div id="input-option{{ option.product_option_id }}">
+                                                    {% for option_value in option.product_option_value %}
+                                                        <div class="form-check">
+                                                            <input type="checkbox" id="option[{{ option.product_option_id }}][{{ option_value.product_option_value_id }}]" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" class="form-check-input">
+                                                            <label class="form-check-label d-flex align-items-center" for="option[{{ option.product_option_id }}][{{ option_value.product_option_value_id }}]">
+                                                                {% if option_value.image %}<img src="{{ option_value.image }}" alt="{{ option_value.name }} {% if option_value.price %} {{ option_value.price_prefix }} {{ option_value.price }} {% endif %}" class="img-thumbnail" width="50" height="50" />{% endif %}
+                                                                {{ option_value.name }}
+                                                                {% if option_value.price %}
+                                                                    ({{ option_value.price_prefix }}{{ option_value.price }})
+                                                                {% endif %}
+                                                            </label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        {% if option.type == 'text' %}
+                                            <div class="form-group">
+                                                <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                    {% if option.required %}
+                                                        <span class="required"> *</span>
+                                                    {% endif %}
+                                                </label>
+                                                <input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" placeholder="{{ option.name }}" id="input-option{{ option.product_option_id }}" class="form-control" inputmode="text">
+                                            </div>
+                                        {% endif %}
+                                        {% if option.type == 'textarea' %}
+                                            <div class="form-group">
+                                                <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                    {% if option.required %}
+                                                        <span class="required"> *</span>{% endif %}
+                                                </label>
+                                                <textarea name="option[{{ option.product_option_id }}]" rows="5" placeholder="{{ option.name }}" id="input-option{{ option.product_option_id }}" class="form-control">{{ option.value }}</textarea>
+                                            </div>
+                                        {% endif %}
+                                        {% if option.type == 'file' %}
+                                            <div class="form-group">
+                                                <label class="ds-control-label fw-500 dark-text fsz-14 mb-2 d-block">{{ option.name }}
+                                                    {% if option.required %}
+                                                        <span class="required"> *</span>{% endif %}
+                                                </label>
+                                                <button type="button" id="popup-button-upload{{ option.product_option_id }}" data-loading-text="{{ text_loading }}" class="button button-outline button-outline-primary br-7">
+                                                    <i class="fa fa-upload me-2"></i>
+                                                    {{ button_upload }}</button>
+                                                <input type="hidden" name="option[{{ option.product_option_id }}]" value="" id="input-option{{ option.product_option_id }}"/>
+                                            </div>
+                                        {% endif %}
+                                        {% if option.type == 'date' %}
+                                            <div class="form-group">
+                                                <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                    {% if option.required %}
+                                                        <span class="required"> *</span>{% endif %}
+                                                </label>
+                                                <div class="input-group date">
+                                                    <input type="date" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option{{ option.product_option_id }}" class="form-control"/>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        {% if option.type == 'datetime' %}
+                                            <div class="form-group">
+                                                <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                    {% if option.required %}
+                                                        <span class="required"> *</span>{% endif %}
+                                                </label>
+                                                <div class="input-group datetime">
+                                                    <input type="datetime-local" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option{{ option.product_option_id }}" class="form-control"/>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        {% if option.type == 'time' %}
+                                            <div class="form-group">
+                                                <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                    {% if option.required %}
+                                                        <span class="required"> *</span>{% endif %}
+                                                </label>
+                                                <div class="input-group time">
+                                                    <input type="time" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option{{ option.product_option_id }}" class="form-control"/>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        {% if not options %}
+                            <div class="fw-500 secondary-text text-center mt-4">{{ enter_text_title }}</div>
+                            <div class="light-text text-center mt-3">{{ enter_text }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="modal-body-inputs flex-grow-1">
+                        {% if oct_popup_purchase_data.firstname %}
+                            <div class="input-group">
+                                <span class="input-group-text" id="usernamePopupPurchaseIcon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="17" viewBox="0 0 14 17" fill="none">
+                                        <path
+                                            d="M7.00726 7.47837C5.1217 7.47837 3.58848 5.94434 3.58848 4.05959C3.58848 2.17483 5.1217 0.640808 7.00726 0.640808C8.89282 0.640808 10.426 2.17483 10.426 4.05959C10.426 5.94434 8.89282 7.47837 7.00726 7.47837ZM7.00726 1.84744C5.78696 1.84744 4.79511 2.83928 4.79511 4.05959C4.79511 5.27989 5.78696 6.27174 7.00726 6.27174C8.22756 6.27174 9.21941 5.27989 9.21941 4.05959C9.21941 2.83928 8.22676 1.84744 7.00726 1.84744ZM13.2342 15.7237V13.3257C13.2342 11.1852 12.0228 8.685 8.60883 8.685H5.39115C1.9772 8.685 0.765747 11.1844 0.765747 13.3257V15.7237C0.765747 16.0567 1.03603 16.327 1.36906 16.327C1.70209 16.327 1.97238 16.0567 1.97238 15.7237V13.3257C1.97238 12.5205 2.21933 9.89162 5.39115 9.89162H8.60883C11.7807 9.89162 12.0276 12.5197 12.0276 13.3257V15.7237C12.0276 16.0567 12.2979 16.327 12.6309 16.327C12.964 16.327 13.2342 16.0567 13.2342 15.7237Z"
+                                            fill="#00171F"></path>
+                                    </svg>
+                                </span>
+                                <input type="text" name="name" value="{{ user_name }}" class="form-control" id="inputPurchaseName" placeholder="{{ enter_firstname }}" inputmode="text" aria-label="Username" aria-describedby="usernamePopupPurchaseIcon">
+                            </div>
+                        {% endif %}
+                        {% if oct_popup_purchase_data.telephone %}
+                            <div class="input-group mt-4">
+                                <span class="input-group-text" id="telPopupPurchaseIcon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 16 15" fill="none">
+                                            <path
+                                                d="M11.3368 14.9434C11.0004 14.9434 10.6618 14.8981 10.3276 14.8069C5.80905 13.5725 2.23157 10.0136 0.990714 5.51857C0.708533 4.49641 0.863144 3.43121 1.42751 2.52068C1.99406 1.60578 2.92567 0.960095 3.9833 0.749974C4.68692 0.609893 5.38247 0.922162 5.73941 1.52115L6.88498 3.44725C7.44128 4.38258 7.16487 5.58713 6.25529 6.18977L5.42645 6.73843C6.20116 8.32164 7.50421 9.62249 9.08808 10.3929L9.64673 9.56338C10.2558 8.65942 11.4658 8.38876 12.4047 8.94543L14.3419 10.0953C14.9415 10.4513 15.2515 11.148 15.1151 11.828C14.904 12.8808 14.2554 13.8081 13.337 14.3721C12.7199 14.75 12.0331 14.9434 11.3368 14.9434ZM4.3197 1.80933C4.28379 1.80933 4.24716 1.81299 4.21198 1.82029C3.43947 1.97423 2.7703 2.4375 2.36425 3.09486C1.96187 3.74419 1.85118 4.50224 2.052 5.22818C3.19025 9.35254 6.47307 12.6189 10.6186 13.7512C11.3486 13.9504 12.1078 13.8395 12.7594 13.4397C13.419 13.0348 13.8853 12.3679 14.037 11.6121C14.0825 11.3852 13.9791 11.1524 13.7783 11.0335L11.8418 9.88367C11.4057 9.62539 10.8428 9.75162 10.5599 10.1711L9.74265 11.3859C9.59606 11.6033 9.31324 11.6865 9.07431 11.5858C6.90262 10.6818 5.1355 8.91916 4.22666 6.74937C4.12551 6.50714 4.21043 6.22844 4.42957 6.08326L5.64708 5.27705C6.06925 4.99762 6.19748 4.43803 5.93875 4.00393L4.79318 2.07854C4.69277 1.90928 4.511 1.80933 4.3197 1.80933Z"
+                                                fill="#00171F" />
+                                        </svg>
+                                    </span>
+                                <input type="tel" name="telephone" value="{{ user_telephone }}" class="form-control" id="inputPurchasePhone" placeholder="{{ enter_telephone }}" inputmode="tel" aria-label="Telephone" aria-describedby="telPopupPurchaseIcon">
+                            </div>
+                        {% endif %}
+                        {% if oct_popup_purchase_data.email %}
+                            <div class="input-group mt-4">
+                                <span class="input-group-text" id="emailPopupPurchaseIcon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 16 15" fill="none">
+                                        <path
+                                            d="M12.9231 14.4517H3.07692C1.09292 14.4517 0 13.3588 0 11.3748V3.99019C0 2.00619 1.09292 0.913269 3.07692 0.913269H12.9231C14.9071 0.913269 16 2.00619 16 3.99019V11.3748C16 13.3588 14.9071 14.4517 12.9231 14.4517ZM3.07692 2.14404C1.78297 2.14404 1.23077 2.69624 1.23077 3.99019V11.3748C1.23077 12.6688 1.78297 13.221 3.07692 13.221H12.9231C14.217 13.221 14.7692 12.6688 14.7692 11.3748V3.99019C14.7692 2.69624 14.217 2.14404 12.9231 2.14404H3.07692ZM8.84435 8.23963L12.8746 5.30875C13.1495 5.10937 13.2102 4.72374 13.01 4.44886C12.8106 4.17481 12.4268 4.11245 12.1502 4.31347L8.11979 7.24435C8.04759 7.29686 7.95161 7.29686 7.87941 7.24435L3.84896 4.31347C3.57162 4.11245 3.18857 4.17563 2.98918 4.44886C2.78898 4.72374 2.84973 5.10855 3.1246 5.30875L7.15485 8.24044C7.40757 8.42424 7.70381 8.51532 7.9992 8.51532C8.29458 8.51532 8.59245 8.42342 8.84435 8.23963Z"
+                                            fill="#00171F"></path>
+                                    </svg>
+                                </span>
+                                <input type="email" name="email" value="{{ user_email }}" class="form-control" id="inputPurchaseMail" placeholder="{{ enter_email }}" inputmode="email" aria-label="email" aria-describedby="emailPopupPurchaseIcon">
+                            </div>
+                        {% endif %}
+                        {% if oct_popup_purchase_data.comment %}
+                            <div class="form-group pt-4">
+                                <textarea name="comment" class="form-control" id="inputPurchaseComment" placeholder="{{ enter_comment }}" rows="11"></textarea>
+                            </div>
+                        {% endif %}
+                        <input type="hidden" name="product_id" value="{{ product_id }}"/>
+                        {% if text_agree %}
+                            <div class="form-check py-3">
+                                <input id="agreePurchaseCheck" type="checkbox" class="form-check-input" name="agree">
+                                <label class="form-check-label" for="agreePurchaseCheck">
+                                    {{ text_agree }}
+                                </label>
+                            </div>
+                        {% endif %}
+                        {{ captcha }}
+                    </div>
+                </form>
+                <div class="modal-body-buttons d-flex flex-column flex-sm-row align-items-center justify-content-between pt-4">
+                    <span class="blue-link fsz-14 fw-300 d-inline-flex align-items-center order-1 order-sm-0" data-bs-dismiss="modal">
+                        <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="7" height="13" viewBox="0 0 7 13" fill="none">
+                            <path
+                                d="M6.28371 11.8492C6.43972 12.0052 6.43972 12.2588 6.28371 12.4148C6.20531 12.4932 6.1029 12.5316 6.00049 12.5316C5.89809 12.5316 5.79568 12.4924 5.71728 12.4148L0.117006 6.81454C-0.0390019 6.65854 -0.0390019 6.4049 0.117006 6.24889L5.71728 0.648622C5.87328 0.492614 6.12692 0.492614 6.28293 0.648622C6.43894 0.804629 6.43894 1.05827 6.28293 1.21427L0.965875 6.53133L6.28371 11.8492Z"
+                                fill="#00A8E8" />
+                        </svg>
+                        {{ button_continue }}
+                    </span>
+                    <button id="button_checkout" type="submit" class="button button-primary br-7 px-5 order-0 order-sm-1 mb-4 mb-sm-0">{{ button_checkout }}</button>
+                </div>
+                <div class="ds-popup-success d-none flex-column align-items-center text-center">
+                    <div class="d-flex align-items-center justify-content-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="224" height="170" viewBox="0 0 224 170" fill="none">
+                            <g filter="url(#filter0_d_1701_4211)">
+                            <circle cx="112" cy="85" r="46.5642" fill="url(#paint0_linear_1701_4211)"/>
+                            </g>
+                            <path d="M106.503 98.1417L96 87.6385L100.786 82.852L106.503 88.5856L123.214 71.8584L128 76.6448L106.503 98.1417Z" fill="#F8FBFD"/>
+                            <rect x="174.04" y="99.954" width="6.60913" height="6.60913" transform="rotate(30 174.04 99.954)" fill="url(#paint1_linear_1701_4211)"/>
+                            <rect x="179.764" y="74.054" width="2.70734" height="2.70734" transform="rotate(-14.459 179.764 74.054)" fill="url(#paint2_linear_1701_4211)"/>
+                            <rect x="57.5212" y="54.1715" width="2.70734" height="2.70734" transform="rotate(15 57.5212 54.1715)" fill="url(#paint3_linear_1701_4211)"/>
+                            <circle cx="156.001" cy="49.0761" r="3" fill="url(#paint4_linear_1701_4211)"/>
+                            <circle cx="53.6396" cy="120.059" r="3" fill="url(#paint5_linear_1701_4211)"/>
+                            <circle cx="136.792" cy="134.346" r="1.86084" fill="url(#paint6_linear_1701_4211)"/>
+                            <circle cx="50.6398" cy="87.004" r="0.698364" fill="url(#paint7_linear_1701_4211)"/>
+                            <defs>
+                            <filter id="filter0_d_1701_4211" x="46.4358" y="23.4358" width="131.128" height="131.128" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                            <feOffset dy="4"/>
+                            <feGaussianBlur stdDeviation="9.5"/>
+                            <feComposite in2="hardAlpha" operator="out"/>
+                            <feColorMatrix type="matrix" values="0 0 0 0 0.283797 0 0 0 0 0.62711 0 0 0 0 0.318128 0 0 0 0.46 0"/>
+                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1701_4211"/>
+                            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1701_4211" result="shape"/>
+                            </filter>
+                            <linearGradient id="paint0_linear_1701_4211" x1="93.2285" y1="48.6499" x2="125.072" y2="127.959" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#69B570"/>
+                            <stop offset="1" stop-color="#2F993A"/>
+                            </linearGradient>
+                            <linearGradient id="paint1_linear_1701_4211" x1="177.345" y1="99.954" x2="177.345" y2="106.563" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#42A24B"/>
+                            <stop offset="1" stop-color="#4CBC56"/>
+                            </linearGradient>
+                            <linearGradient id="paint2_linear_1701_4211" x1="181.118" y1="74.054" x2="181.118" y2="76.7613" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#42A24B"/>
+                            <stop offset="1" stop-color="#4CBC56"/>
+                            </linearGradient>
+                            <linearGradient id="paint3_linear_1701_4211" x1="58.8749" y1="54.1715" x2="58.8749" y2="56.8788" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#42A24B"/>
+                            <stop offset="1" stop-color="#4CBC56"/>
+                            </linearGradient>
+                            <linearGradient id="paint4_linear_1701_4211" x1="156.001" y1="46.0761" x2="156.001" y2="52.0761" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#42A24B"/>
+                            <stop offset="1" stop-color="#4CBC56"/>
+                            </linearGradient>
+                            <linearGradient id="paint5_linear_1701_4211" x1="53.6396" y1="117.059" x2="53.6396" y2="123.059" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#42A24B"/>
+                            <stop offset="1" stop-color="#4CBC56"/>
+                            </linearGradient>
+                            <linearGradient id="paint6_linear_1701_4211" x1="136.792" y1="132.485" x2="136.792" y2="136.207" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#42A24B"/>
+                            <stop offset="1" stop-color="#4CBC56"/>
+                            </linearGradient>
+                            <linearGradient id="paint7_linear_1701_4211" x1="50.6398" y1="86.3056" x2="50.6398" y2="87.7024" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#42A24B"/>
+                            <stop offset="1" stop-color="#4CBC56"/>
+                            </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div id="ds-popup-success-text"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% if oct_popup_purchase_data.mask is defined and oct_popup_purchase_data.mask is not empty %}
+    <script>
+        $('#inputPurchasePhone').inputmask({
+            mask: '{{ oct_popup_purchase_data.mask }}',
+            clearMaskOnLostFocus: false
+        });
+    </script>
+{% endif %}
+<script>
+
+$("#inputPurchaseName, #inputPurchasePhone, #inputPurchaseMail, #inputPurchaseComment, #agreePurchaseCheck").on("change paste keyup", function() {
+    $(this).removeClass('error_style');
+});
+
+{% if error_stock_check is not defined %}
+    $('#button_checkout').on('click', function() {
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            cache: false,
+            url: 'index.php?route=octemplates/module/oct_popup_purchase/makeOrder',
+            data: $('#oct_purchase_form').serialize(),
+            beforeSend: function() {
+                masked('body', true);
+
+                $('#button_checkout').data('original-content', $('#button_checkout').html());
+                $('#button_checkout').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>').prop('disabled', true);
+            },
+            complete: function() {
+                masked('body', false);
+                
+                setTimeout(function () {
+                    $('#button_checkout').html($('#button_checkout').data('original-content')).prop('disabled', false);
+                }, 600);
+            },
+            success: function(json) {
+                masked('body', false);
+                if (json['error']) {
+                    $('#quickOrderModal .text-danger').remove();
+                    let errorOption = '';
+
+                    $.each(json['error']['options'], function(i, val) {
+                        if (val) {
+                            var element = $('#oct_purchase_form #input-option' + i.replace('_', '-'));
+
+                            if (element.parent().hasClass('input-group')) {
+                                element.parent().after('<div class="text-danger fsz-14 fw-500 mb-4">' + val + '</div>');
+                            } else {
+                                element.parent().after('<div class="text-danger mb-3 fsz-14 fw-500 mb-4">' + val + '</div>');
+                            }
+
+                            errorOption += '<div class="alert-text-item">' + val + '</div>';
+                        }
+                    });
+
+                    delete json['error']['options'];
+
+                    $.each(json['error'], function(i, val) {
+                        if (val) {
+                            $('#quickOrderModal [name="' + i + '"]').addClass('error_style');
+                            errorOption += '<div class="alert-text-item">' + val + '</div>';
+                        }
+                    });
+
+                    scNotify('danger', errorOption);
+                } else {
+                    if (json['success']) {
+                        {% if oct_analytics_google_ecommerce is defined and oct_analytics_google_ecommerce is not empty %}
+                            if (typeof gtag != 'undefined' && json['ecommerce']) {
+                                gtag('event', 'purchase', json['ecommerce']);
+                            }
+                        {% endif %}
+
+                        $("#ds-popup-success-text").html(json['success']);
+                        $("#one-click-main-block").html($(".ds-popup-success"));
+                        $(".ds-popup-success").removeClass("d-none");
+                        $('#quickOrderModal .modal-dialog').removeClass('wide');
+                    }
+                }
+            }
+        });
+    });
+{% endif %}
+
+$('#popup-purchase-input-quantity').on('input', function(e) {
+    updatePurchaseValue(false, false, true);
+});
+
+function updatePurchaseValue(minus, plus, manual) {
+	let use_minimum_step = {{ use_minimum_step ?? 0 }};
+	let current = parseInt($('#popup-purchase-input-quantity').val()) || 0;
+	let currentMinimum = parseInt($('#popup-purchase-min-quantity').val()) || 1;
+	let max = parseInt($('#popup-purchase-max-quantity').val()) || 0;
+
+	if (max === 0) return;
+
+	let newValue = current;
+	let step = use_minimum_step ? currentMinimum : 1;
+
+	if (minus) {
+		if (use_minimum_step) {
+			newValue = current - currentMinimum;
+			if (newValue < currentMinimum) {
+				newValue = currentMinimum;
+			}
+		} else {
+			if (current > 1) {
+				newValue = current - 1;
+			}
+		}
+	}
+
+	if (plus) {
+		if (use_minimum_step) {
+			newValue = current + currentMinimum;
+		} else {
+			newValue = current + 1;
+		}
+		
+		if (max && newValue > max) {
+			if (use_minimum_step) {
+				newValue = Math.floor(max / currentMinimum) * currentMinimum;
+				if (newValue < currentMinimum) {
+					newValue = currentMinimum;
+				}
+			} else {
+				newValue = max;
+			}
+		}
+	}
+
+	if (manual) {
+		if (use_minimum_step) {
+			if (current < currentMinimum) {
+				newValue = currentMinimum;
+			} else {
+				let remainder = current % currentMinimum;
+				if (remainder !== 0) {
+					newValue = current - remainder + currentMinimum;
+				}
+			}
+		} else {
+			if (current < 1) {
+				newValue = 1;
+			}
+		}
+
+		if (max && newValue > max) {
+			if (use_minimum_step) {
+				newValue = Math.floor(max / currentMinimum) * currentMinimum;
+				if (newValue < currentMinimum) {
+					newValue = currentMinimum;
+				}
+			} else {
+				newValue = max;
+			}
+		}
+	}
+
+	$('#popup-purchase-input-quantity').val(newValue);
+	updatePurchasePrice();
+}
+
+updatePurchasePrice();
+
+$("#ds-purchase-options-box input:not(.form-control), #ds-purchase-options-box select ").on('change', function() {
+    updatePurchasePrice();
+});
+
+function updatePurchasePrice() {
+    let priceOld = document.querySelector('#quickOrderModal .ds-price-old');
+    let priceNew = document.querySelector('#quickOrderModal .ds-price-new');
+    let youSaveOrder = document.querySelector('#popup-quickorder-product-you-save');
+
+    $.ajax({
+        type: 'post',
+        url: 'index.php?route=octemplates/main/oct_functions/updatePrices',
+        data: $('#quickOrderModal input[type=\'text\'], #quickOrderModal input[type=\'hidden\'], #quickOrderModal input[type=\'radio\']:checked, #quickOrderModal input[type=\'checkbox\']:checked, #quickOrderModal select'),
+        dataType: 'json',
+        cache: false,
+        success: function(json) {
+            {% if special %}
+                animatePrice(json['price'], priceOld);
+                animatePrice(json['special'], priceNew);
+            {% else %}
+                animatePrice(json['price'], priceNew);
+            {% endif %}
+
+            {% if oct_sticker_you_save and you_save %}
+                animatePrice(json['you_save_price'], youSaveOrder);
+            {% endif %}
+
+            {% if tax %}
+                $('.ds-product-center-price-tax > span').html(json['tax']);
+            {% endif %}
+        }
+    });
+}
+
+$('button[id^=\'popup-button-upload\']').on('click', function() {
+    var node = this;
+
+    $('#form-upload').remove();
+
+    $('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
+
+    $('#form-upload input[name=\'file\']').trigger('click');
+
+    if (typeof timer != 'undefined') {
+        clearInterval(timer);
+    }
+
+    timer = setInterval(function() {
+        if ($('#form-upload input[name=\'file\']').val() != '') {
+            clearInterval(timer);
+
+            $.ajax({
+                url: 'index.php?route=tool/upload',
+                type: 'post',
+                dataType: 'json',
+                data: new FormData($('#form-upload')[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                beforeSend: function() {
+                    $(node).button('loading');
+                },
+                complete: function() {
+                    $(node).button('reset');
+                },
+                success: function(json) {
+                    $('.text-danger').remove();
+
+                    if (json['error']) {
+                        $(node).parent().find('input').after('<div class="text-danger fsz-14 fw-500 mb-4">' + json['error'] + '</div>');
+                    }
+
+                    if (json['success']) {
+                        alert(json['success']);
+
+                        $(node).parent().find('input').val(json['code']);
+                    }
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                }
+            });
+        }
+    }, 500);
+});
+</script>

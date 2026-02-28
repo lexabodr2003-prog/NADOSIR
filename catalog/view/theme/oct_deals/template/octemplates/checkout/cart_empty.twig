@@ -1,0 +1,16 @@
+{{ header }}
+<div id="error-not-found" class="container-fluid container-xl flex-grow-1">
+	<main>
+	
+		<div class="content-top-box">{{ content_top }}</div>
+		<div>
+			<img class="img-fluid my-5 mx-auto d-block br-4" src="catalog/view/theme/oct_deals/images/cart-empty.svg" width="500" height="350" />
+			<div class="text-center">
+			<p class="fw-500 dark-text fsz-22 mb-4">{{ text_error }}</p>
+				<a href="{{ continue }}" class="button button-primary mt-3 mb-5 br-7 d-inline-flex">{{ button_continue }}</a>
+			</div>
+		</div>
+		{{ content_bottom }}
+	</div>
+</div>
+{{ footer }}

@@ -1,0 +1,679 @@
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered wide">
+        <div class="modal-content p-0">
+            <div class="modal-header p-4">
+                <h5 class="modal-title fsz-20 fw-700 d-flex align-items-center justify-content-between" id="quickViewModalLabel">{{ product_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="13" viewBox="0 0 12 13" fill="none">
+                        <path d="M11.8029 11.5725C12.0633 11.8329 12.0633 12.2551 11.8029 12.5155C11.6731 12.6453 11.5025 12.7111 11.3319 12.7111C11.1612 12.7111 10.9906 12.6462 10.8608 12.5155L5.99911 7.65384L1.13743 12.5155C1.00766 12.6453 0.837017 12.7111 0.666369 12.7111C0.495722 12.7111 0.325075 12.6462 0.195312 12.5155C-0.0651039 12.2551 -0.0651039 11.8329 0.195312 11.5725L5.057 6.71085L0.195312 1.8492C-0.0651039 1.58878 -0.0651039 1.16657 0.195312 0.906158C0.455727 0.645742 0.877907 0.645742 1.13832 0.906158L6.00001 5.76787L10.8617 0.906158C11.1221 0.645742 11.5443 0.645742 11.8047 0.906158C12.0651 1.16657 12.0651 1.58878 11.8047 1.8492L6.943 6.71085L11.8029 11.5725Z" fill="#00A8E8" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body modal-body-quick-view p-3 p-md-4">
+                <div class="d-flex justify-content-between align-items-start align-iems-md-center secondary-text fsz-12 mt-1 mb-3 mb-md-4">
+                    {% if manufacturer or oct_deals_data.product_model is defined and oct_deals_data.product_model == 'on'  %}
+                        <div class="ds-product-top-info d-flex flex-column flex-md-row align-iems-md-center">
+                            {% if manufacturer %}
+                                <span>{{ oct_product_manufacturer }} <a href="{{ manufacturers }}" class="blue-link">{{ manufacturer }}</a></span>
+                            {% endif %}
+                            {% if oct_deals_data.product_model is defined and oct_deals_data.product_model == 'on' %}
+                                <span>
+                                    {{ text_model }} <span class="light-text">{{ model }}</span>
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    {% if review_status %}
+                        <div class="ds-module-rating d-flex align-items-center">
+                            <div class="ds-module-rating-stars d-flex align-items-center me-2">
+                                {% for i in 1..5 %}
+                                    {% if rating < i %}
+                                        <span class="ds-module-rating-star"></span>
+                                    {% else %}
+                                        <span class="ds-module-rating-star ds-module-rating-star-is"></span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="ds-module-reviews d-flex align-items-center">
+                                <svg width="13" height="12" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g>
+                                        <path
+                                            d="M1.88345 11.5383C1.82835 11.5383 1.77318 11.5276 1.72036 11.506C1.5613 11.4401 1.45741 11.2844 1.45741 11.1123V2.5916C1.45741 1.21806 2.21405 0.461426 3.58759 0.461426H10.4042C11.7777 0.461426 12.5343 1.21806 12.5343 2.5916V7.70403C12.5343 9.07757 11.7777 9.83421 10.4042 9.83421H3.76427L2.18508 11.4134C2.10329 11.4952 1.99422 11.5383 1.88345 11.5383ZM3.58759 1.3135C2.69178 1.3135 2.30948 1.69579 2.30948 2.5916V10.0836L3.28651 9.10653C3.3666 9.02644 3.47455 8.98158 3.58759 8.98158H10.4042C11.3 8.98158 11.6823 8.59929 11.6823 7.70347V2.59105C11.6823 1.69524 11.3 1.31294 10.4042 1.31294H3.58759V1.3135ZM9.6941 4.01172C9.6941 3.77655 9.50323 3.58569 9.26806 3.58569H4.72369C4.48851 3.58569 4.29765 3.77655 4.29765 4.01172C4.29765 4.24689 4.48851 4.43776 4.72369 4.43776H9.26806C9.50323 4.43776 9.6941 4.24689 9.6941 4.01172ZM7.98996 6.28391C7.98996 6.04874 7.79909 5.85788 7.56392 5.85788H4.72369C4.48851 5.85788 4.29765 6.04874 4.29765 6.28391C4.29765 6.51908 4.48851 6.70995 4.72369 6.70995H7.56392C7.79909 6.70995 7.98996 6.51908 7.98996 6.28391Z"
+                                            fill="#9CA3AF"></path>
+                                    </g>
+                                </svg>
+                                <span class="dark-text">{{ total_reviews }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="ds-product-main-content ds-product-tab-content content-block d-flex flex-column flex-md-row p-xl-4">
+                    {% if image_view and thumb %}
+                        {% if thumb %}
+                            <div class="ds-product-images position-relative pe-md-3 pe-xl-4 me-md-3 me-xl-4">
+                                {% if oct_product_stickers %}
+                                    <div class="ds-product-stickers d-flex align-items-center justify-content-between">
+                                        <div class="ds-module-stickers ds-module-sticker-images d-flex align-items-center">
+                                            {% for key, oct_sticker in oct_product_stickers %}
+                                                {% if oct_sticker is not empty and oct_sticker is iterable %}
+                                                    <img src="{{ oct_sticker.image }}" alt="{{ oct_sticker.title }}" data-bs-html="true" data-bs-placement="bottom" data-bs-toggle="popover" data-bs-trigger="hover" title="{{ oct_sticker.title }}" data-bs-content="{{ oct_sticker.description }}" width="20" height="20" />
+                                                {% else %}
+                                                    <div class="ds-module-sticker br-12 fw-500 ds-module-sticker-{{ key }}">
+                                                        {{ oct_sticker }}
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="ds-product-images-main mb-3 p-0">
+                                    <img src="{{ thumb }}" class="d-block mx-auto" alt="{{ product_name }}" title="{{ product_name }}" width="450" height="450">
+                                </div>
+                                 {% if specification_view and attribute_groups %}
+                                        <div class="ds-product-main-attributes dark-text fsz-14 fw-300 mt-4 py-3 d-flex flex-wrap">
+                                            {% for attribute_group in attribute_groups %}
+                                                {% for attribute in attribute_group.attribute|slice(0, 6) %}
+                                                    <div class="ds-product-main-attributes-item br-4 py-1 px-2">
+                                                        {{ attribute.name }}
+                                                        <span class="fsz-12 fw-500 ps-2">{{ attribute.text }}</span>
+                                                    </div>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    <div class="ds-product-main mt-3 mt-md-0">
+                        <div class="d-flex align-items-stretch justify-content-between mb-3">
+                            <div class="ds-product-main-stock d-flex align-items-center justify-content-center green-text fsz-10 fw-500 br-7{% if out_of_stock %} out-of-stock{% endif %}">
+                                <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                    <path d="M5 -0.00305176C2.24279 -0.00305176 0 2.2402 0 4.99695C0 7.75369 2.24279 9.99695 5 9.99695C7.75721 9.99695 10 7.75369 10 4.99695C10 2.2402 7.75721 -0.00305176 5 -0.00305176ZM5 9.29927C2.62744 9.29927 0.697674 7.36951 0.697674 4.99695C0.697674 2.62439 2.62744 0.694623 5 0.694623C7.37256 0.694623 9.30233 2.62439 9.30233 4.99695C9.30233 7.36951 7.37256 9.29927 5 9.29927ZM6.87442 3.66485C7.0107 3.80113 7.0107 4.02207 6.87442 4.15835L4.70372 6.32905C4.63582 6.39696 4.54652 6.43136 4.45721 6.43136C4.36791 6.43136 4.27861 6.39742 4.2107 6.32905L3.12558 5.24393C2.9893 5.10765 2.9893 4.8867 3.12558 4.75042C3.26186 4.61414 3.48279 4.61414 3.61907 4.75042L4.45768 5.58905L6.3814 3.66533C6.51768 3.52905 6.73814 3.52904 6.87442 3.66485Z" fill="#59AA45" />
+                                </svg>
+                                {{ stock }}
+                            </div>
+                            {% if wishlist_view or compare_view %}
+                                <div class="ds-product-wishlist-compare d-flex align-items-center">
+                                    {% if wishlist_view %}
+                                        <button type="button" class="ds-product-wishlist br-7 button button-light ds-wishlist-btn" onclick="wishlist.add('{{ product_id }}');" title="{{ button_wishlist }}">
+                                            <svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 14 13"
+                                                fill="none">
+                                                <path
+                                                    d="M6.99998 12.497C6.92932 12.497 6.85863 12.4823 6.79263 12.4523C6.57463 12.353 1.44399 9.97363 0.621322 5.7363C0.303322 4.09697 0.622659 2.49762 1.47533 1.45896C2.16533 0.617625 3.1573 0.17028 4.34463 0.16428C4.35063 0.16428 4.35663 0.16428 4.36196 0.16428C5.71663 0.16428 6.54267 0.935633 6.99933 1.5923C7.458 0.932966 8.29062 0.15828 9.65396 0.16428C10.842 0.17028 11.8346 0.617625 12.5253 1.45896C13.3766 2.49696 13.6953 4.09629 13.3766 5.73695C12.5553 9.97429 7.42396 12.3543 7.20596 12.453C7.14129 12.4823 7.07065 12.497 6.99998 12.497ZM4.36131 1.16363C4.35731 1.16363 4.354 1.16363 4.35 1.16363C3.458 1.16763 2.75135 1.48028 2.24868 2.09295C1.58268 2.90428 1.342 4.19496 1.60334 5.54563C2.24 8.82829 6.06198 10.9616 6.99998 11.4403C7.93798 10.9616 11.76 8.82829 12.396 5.54563C12.6586 4.19429 12.418 2.90362 11.7533 2.09295C11.2507 1.48095 10.544 1.16895 9.64997 1.16428C9.64597 1.16428 9.64199 1.16428 9.63866 1.16428C8.05732 1.16428 7.49669 2.74897 7.47402 2.8163C7.40469 3.0183 7.21397 3.15561 7.00064 3.15561C6.9993 3.15561 6.99862 3.15561 6.99795 3.15561C6.78395 3.15495 6.59329 3.01829 6.52529 2.81496C6.50329 2.74829 5.94198 1.16363 4.36131 1.16363Z"
+                                                    fill="#00171F" />
+                                            </svg>
+                                        </button>
+                                    {% endif %}
+                                    {% if compare_view %}
+                                        <button type="button" class="ds-product-compare br-7 button button-light ds-compare-btn" onclick="compare.add('{{ product_id }}');" title="{{ button_compare }}">
+                                            <svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14"
+                                                fill="none">
+                                                <path
+                                                    d="M13.5 6.99698V8.99698C13.5 10.3757 12.378 11.497 11 11.497H2.20736L3.354 12.6436C3.54934 12.839 3.54934 13.1557 3.354 13.351C3.25667 13.4483 3.12865 13.4976 3.00065 13.4976C2.87265 13.4976 2.74463 13.449 2.6473 13.351L0.647298 11.351C0.601298 11.305 0.564721 11.2497 0.539388 11.1884C0.488721 11.0664 0.488721 10.9284 0.539388 10.8064C0.564721 10.7451 0.601298 10.6896 0.647298 10.6436L2.6473 8.64363C2.84263 8.4483 3.15932 8.4483 3.35466 8.64363C3.54999 8.83897 3.54999 9.15565 3.35466 9.35099L2.20801 10.4976H11C11.8267 10.4976 12.5 9.82497 12.5 8.99764V6.99764C12.5 6.72164 12.724 6.49764 13 6.49764C13.276 6.49764 13.5 6.72098 13.5 6.99698ZM1 7.49698C1.276 7.49698 1.5 7.27298 1.5 6.99698V4.99698C1.5 4.16965 2.17333 3.49698 3 3.49698H11.7926L10.646 4.64363C10.4507 4.83896 10.4507 5.15565 10.646 5.35099C10.7433 5.44832 10.8713 5.49764 10.9993 5.49764C11.1273 5.49764 11.2554 5.44899 11.3527 5.35099L13.3527 3.35099C13.3987 3.30499 13.4353 3.24972 13.4606 3.18839C13.5113 3.06639 13.5113 2.92839 13.4606 2.80639C13.4353 2.74506 13.3987 2.68963 13.3527 2.64363L11.3527 0.643631C11.1574 0.448298 10.8407 0.448298 10.6453 0.643631C10.45 0.838965 10.45 1.15565 10.6453 1.35099L11.792 2.49764H3C1.622 2.49764 0.5 3.61897 0.5 4.99764V6.99764C0.5 7.27297 0.724 7.49698 1 7.49698Z"
+                                                    fill="#00171F" />
+                                            </svg>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        setAddedCompareWishlist();
+                                    });
+                                </script>
+                            {% endif %}
+                        </div>
+                        {% if price %}
+                            <div class="ds-product-main-price">
+                                {% if not special %}
+                                    <div class="ds-price-new fsz-24 fw-700 dark-text">{{ price }}</div>
+                                {% else %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="ds-price-old light-text text-decoration-line-through fw-500">{{ price }}</div>
+                                        {% if oct_sticker_you_save %}
+                                            <div class="ds-module-sticker br-8 fw-600 red-bg ms-2">{{ you_save }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="ds-price-new fsz-24 fw-700 red-text">{{ special }}</div>
+                                    <div class="ds-product-price-discount fsz-12 mt-1">{{ oct_product_you_save }} <span id="main-product-you-save-popup">{{ you_save_price }}</span></div>
+                                {% endif %}
+                                {% if oct_popup_found_cheaper_status is defined and oct_popup_found_cheaper_status == 'on' and can_buy %}
+                                    <span class="ds-product-found-cheaper blue-link fsz-12" onclick="octPopupFoundCheaper('{{ product_id }}');">{{ oct_product_cheaper }}</span>
+                                {% endif %}
+                                {% if tax %}
+                                    <div class="price-tax fsz-10 fw-300 mt-1">{{ text_tax }}
+                                        <span>{{ tax }}</span>
+                                    </div>
+                                {% endif %}
+                                {% if discounts %}
+                                    {% for discount in discounts %}
+                                        <div class="ds-product-price-discount fsz-12 mt-1">{{ discount.quantity }}{{ text_discount }}{{ discount.price }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if minimum > 1 %}
+                                    <div class="ds-product-option-minquant fsz-12 mt-1">{{ text_minimum }}</div>
+                                {% endif %}
+                                {% if points %}
+                                    <div class="ds-product-option-bonus fsz-12 mt-1">{{ text_points }}
+                                        {{ points }}</div>
+                                {% endif %}
+                                {% if reward %}
+                                    <div class="ds-product-option-bonus fsz-12 mt-1">{{ text_reward }}
+                                        {{ reward }}</div>
+                                {% endif %}
+                                {% if recurrings %}
+                                    <div class="form-group d-flex flex-column flex-md-row align-items-md-center">
+                                        <div class="ds-control-label fw-500 dark-text fsz-14 mb-2">{{ text_payment_recurring }}
+                                            <span class="required"> *</span></div>
+                                        <div class="form-group">
+                                            <select name="recurring_id" class="form-select form-control">
+                                                <option value="">{{ text_select }}</option>
+                                                {% for recurring in recurrings %}
+                                                    <option value="{{ recurring.recurring_id }}">{{ recurring.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <div class="help-block" id="recurring-description"></div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        {% if can_buy is not empty %}
+                            <div class="ds-product-main-actions br-7 content-block p-3 p-md-4 my-3 my-md-4 d-flex flex-column g-3 g-md-4">
+                                {% if options %}
+                                    <div id="productPopupOptions" class="ds-product-options mb-4 pb-4">
+                                        {% for option in options %}
+                                            {% if option.type == 'select' %}
+                                                <div class="form-group">
+                                                    <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                        {% if option.required %}
+                                                            <span class="required option-required"> *</span>
+                                                        {% endif %}
+                                                    </label>
+                                                    <select name="option[{{ option.product_option_id }}]" id="input-option{{ option.product_option_id }}" class="form-select form-control">
+                                                        <option value="">{{ text_select }}</option>
+                                                        {% for option_value in option.product_option_value %}
+                                                            <option value="{{ option_value.product_option_value_id }}">{{ option_value.name }}
+                                                                {% if option_value.price %}
+                                                                    ({{ option_value.price_prefix }}{{ option_value.price }})
+                                                                {% endif %}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            {% endif %}
+                                            {% if option.type == 'radio' %}
+                                                <div class="form-group">
+                                                    <label class="ds-control-label fw-500 dark-text fsz-14 mb-2">{{ option.name }}
+                                                        {% if option.required %}
+                                                            <span class="required option-required"> *</span>{% endif %}
+                                                    </label>
+                                                    <div id="input-option{{ option.product_option_id }}" class="options-box d-flex flex-wrap">
+                                                        {% for option_value in option.product_option_value %}
+                                                            <div class="radio">
+                                                                <label
+                                                                    data-bs-toggle="tooltip"
+                                                                    data-bs-placement="top"
+                                                                    class="option optid-{{ option.product_option_id }} not-selected{% if option_value.image %} radio-img{% else %} ds-radio{% endif %}{% if option.option_id in allowed_options_ids and loop.index == 1 %} auto-choose{% endif %}"
+                                                                    title="{{ option_value.name }} {% if option_value.price %}{{ option_value.price_prefix }}{{ option_value.price }}{% endif %}">
+                                                                    <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" class="input-radio"/>
+                                                                    {% if option_value.image %}
+                                                                        <img src="{{ option_value.image }}" alt="{{ option_value.name }} {% if option_value.price %} {{ option_value.price_prefix }} {{ option_value.price }} {% endif %}" width="50" height="50" />
+                                                                    {% else %}
+                                                                        {{ option_value.name }}
+                                                                    {% endif %}
+                                                                </label>
+                                                                <script>
+                                                                    $(document).ready(function() {
+                                                                        $(document).on('click', 'label.optid-{{ option.product_option_id }}', function(event) {
+                                                                            $('label.optid-{{ option.product_option_id }}').removeClass('selected').addClass('not-selected');
+                                                                            $(this).removeClass('not-selected').addClass('selected');
+                                                                        });
+                                                                    });
+                                                                </script>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            {% if option.type == 'checkbox' %}
+                                                <div class="form-checkbox-group">
+                                                    <div class="ds-control-label fw-500 dark-text fsz-14 mb-2">{{ option.name }}
+                                                        {% if option.required %}
+                                                            <span class="required option-required"> *</span>{% endif %}
+                                                    </div>
+                                                    <div id="input-option{{ option.product_option_id }}">
+                                                        {% for option_value in option.product_option_value %}
+                                                            <div class="form-check">
+                                                                <label class="form-check-label d-flex align-items-center">
+                                                                    {% if option_value.image %}<img src="{{ option_value.image }}" alt="{{ option_value.name }} {% if option_value.price %} {{ option_value.price_prefix }} {{ option_value.price }} {% endif %}" class="img-thumbnail" width="50" height="50" />{% endif %}
+                                                                    <input type="checkbox" id="option[{{ option.product_option_id }}][{{ option_value.product_option_value_id }}]" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" class="form-check-input"/>
+                                                                    {{ option_value.name }}
+                                                                    {% if option_value.price %}
+                                                                        ({{ option_value.price_prefix }}{{ option_value.price }})
+                                                                    {% endif %}
+                                                                </label>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            {% if option.type == 'text' %}
+                                                <div class="form-group">
+                                                    <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                        {% if option.required %}
+                                                            <span class="required option-required"> *</span>
+                                                        {% endif %}
+                                                    </label>
+                                                    <input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" placeholder="{{ option.name }}" id="input-option{{ option.product_option_id }}" class="form-control" inputmode="text">
+                                                </div>
+                                            {% endif %}
+                                            {% if option.type == 'textarea' %}
+                                                <div class="form-group">
+                                                    <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                        {% if option.required %}
+                                                            <span class="required option-required"> *</span>{% endif %}
+                                                    </label>
+                                                    <textarea name="option[{{ option.product_option_id }}]" rows="5" placeholder="{{ option.name }}" id="input-option{{ option.product_option_id }}" class="form-control">{{ option.value }}</textarea>
+                                                </div>
+                                            {% endif %}
+                                            {% if option.type == 'file' %}
+                                                <div class="form-group">
+                                                    <label class="ds-control-label fw-500 dark-text fsz-14 mb-2 d-block">{{ option.name }}
+                                                        {% if option.required %}
+                                                            <span class="required option-required"> *</span>{% endif %}
+                                                    </label>
+                                                    <button type="button" id="popup-button-upload{{ option.product_option_id }}" data-loading-text="{{ text_loading }}" class="button button-outline button-outline-primary br-7">
+                                                        <i class="fa fa-upload me-2"></i>
+                                                        {{ button_upload }}</button>
+                                                    <input type="hidden" name="option[{{ option.product_option_id }}]" value="" id="input-option{{ option.product_option_id }}"/>
+                                                </div>
+                                            {% endif %}
+                                            {% if option.type == 'date' %}
+                                                <div class="form-group">
+                                                    <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                        {% if option.required %}
+                                                            <span class="required option-required"> *</span>{% endif %}
+                                                    </label>
+                                                    <div class="input-group date">
+                                                        <input type="date" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option{{ option.product_option_id }}" class="form-control"/>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            {% if option.type == 'datetime' %}
+                                                <div class="form-group">
+                                                    <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                        {% if option.required %}
+                                                            <span class="required option-required"> *</span>{% endif %}
+                                                    </label>
+                                                    <div class="input-group datetime">
+                                                        <input type="datetime-local" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option{{ option.product_option_id }}" class="form-control"/>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            {% if option.type == 'time' %}
+                                                <div class="form-group">
+                                                    <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="input-option{{ option.product_option_id }}">{{ option.name }}
+                                                        {% if option.required %}
+                                                            <span class="required option-required"> *</span>{% endif %}
+                                                    </label>
+                                                    <div class="input-group time">
+                                                        <input type="time" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option{{ option.product_option_id }}" class="form-control"/>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="ds-product-main-buttons d-flex">
+                                    <div class="ds-product-main-cart d-flex align-items-stretch justify-content-between">
+                                        {% if quantity_view %}
+                                            <div class="ds-module-quantity d-flex align-items-center justify-content-center br-8 me-3">
+                                                <button type="button" aria-label="Minus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="updateValuePopUpView(true, false, false);">
+                                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <g>
+                                                            <path
+                                                                d="M3.33333 7.5L12.6667 7.5C12.9427 7.5 13.1667 7.724 13.1667 8C13.1667 8.276 12.9427 8.5 12.6667 8.5L3.33333 8.5C3.05733 8.5 2.83333 8.276 2.83333 8C2.83333 7.724 3.05733 7.5 3.33333 7.5Z"
+                                                                fill="#25314C"></path>
+                                                        </g>
+                                                    </svg>
+                                                </button>
+                                                <input type="text" class="form-control" name="quantity" value="{{ minimum }}" id="popup-input-quantity" aria-label="Quantity" inputmode="numeric">
+                                                <button type="button" aria-label="Plus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="updateValuePopUpView(false, true, false);">
+                                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <g>
+                                                            <path
+                                                                d="M2.83341 8.00009C2.83341 7.72409 3.05741 7.50009 3.33341 7.50009L7.50008 7.50009L7.50008 3.33342C7.50008 3.05742 7.72408 2.83342 8.00008 2.83342C8.27608 2.83342 8.50008 3.05742 8.50008 3.33342L8.50008 7.50009L12.6667 7.50008C12.9427 7.50008 13.1667 7.72408 13.1667 8.00008C13.1667 8.27608 12.9427 8.50008 12.6667 8.50008L8.50008 8.50009L8.50008 12.6668C8.50008 12.9428 8.27608 13.1668 8.00008 13.1668C7.72408 13.1668 7.50008 12.9428 7.50008 12.6668L7.50008 8.50009L3.33342 8.50009C3.05742 8.50009 2.83342 8.27609 2.83341 8.00009Z"
+                                                                fill="#25314C"></path>
+                                                        </g>
+                                                    </svg>
+                                                </button>
+                                                <input type="hidden" name="product_id" value="{{ product_id }}"/>
+                                                <input type="hidden" id="min-popup-view-quantity" value="{{ minimum }}" name="min_quantity">
+                                                <input type="hidden" id="max-popup-view-quantity" value="{{ max_quantity }}" name="max_quantity">
+                                            </div>
+                                        {% endif %}
+                                        <button type="button" id="oct-popup-button-cart" data-loading-text="{{ text_loading }}" class="ds-product-main-cart-button button button-primary br-7 fsz-14 fw-500 flex-grow-1">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M13.3333 4.10256H11.4872V3.48718C11.4872 1.5639 9.92328 0 8 0C6.07672 0 4.51282 1.5639 4.51282 3.48718V4.10256H2.66666C1.64923 4.10256 0.820511 4.93046 0.820511 5.94872V12.9231C0.820511 14.9071 1.91343 16 3.89743 16H12.1026C14.0866 16 15.1795 14.9071 15.1795 12.9231V5.94872C15.1795 4.93046 14.3508 4.10256 13.3333 4.10256ZM5.74359 3.48718C5.74359 2.24246 6.75528 1.23077 8 1.23077C9.24472 1.23077 10.2564 2.24246 10.2564 3.48718V4.10256H5.74359V3.48718ZM13.9487 12.9231C13.9487 14.217 13.3965 14.7692 12.1026 14.7692H3.89743C2.60349 14.7692 2.05128 14.217 2.05128 12.9231V5.94872C2.05128 5.60903 2.32779 5.33333 2.66666 5.33333H4.51282V7.17949C4.51282 7.51918 4.78851 7.79487 5.1282 7.79487C5.4679 7.79487 5.74359 7.51918 5.74359 7.17949V5.33333H10.2564V7.17949C10.2564 7.51918 10.5321 7.79487 10.8718 7.79487C11.2115 7.79487 11.4872 7.51918 11.4872 7.17949V5.33333H13.3333C13.6722 5.33333 13.9487 5.60903 13.9487 5.94872V12.9231Z"
+                                                    fill="#FFF"></path>
+                                            </svg>
+                                            <span class="button-text">{{ button_cart }}</span>
+                                        </button>
+                                        <input type="hidden" name="product_id" value="{{ product_id }}"/>
+                                    </div>
+                                    {% if oct_popup_purchase_status is defined and can_buy %}
+                                        <button type="button" class="ds-product-fast-order-button button button-outline button-outline-primary br-7 fsz-12" onclick="octPopPurchase('{{ product_id }}')">
+                                            <span class="button-text">{{ oct_product_quickbuy }}</span>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {{ oct_byoneclick }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% if description is defined and description | length > 10 %}
+                    <div class="ds-product-description ds-product-tab-content content-block p-xl-4">
+                        <div class="ds-product-tab-content-title d-flex align-items-center dark-text fsz-20 fw-500 pb-3 mb-3">
+                            <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 20 21" fill="none">
+                                <path
+                                    d="M10 20.3529C4.48558 20.3529 0 15.8673 0 10.3529C0 4.83849 4.48558 0.352905 10 0.352905C15.5144 0.352905 20 4.83849 20 10.3529C20 15.8673 15.5144 20.3529 10 20.3529ZM10 1.74825C5.25488 1.74825 1.39535 5.60779 1.39535 10.3529C1.39535 15.098 5.25488 18.9576 10 18.9576C14.7451 18.9576 18.6047 15.098 18.6047 10.3529C18.6047 5.60779 14.7451 1.74825 10 1.74825ZM10.6977 14.539V10.2868C10.6977 9.9017 10.3851 9.58914 10 9.58914C9.61488 9.58914 9.30233 9.9017 9.30233 10.2868V14.539C9.30233 14.9241 9.61488 15.2366 10 15.2366C10.3851 15.2366 10.6977 14.9241 10.6977 14.539ZM10.9489 7.09709C10.9489 6.5836 10.533 6.16686 10.0186 6.16686H10.0093C9.49582 6.16686 9.08362 6.5836 9.08362 7.09709C9.08362 7.61058 9.50513 8.02732 10.0186 8.02732C10.5321 8.02732 10.9489 7.61058 10.9489 7.09709Z"
+                                    fill="#00171F" />
+                            </svg>
+                            {{ oct_product_maintab }}
+                        </div>
+                        <div class="ds-product-tab-content-text secondary-text fw-300">
+                            {{ description }}
+                            {% if tags %}
+                                <p class="ds-product-tags">{{ text_tags }}
+                                    {% for i in 0..tags | length - 1 %}
+                                        <a href="{{ tags[i].href }}">{{ tags[i].tag }}</a>{% if i < (tags|length - 1) %},{% endif %}
+                                    {% endfor %}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if specification_view and attribute_groups %}
+                    <div class="ds-product-attributes ds-product-tab-content content-block p-xl-4">
+                        <div class="ds-product-tab-content-title d-flex align-items-center dark-text fsz-20 fw-500 pb-3 mb-3">
+                            <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
+                                    <path
+                                        d="M14.75 8.84631H6.75C6.336 8.84631 6 8.51031 6 8.09631C6 7.68231 6.336 7.34631 6.75 7.34631H14.75C15.164 7.34631 15.5 7.68231 15.5 8.09631C15.5 8.51031 15.164 8.84631 14.75 8.84631ZM15.5 11.0963C15.5 10.6823 15.164 10.3463 14.75 10.3463H6.75C6.336 10.3463 6 10.6823 6 11.0963C6 11.5103 6.336 11.8463 6.75 11.8463H14.75C15.164 11.8463 15.5 11.5103 15.5 11.0963ZM11.5 14.0963C11.5 13.6823 11.164 13.3463 10.75 13.3463H6.75C6.336 13.3463 6 13.6823 6 14.0963C6 14.5103 6.336 14.8463 6.75 14.8463H10.75C11.164 14.8463 11.5 14.5103 11.5 14.0963ZM21.5 11.0963C21.5 5.16831 16.678 0.346313 10.75 0.346313C4.822 0.346313 0 5.16831 0 11.0963C0 17.0243 4.822 21.8463 10.75 21.8463C16.678 21.8463 21.5 17.0243 21.5 11.0963ZM20 11.0963C20 16.1973 15.851 20.3463 10.75 20.3463C5.649 20.3463 1.5 16.1973 1.5 11.0963C1.5 5.99531 5.649 1.84631 10.75 1.84631C15.851 1.84631 20 5.99531 20 11.0963Z"
+                                        fill="#00171F" />
+                                </svg>
+                                {{ oct_product_attributes_tab }}
+                        </div>
+                        <div class="ds-product-attributes-items dark-text fsz-14 w-100">
+                            {% for attribute_group in attribute_groups %}
+                                <div class="ds-product-content-attributes-list">
+                                    <div class="ds-product-content-attributes-list-title fw-500">{{ attribute_group.name }}</div>
+                                    {% for attribute in attribute_group.attribute %}
+                                        <div class="ds-product-attributes-item d-flex br-2">
+                                            <span class="light-text">{{ attribute.name }}</span>
+                                            <span>{{ attribute.text }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $('button[id^=\'popup-button-upload\']').on('click', function() {
+        var node = this;
+
+        $('#form-upload').remove();
+
+        $('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
+
+        $('#form-upload input[name=\'file\']').trigger('click');
+
+        if (typeof timer != 'undefined') {
+            clearInterval(timer);
+        }
+
+        timer = setInterval(function() {
+            if ($('#form-upload input[name=\'file\']').val() != '') {
+                clearInterval(timer);
+
+                $.ajax({
+                    url: 'index.php?route=tool/upload',
+                    type: 'post',
+                    dataType: 'json',
+                    data: new FormData($('#form-upload')[0]),
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function() {
+                        $(node).button('loading');
+                    },
+                    complete: function() {
+                        $(node).button('reset');
+                    },
+                    success: function(json) {
+                        $('.text-danger').remove();
+
+                        if (json['error']) {
+                            $(node).parent().find('input').after('<div class="text-danger">' + json['error'] + '</div>');
+                        }
+
+                        if (json['success']) {
+                            alert(json['success']);
+
+                            $(node).parent().find('input').val(json['code']);
+                        }
+                    },
+                    error: function(xhr, ajaxOptions, thrownError) {
+                        alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                    }
+                });
+            }
+        }, 500);
+    });
+
+    $('#oct-popup-button-cart').on('click', function() {
+        $.ajax({
+            url: 'index.php?route=checkout/cart/add',
+            type: 'post',
+            cache: false,
+            data: $('#quickViewModal input[type=\'text\'], #quickViewModal input[type=\'hidden\'], #quickViewModal input[type=\'radio\']:checked, #quickViewModal input[type=\'checkbox\']:checked, #quickViewModal select, #quickViewModal textarea, #quickViewModal input[type=\'date\'], #quickViewModal input[type=\'datetime-local\'], #quickViewModal input[type=\'time\']'),
+            dataType: 'json',
+            beforeSend: function() {
+                $('#oct-popup-button-cart').button('loading');
+                masked('body', true);
+
+                $('#oct-popup-button-cart').data('original-content', $('#oct-popup-button-cart').html());
+                $('#oct-popup-button-cart').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>').prop('disabled', true);
+            },
+            complete: function() {
+                $('#oct-popup-button-cart').button('reset');
+                masked('body', false);
+
+                setTimeout(function () {
+                    $('#oct-popup-button-cart').html('<i class="fas fa-check fsz-18"></i>').prop('disabled', true);
+                }, 1000);
+
+                setTimeout(function () {
+                    $('#oct-popup-button-cart').html($('#oct-popup-button-cart').data('original-content')).prop('disabled', false);
+                }, 1200);
+            },
+            success: function(json) {
+                $('.alert-dismissible, .text-danger').remove();
+                $('.form-group').removeClass('has-error');
+
+                if (json['error']) {
+                    if (json['error']['option']) {
+                        let errorOption = '';
+                        for (i in json['error']['option']) {
+                            var element = $('#input-option' + i.replace('_', '-'));
+
+                            if (element.parent().hasClass('input-group')) {
+                                element.parent().after('<div class="text-danger">' + json['error']['option'][i] + '</div>');
+                            } else {
+                                element.parent().after('<div class="text-danger">' + json['error']['option'][i] + '</div>');
+                            }
+                            errorOption += '<div class="alert-text-item">' + json['error']['option'][i] + '</div>';
+                        }
+                        scNotify('danger', errorOption);
+                    }
+
+                    if (json['error']['error_warning']) {
+                        scNotify('danger', json['error']['error_warning']);
+                    }
+
+                    if (json['error']['recurring']) {
+                        $('select[name=\'recurring_id\']').after('<div class="text-danger">' + json['error']['recurring'] + '</div>');
+                    }
+
+                    // Highlight any found errors
+                    $('.text-danger').parent().addClass('has-error');
+                }
+
+                if (json['success']) {
+                    scNotify('success', json['success']);
+                    
+                    let cartIdsHolder = document.querySelector("[data-cart-ids]");
+
+                    if (json.oct_cart_ids && json.oct_cart_ids.length > 0 && cartIdsHolder) {
+                        cartIdsHolder.dataset.cartIds = json.oct_cart_ids;
+                        setTimeout(function () {
+                            setCartBtnAdded();
+                        }, 1201);
+                    }
+
+                    // Need to set timeout otherwise it wont update the total
+                    setTimeout(function() {
+                        $('#cart .ds-cart-qty').addClass('active').html(json['total_products']);
+                    }, 100);
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+            }
+        });
+    });
+
+    $('#productPopupOptions input, #productPopupOptions select ').on('change', function() {
+        updateViewPrice();
+    });
+
+    function updateViewPrice() {
+        let priceOld = document.querySelector('#quickViewModal .ds-price-old');
+        let priceNew = document.querySelector('#quickViewModal .ds-price-new');
+        let youSavePopup = document.querySelector('#main-product-you-save-popup');
+
+        $.ajax({
+            type: 'post',
+            url: 'index.php?route=octemplates/main/oct_functions/updatePrices',
+            data: $('#quickViewModal input[type=\'text\'], #quickViewModal input[type=\'hidden\'], #quickViewModal input[type=\'radio\']:checked, #quickViewModal input[type=\'checkbox\']:checked, #quickViewModal select'),
+            dataType: 'json',
+            cache: false,
+            success: function(json) {
+                {% if special %}
+                    animatePrice(json['price'], priceOld);
+                    animatePrice(json['special'], priceNew);
+                {% else %}
+                    animatePrice(json['price'], priceNew);
+                {% endif %}
+
+                {% if oct_sticker_you_save and you_save %}
+                    animatePrice(json['you_save_price'], youSavePopup);
+                {% endif %}
+
+                {% if tax %}
+                    $('#popupQuickviewModalTax').html(json['tax']);
+                {% endif %}
+            }
+        });
+    }
+
+    $('#popup-input-quantity').on('change', function(e) {
+        updateValuePopUpView(false, false, true);
+    });
+
+    function updateValuePopUpView(minus, plus, manual) {
+        let use_minimum_step = {{ use_minimum_step ?? 0 }};
+        let current = parseInt($('#popup-input-quantity').val()) || 0;
+        let currentMinimum = parseInt($('#min-popup-view-quantity').val()) || 1;
+        let max = parseInt($('#max-popup-view-quantity').val()) || 0;
+
+        if (max === 0) return;
+
+        let newValue = current;
+        let step = use_minimum_step ? currentMinimum : 1;
+
+        if (minus) {
+            if (use_minimum_step) {
+                newValue = current - currentMinimum;
+                if (newValue < currentMinimum) {
+                    newValue = currentMinimum;
+                }
+            } else {
+                if (current > 1) {
+                    newValue = current - 1;
+                }
+            }
+        }
+
+        if (plus) {
+            if (use_minimum_step) {
+                newValue = current + currentMinimum;
+            } else {
+                newValue = current + 1;
+            }
+            
+            if (max && newValue > max) {
+                if (use_minimum_step) {
+                    newValue = Math.floor(max / currentMinimum) * currentMinimum;
+                    if (newValue < currentMinimum) {
+                        newValue = currentMinimum;
+                    }
+                } else {
+                    newValue = max;
+                }
+            }
+        }
+
+        if (manual) {
+            if (use_minimum_step) {
+                if (current < currentMinimum) {
+                    newValue = currentMinimum;
+                } else {
+                    let remainder = current % currentMinimum;
+                    if (remainder !== 0) {
+                        newValue = current - remainder + currentMinimum;
+                    }
+                }
+            } else {
+                if (current < 1) {
+                    newValue = 1;
+                }
+            }
+
+            if (max && newValue > max) {
+                if (use_minimum_step) {
+                    newValue = Math.floor(max / currentMinimum) * currentMinimum;
+                    if (newValue < currentMinimum) {
+                        newValue = currentMinimum;
+                    }
+                } else {
+                    newValue = max;
+                }
+            }
+        }
+
+        $('#popup-input-quantity').val(newValue);
+        updateViewPrice();
+    }
+
+{% if minimum > 1 %}
+	updateViewPrice();
+{% endif %}
+</script>

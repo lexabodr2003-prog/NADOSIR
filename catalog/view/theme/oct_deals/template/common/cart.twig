@@ -1,0 +1,9 @@
+{% if oct_popup_cart_status is defined and oct_popup_cart_status %}
+<button title="{{ oct_cart }}" id="cart" class="ds-header-cart-button button button-transparent position-relative overflow-visible" type="button" onclick="octPopupCart();">
+{% else %}
+<button title="{{ oct_cart }}" id="cart" type="button" class="ds-header-cart-button button button-transparent position-relative overflow-visible" onclick="location = '{{ cart }}';">
+{% endif %}
+    <span class="button-icon button-icon-cart"></span>
+    <span class="badge rounded-pill position-absolute ds-cart-qty{% if total_products > 0 %} active{% endif %}">{{ total_products }}</span>
+</button>
+<span class="d-none" {% if oct_deals_data.isbuttoninteractive is defined %}data-cart-ids="{{ cart_product_ids }}"{% endif %} data-cart-text="{{ cart_text }}" data-cart-text-in="{{ cart_text_in }}"></span>

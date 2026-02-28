@@ -1,0 +1,234 @@
+{{ header }}{{ column_left }}
+<div id="content">
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="pull-right">
+                <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary">
+                    <i class="fa fa-plus"></i>
+                </a>
+				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default">
+					<i class="fa fa-reply"></i>
+				</a>
+			</div>
+			<h1>{{ heading_title }}</h1>
+			<ul class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %}
+					<li>
+						<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+					</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="container-fluid">
+		{% if error_warning %}
+			<div class="alert alert-danger alert-dismissible">
+				<i class="fa fa-exclamation-circle"></i>
+				{{ error_warning_info }}
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+			</div>
+		{% endif %}
+		{% if success %}
+			<script>
+				usNotify('success', '{{ success }}');
+			</script>
+		{% endif %}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					<i class="fa fa-list"></i>
+					{{ text_list }}</h3>
+			</div>
+			<div class="panel-body">
+				{% if product_sets %}
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title"><i class="fa fa-filter"></i> {{ text_filter }}</h3>
+					</div>
+					<div class="panel-body">
+						<form action="{{ filter_action }}" method="get" id="filter-form">
+							<div class="row mb-3">
+								<div class="col-sm-6 mb-3">
+									<label for="filter_set_name">{{ text_set_name }}</label>
+									<input type="text" name="filter_set_name" id="filter_set_name" class="form-control" value="{{ filter_set_name }}">
+								</div>
+								<div class="col-sm-6 mb-3">
+									<label for="filter_product_name">{{ text_product_name }}</label>
+									<input type="text" name="filter_product_name" id="filter_product_name" class="form-control" value="{{ filter_product_name }}">
+								</div>
+								<div class="col-sm-6">
+									<label for="filter_category_name">{{ text_category_name }}</label>
+									<input type="text" name="filter_category_name" id="filter_category_name" class="form-control" value="{{ filter_category_name }}">
+								</div>
+								<div class="col-sm-6">
+									<label for="filter_manufacturer_name">{{ text_manufacturer_name }}</label>
+									<input type="text" name="filter_manufacturer_name" id="filter_manufacturer_name" class="form-control" value="{{ filter_manufacturer_name }}">
+								</div>
+								<div class="clearfix"></div>
+							</div>
+							<button type="submit" class="btn btn-primary">{{ button_filter }}</button>
+						</form>
+					</div>
+				</div>
+					<div class="btn-group">
+						<button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false" disabled id="deleteButton">
+							<i class="fa fa-trash-o"></i>
+							{{ button_delete_selected }}
+							<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu">
+							<li>
+								<a onclick="deleteAllSelected();">{{ button_delete_selected }}</a>
+							</li>
+						</ul>
+					</div>
+					<br/><br/>
+					<div class="table-responsive" id="product-sets">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<tr>
+									<th style="text-align: center;"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);checkCheckBoxes();"/></th>
+									<th>{{ column_name }}</th>
+									<th>{{ column_date_added }}</th>
+									<th>{{ column_status }}</th>
+									<th>{{ column_action }}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for product_set in product_sets %}
+									<tr>
+										<td style="text-align: center;"><input type="checkbox" name="selected[]" value="{{ product_set.set_id }}"/></td>
+										<td>
+											<p>
+												<b>{{ product_set.name }}</b>
+											</p>
+											<p>{{ text_product_sets }}</p>
+											{% if product_set.products %}
+												<div style="display: flex; gap: 12px; flex-wrap: wrap;">
+													{% for product in product_set.products %}
+														<div style="margin: 4px 0; padding: 8px; border: 1px solid #f8f8f8; border-radius: 8px;">
+															<img src="{{ product.image }}" alt="{{ product.name }}" title="{{ product.name }}" style="max-height: 30px; max-width: 30px;"/>
+															<a target="_blank" href="{{ product.edit }}">{{ product.name }}</a>
+														</div>
+													{% endfor %}
+												</div>
+											{% endif %}
+										</td>
+										<td>{{ product_set.date_added }}</td>
+										<td>
+											{% if product_set.status %}
+												<span class="label label-success">{{ text_enabled }}</span>
+											{% else %}
+												<span class="label label-danger">{{ text_disabled }}</span>
+											{% endif %}
+										</td>
+										<td>
+											<div style="display: flex; gap: 8px; flex-wrap: no-wrap;">
+												<a href="{{ product_set.edit }}" data-toggle="tooltip" title="" class="btn btn-primary" data-original-title="{{ button_edit }}" class="btn btn-primary">
+												<i class="fa fa fa-pencil"></i>
+												</a>
+												<a onclick="deleteSelected({{ product_set.set_id }});" data-toggle="tooltip" title="" class="btn btn-danger" data-original-title="{{ button_delete }}">
+													<i class="fa fa-trash-o"></i>
+												</a>
+											</div>
+										</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				{% else %}
+					{{ text_empty }}
+				{% endif %}
+				{% if pagination %}
+					<div class="row">
+						<div class="col-sm-6 text-left">
+							<div class="pagination">
+								<div class="links">{{ pagination }}</div>
+							</div>
+						</div>
+						<div class="col-sm-6 text-right">
+							<div class="results">{{ results }}</div>
+						</div>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+
+	</div>
+</div>
+<script>
+
+const baseUrl = 'index.php?route=octemplates/module/oct_product_set/';
+const userToken = '{{ user_token }}';
+
+function sendRequest(type, action, data = {}) {
+    $.ajax({
+        type: type,
+        url: `${baseUrl}${action}&user_token=${userToken}`,
+        data: data,
+        dataType: 'json',
+        cache: false,
+        success: function(json) {
+           window.location.href = `index.php?route=octemplates/module/oct_product_set&user_token=${userToken}`;
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+        }
+    });
+}
+
+function deleteSelected(subscription_id) {
+	if (confirm('{{ text_confirm }}')) {
+		sendRequest('post', `deleteSelected&delete=${subscription_id}`);
+	}
+}
+
+function deleteAllSelected() {
+	if (confirm('{{ text_confirm }}')) {
+		const checkedInputs = $('#product-sets input[type=\'checkbox\']:checked');
+		sendRequest('post', 'deleteAllSelected', checkedInputs);
+	}
+}
+
+function checkCheckBoxes() {
+    if ($('input[name="selected[]"]:checked').length > 0) {
+        $('#deleteButton').removeAttr('disabled');
+    } else {
+        $('#deleteButton').attr('disabled', 'disabled');
+    }
+}
+
+$('input[name="selected[]"]').change(function() {
+    checkCheckBoxes();
+});
+
+$('#filter-form').submit(function() {
+    var url = baseUrl + 'index&user_token=' + userToken;
+
+    var filterSetName = $('#filter_set_name').val();
+    if (filterSetName) {
+        url += '&filter_set_name=' + encodeURIComponent(filterSetName);
+    }
+
+    var filterProductName = $('#filter_product_name').val();
+    if (filterProductName) {
+        url += '&filter_product_name=' + encodeURIComponent(filterProductName);
+    }
+
+    var filterCategoryName = $('#filter_category_name').val();
+    if (filterCategoryName) {
+        url += '&filter_category_name=' + encodeURIComponent(filterCategoryName);
+    }
+
+    var filterManufacturerName = $('#filter_manufacturer_name').val();
+    if (filterManufacturerName) {
+        url += '&filter_manufacturer_name=' + encodeURIComponent(filterManufacturerName);
+    }
+
+    window.location.href = url;
+    return false; 
+});
+
+</script>
+{{ footer }}

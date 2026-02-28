@@ -1,0 +1,198 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid csvprice_pro_container">
+        {% if warning %}
+            <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ warning }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        {% if success %}
+            <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        {{ app_header }}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <form action="{{ action_export }}" class="form-horizontal" method="post" id="form_customer_export" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group form-group-sm">
+                                <label class="col-sm-5 control-label">{{ entry_file_format }}</label>
+                                <div class="col-sm-7">
+                                    <select name="csv_export[file_format]" class="form-control input-sm">
+                                        {% if csv_export.file_format == 'csv' %}
+                                            <option value="csv" selected="selected">&nbsp;CSV&nbsp;</option>
+                                            <option value="vcf">&nbsp;vCard&nbsp;</option>
+                                        {% else %}
+                                            <option value="csv">&nbsp;CSV&nbsp;</option>
+                                            <option value="vcf" selected="selected">&nbsp;vCard&nbsp;</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-sm">
+                                <label class="col-sm-5 control-label">{{ entry_file_encoding }}</label>
+                                <div class="col-sm-7">
+                                    <select name="csv_export[file_encoding]" class="form-control input-sm">
+                                        {% for key, item in charsets %}
+                                            {% if csv_export.file_encoding == key %}
+                                                <option value="{{ key }}" selected="selected">{{ item }}</option>
+                                            {% else %}
+                                                <option value="{{ key }}">{{ item }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-sm">
+                                <label class="col-sm-5 control-label">{{ entry_csv_delimiter }}</label>
+                                <div class="col-sm-7">
+                                    <select name="csv_export[csv_delimiter]" class="form-control input-sm">
+                                        <option value=";"{% if csv_export.csv_delimiter == ';' %} selected="selected"{% endif %}> ;</option>
+                                        <option value=","{% if csv_export.csv_delimiter == ',' %} selected="selected"{% endif %}> ,</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-sm">
+                                <label class="col-sm-5 control-label">{{ entry_customer_group }}</label>
+                                <div class="col-sm-7">
+                                    <select name="csv_export[customer_group_id]" class="form-control input-sm">
+                                        <option value="0" {% if csv_export.customer_group_id == 0 %} selected="selected" {% endif %}>{{ text_all }}</option>
+                                        {% for customer_group in customer_groups %}
+                                            {% if customer_group.customer_group_id == csv_export.customer_group_id %}
+                                                <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
+                                            {% else %}
+                                                <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-sm">
+                                <label class="col-sm-5 control-label">{{ entry_newsletter }}</label>
+                                <div class="col-sm-7">
+                                    <select name="csv_export[newsletter]" class="form-control input-sm">
+                                        <option value="2" {% if csv_export.newsletter == 2 %} selected="selected" {% endif %}> {{ text_all }} </option>
+                                        <option value="1" {% if csv_export.newsletter == 1 %} selected="selected" {% endif %}> {{ text_enabled }} </option>
+                                        <option value="0" {% if csv_export.newsletter == 0 %} selected="selected" {% endif %}> {{ text_disabled }} </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-group-sm">
+                                <label class="col-sm-5 control-label">{{ entry_date_start }}</label>
+                                <div class="col-sm-7">
+                                    <div class="input-group datetime">
+                                        <input type="text" name="csv_export[date_start]" value="{{ csv_export.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-start" class="form-control input-sm"/>
+                                        <span class="input-group-btn"> <button class="btn btn-default btn-sm" type="button"><i class="fa fa-calendar"></i></button> <button class="btn btn-default btn-calendar-check-o  btn-sm" type="button" data-toggle="tooltip" title="{{ text_cur_date }}"><i class="fa fa-refresh"></i></button> <button class="btn btn-default btn-calendar-eraser btn-sm" type="button" data-toggle="tooltip" title="{{ text_clear }}"><i class="fa fa-eraser"></i></button> </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-sm">
+                                <label class="col-sm-5 control-label">{{ entry_date_end }}</label>
+                                <div class="col-sm-7">
+                                    <div class="input-group datetime">
+                                        <input type="text" name="csv_export[date_end]" value="{{ csv_export.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control input-sm"/>
+                                        <span class="input-group-btn"> <button class="btn btn-default btn-sm" type="button"><i class="fa fa-calendar"></i></button> <button class="btn btn-default btn-calendar-check-o btn-sm" type="button" data-toggle="tooltip" title="{{ text_cur_date }}"><i class="fa fa-refresh"></i></button> <button class="btn btn-default btn-calendar-eraser btn-sm" type="button" data-toggle="tooltip" title="{{ text_clear }}"><i class="fa fa-eraser"></i></button> </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-sm">
+                                <label class="col-sm-5 control-label">{{ entry_status }}</label>
+                                <div class="col-sm-7">
+                                    <select name="csv_export[status]" class="form-control input-sm">
+                                        <option value="2" {% if csv_export.status == 2 %} selected="selected" {% endif %}> {{ text_all }} </option>
+                                        <option value="1" {% if csv_export.status == 1 %} selected="selected" {% endif %}> {{ text_enabled }} </option>
+                                        <option value="0" {% if csv_export.status == 0 %} selected="selected" {% endif %}> {{ text_disabled }} </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <table class="table table-hover csvpricepro-field_set form-group-sm" id="tbl_field_set">
+                                <tbody>
+                                {% for field in csv_export.fields_set_data %}
+                                    <tr id="row_{{ field.uid }}">
+                                        <td>
+                                            <label class="control-label" title="{{ fields_set_help[field.uid] }} {{ field.uid }}">
+                                                <input {% if csv_export.fields_set[field.uid] is defined or field.uid == '_ID_' %} checked="checked" {% endif %} type="checkbox" id="{{ field.uid }}" name="csv_export[fields_set][{{ field.uid }}]" value="1"/>
+                                                {{ fields_set_help[field.uid] }}
+                                            </label>
+                                        </td>
+                                        <td><span>{{ field.uid }}</span></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <a onclick="$(this).parent().find(':checkbox').prop('checked', true);initFieldsSet()">{{ text_select_all }}</a> /
+                            <a onclick="$(this).parent().find(':checkbox').prop('checked', false); initFieldsSet();">{{ text_unselect_all }}</a>
+                            <input type="hidden" name="csv_export[fields_set][_ID_]" value="1">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <hr/>
+                            <div class="pull-right">
+                                <button type="button" class="btn btn-primary" style="min-width:120px" onclick="$('#form_customer_export').submit();">{{ button_export }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var prop_descr = new Array();
+        {{ prop_descr ? prop_descr }}
+        // Document Ready
+        jQuery(document).ready(function ($) {
+            initFieldsSet();
+            $('.csvpricepro-field_set input[type=checkbox]').change(function () {
+                setBackgroundColor(this);
+            });
+            $('.datetime').datetimepicker({
+                pickDate: true,
+                pickTime: false,
+                language: '{{ datepicker }}'
+            });
+            $(".btn-calendar-check-o").on("click", function (e) {
+                e.preventDefault();
+                $(this).parent().parent().data('DateTimePicker').setDate(new Date());
+                return false;
+            });
+            $(".btn-calendar-eraser").on("click", function (e) {
+                e.preventDefault();
+                $(this).parent().parent().children("input").val('');
+                return false;
+            });
+        });
+
+        function setBackgroundColor(obj) {
+            var row = '#row_' + $(obj).attr('id') + ' td';
+            if ($(obj).prop('checked')) {
+                $(row).addClass('active');
+            } else {
+                $(row).removeClass('active    ');
+            }
+        }
+
+        function initFieldsSet() {
+            $('.field_id').prop('checked', true);
+            $('.csvpricepro-field_set input[type=checkbox]').each(function () {
+                setBackgroundColor(this);
+            });
+        }
+    </script>
+    {{ app_footer }}
+</div>
+{{ footer }}

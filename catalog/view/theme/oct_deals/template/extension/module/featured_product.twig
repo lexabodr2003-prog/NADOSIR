@@ -1,0 +1,58 @@
+{% if products %}
+	<div class="row mt-3 mt-md-0 p-3 p-md-0 pt-xl-3 g-2 g-md-3 ds-module">
+		<div class="ds-module-header fsz-22 dark-text fw-700 text-center text-md-start mt-0 mt-md-2 mb-2">{{ heading_title }}</div>
+		
+			{% for product in products %}
+			<div class="ds-module-item ds-module-col">
+				<div class="content-block h-100 d-flex flex-column">
+					<div class="ds-module-img position-relative">
+						<a href="{{ product.href }}">
+							<img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" class="img-fluid" />
+						</a>
+						<div class="ds-module-btns d-flex flex-column position-absolute">
+							<button type="button" aria-label="Wishlist" class="ds-btn ds-btn-outline ds-btn-outline-secondary ds-btn-with-icon br-4 ds-wishlist-btn" title="{{ button_wishlist }}" onclick="wishlist.add('{{ product.product_id }}');">
+								<span class="ds-btn-icon ds-btn-icon-wishlist"></span>
+							</button>
+							<button type="button" aria-label="Compare" class="ds-btn ds-btn-outline ds-btn-outline-secondary ds-btn-with-icon br-4 ds-compare-btn" title="{{ button_compare }}" onclick="compare.add('{{ product.product_id }}');">
+								<span class="ds-btn-icon ds-btn-icon-compare"></span>
+							</button>
+						</div>
+					</div>
+					<div class="ds-module-caption d-flex flex-column justify-content-between py-md-2 h-100">
+						<div class="ds-module-info">
+							<a href="{{ product.href }}" class="ds-module-title dark-text fw-700">{{ product.name }}</a>
+							{% if product.rating is not same as(false) %}
+								<div class="ds-module-rating d-flex align-items-center mt-2 mb-1 br-4">
+									<div class="ds-module-rating-stars d-flex align-items-center">
+										{% for i in 1..5 %}
+                                            {% if product.rating < i %}
+                                                <span class="ds-module-rating-star"></span>
+                                            {% else %}
+                                                <span class="ds-module-rating-star ds-module-rating-star-is"></span>
+                                            {% endif %}
+                                        {% endfor %}
+									</div>
+								</div>
+							{% endif %}
+						</div>
+						{% if product.price %}
+						<div class="ds-module-price-box py-2 mt-auto">
+							{% if product.tax %}
+								<div class="price-tax fw-300 fsz-12 light-text">
+									{{ text_tax }} {{ product.tax }}
+								</div>
+							{% endif %}
+							{% if not product.special %}
+								<span class="ds-module-price fw-800 dark-text mt-1">{{ product.price }}</span>
+							{% else %}
+								<span class="ds-module-price-old light-text fsz-14">{{ product.price }}</span>
+                                <span class="ds-module-price fw-800 dark-text mt-1">{{ product.special }}</span>
+							{% endif %}
+						</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			{% endfor %}
+	</div>
+  {% endif %}

@@ -1,0 +1,67 @@
+{% if oct_banner_pluss %}
+	{% if oct_banner_pluss|length <= 4 %}
+		{% if position == 'column_left' or position == 'column_right' %}
+			<div id="banner_plus_column" class="ds-column-banners swiper overflow-hidden position-relative">
+				{% set key = 1 %}
+				<div class="swiper-wrapper">
+					{% for banner in oct_banner_pluss %}
+						{% set key = key + 1 %}
+						<a id="banner_plus_column{{ module }}_{{ key }}" href="{{ banner.link }}" title="{{ banner.title }}" class="ds-bannerplus-item swiper-slide br-7 position-relative overflow-hidden d-flex flex-column g-4 h-100">
+							<p class="fsz-20">{{ banner.title }}</p>
+							<img class="d-block mx-auto mt-auto" src="{{ banner.image }}" alt="" width="{{ banner.width }}" height="{{ banner.height }}" loading="lazy"/>
+							<span class="ds-bannerplus-button p-0 mx-auto">
+								<svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path
+										d="M19.1053 0.632812H4.89474C1.69263 0.632812 0 2.32544 0 5.52755V19.7381C0 22.9402 1.69263 24.6328 4.89474 24.6328H19.1053C22.3074 24.6328 24 22.9402 24 19.7381V5.52755C24 2.32544 22.3074 0.632812 19.1053 0.632812ZM22.7368 19.7381C22.7368 22.2151 21.5836 23.3697 19.1053 23.3697H4.89474C2.41642 23.3697 1.26316 22.2151 1.26316 19.7381V5.52755C1.26316 3.0505 2.41642 1.89597 4.89474 1.89597H19.1053C21.5836 1.89597 22.7368 3.0505 22.7368 5.52755V19.7381ZM17.6349 12.874C17.6033 12.9523 17.5567 13.0219 17.4986 13.08L13.7091 16.8694C13.5853 16.9932 13.4236 17.0539 13.2619 17.0539C13.1002 17.0539 12.9385 16.992 12.8148 16.8694C12.5684 16.6231 12.5684 16.2227 12.8148 15.9764L15.5255 13.2656H6.94737C6.59874 13.2656 6.31579 12.9827 6.31579 12.634C6.31579 12.2854 6.59874 12.0025 6.94737 12.0025H15.528L12.8172 9.29173C12.5709 9.04542 12.5709 8.64496 12.8172 8.39864C13.0635 8.15233 13.464 8.15233 13.7103 8.39864L17.4998 12.1881C17.5579 12.2462 17.6045 12.3171 17.6361 12.3941C17.6993 12.5457 17.6993 12.7199 17.6349 12.874Z"
+										fill="white" />
+								</svg>
+							</span>
+						</a>
+						<style>
+							#banner_plus_column{{ module }}_{{ key }} {background: {{ banner.background_color }};}
+							#banner_plus_column{{ module }}_{{ key }} p {color: {{ banner.title_color }};}
+							#banner_plus_column{{ module }}_{{ key }} .ds-bannerplus-button path {fill: {{ banner.button_background }};}
+						</style>
+					{% endfor %}
+				</div>
+			</div>
+			<script>
+				window.addEventListener('DOMContentLoaded', () => {
+					var bannerPlusColumnSwiper = new Swiper('#banner_plus_column', {
+						slidesPerView: 1,
+						autoplay: {
+							delay: 5000,
+							disableOnInteraction: false
+						},
+						loop: true
+					});
+				});
+			</script>
+		{% else %}
+			<div class="ds-bannerplus row g-3 pt-3">
+				{% set key = 0 %}
+				{% for banner in oct_banner_pluss %}
+					{% set key = key + 1 %}
+					<div id="banner_plus_{{ module }}_{{ key }}" class="ds-bannerplus-box{% if oct_banner_pluss|length == 1 %} ds-banner-plus-100{% elseif oct_banner_pluss|length == 2 %} ds-banner-plus-50{% elseif oct_banner_pluss|length == 3 %}{% if loop.index == 1 %} ds-banner-plus-50{% else %} ds-banner-plus-25{% endif %}{% elseif oct_banner_pluss|length == 4 %} ds-banner-plus-25{% endif %}">
+						<a href="{{ banner.link }}" title="{{ banner.title }}" class="ds-bannerplus-item br-7 position-relative overflow-hidden d-flex flex-column g-4 h-100">
+							<p class="fsz-20">{{ banner.title }}</p>
+							<img class="d-block mx-auto mt-auto" src="{{ banner.image }}" alt="" width="{{ banner.width }}" height="{{ banner.height }}" loading="lazy"/>
+							<span class="ds-bannerplus-button p-0 mx-auto">
+								<svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path
+										d="M19.1053 0.632812H4.89474C1.69263 0.632812 0 2.32544 0 5.52755V19.7381C0 22.9402 1.69263 24.6328 4.89474 24.6328H19.1053C22.3074 24.6328 24 22.9402 24 19.7381V5.52755C24 2.32544 22.3074 0.632812 19.1053 0.632812ZM22.7368 19.7381C22.7368 22.2151 21.5836 23.3697 19.1053 23.3697H4.89474C2.41642 23.3697 1.26316 22.2151 1.26316 19.7381V5.52755C1.26316 3.0505 2.41642 1.89597 4.89474 1.89597H19.1053C21.5836 1.89597 22.7368 3.0505 22.7368 5.52755V19.7381ZM17.6349 12.874C17.6033 12.9523 17.5567 13.0219 17.4986 13.08L13.7091 16.8694C13.5853 16.9932 13.4236 17.0539 13.2619 17.0539C13.1002 17.0539 12.9385 16.992 12.8148 16.8694C12.5684 16.6231 12.5684 16.2227 12.8148 15.9764L15.5255 13.2656H6.94737C6.59874 13.2656 6.31579 12.9827 6.31579 12.634C6.31579 12.2854 6.59874 12.0025 6.94737 12.0025H15.528L12.8172 9.29173C12.5709 9.04542 12.5709 8.64496 12.8172 8.39864C13.0635 8.15233 13.464 8.15233 13.7103 8.39864L17.4998 12.1881C17.5579 12.2462 17.6045 12.3171 17.6361 12.3941C17.6993 12.5457 17.6993 12.7199 17.6349 12.874Z"
+										fill="white" />
+								</svg>
+							</span>
+						</a>
+					</div>
+					<style>
+						#banner_plus_{{ module }}_{{ key }} .ds-bannerplus-item {background: {{ banner.background_color }};}
+						#banner_plus_{{ module }}_{{ key }} .ds-bannerplus-item p {color: {{ banner.title_color }};}
+						#banner_plus_{{ module }}_{{ key }} .ds-bannerplus-button path {fill: {{ banner.button_background }};}
+					</style>
+				{% endfor %}
+			</div>
+		{% endif %}
+	{% endif %}
+{% endif %}

@@ -1,0 +1,642 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid csvprice_pro_container">
+        {% if warning %}
+            <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ warning }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        {% if success %}
+            <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        {{ app_header }}
+        <div class="panel panel-default csvpricepro-form-wrapper">
+            <div class="panel-body">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#tab_setting" data-toggle="tab" id="link_tab_setting">{{ tab_setting }}</a></li>
+                    <li><a href="#tab_export" data-toggle="tab" id="link_tab_export">{{ tab_export }}</a></li>
+                    <li><a href="#tab_import" data-toggle="tab" id="link_tab_import">{{ tab_import }}</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_setting">
+                        <form action="{{ action }}" method="post" id="form_order_setting" enctype="multipart/form-data" class="form-horizontal">
+                            <div class="row">
+                                <div class="col-sm-8 col-md-offset-2">
+                                    <div class="well well-sm">
+                                        <div class="form-group form-group-sm">
+                                            <label class="col-sm-5 control-label">{{ entry_file_encoding }}</label>
+                                            <div class="col-sm-7">
+                                                <select name="csv_setting[file_encoding]" class="form-control input-sm">
+                                                    {% for key, item in charsets %}
+                                                        {% if csv_setting.file_encoding == key %}
+                                                            <option value="{{ key }}" selected="selected">{{ item }}</option>
+                                                        {% else %}
+                                                            <option value="{{ key }}">{{ item }}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group form-group-sm">
+                                            <label class="col-sm-5 control-label">{{ entry_csv_delimiter }}</label>
+                                            <div class="col-sm-7">
+                                                <select name="csv_setting[delimiter]" class="form-control input-sm">
+                                                    <option value=";"{% if csv_setting.delimiter == ';' %} selected="selected"{% endif %}> ;</option>
+                                                    <option value=","{% if csv_setting.delimiter == ',' %} selected="selected"{% endif %}> ,</option>
+                                                    <option value="|"{% if csv_setting.delimiter == '|' %} selected="selected"{% endif %}> |</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group form-group-sm">
+                                            <label class="col-sm-5 control-label">{{ entry_include_csv_title }}</label>
+                                            <div class="col-sm-7">
+                                                <select name="csv_setting[csv_title]" class="form-control input-sm">
+                                                    {% if csv_setting.csv_title is defined and csv_setting.csv_title == 1 %}
+                                                        <option value="1" selected="selected">{{ text_yes }}</option>
+                                                        <option value="0">{{ text_no }}</option>
+                                                    {% else %}
+                                                        <option value="1">{{ text_yes }}</option>
+                                                        <option value="0" selected="selected">{{ text_no }}</option>
+                                                    {% endif %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                {% set k = fields_count %}{% set s = 1 %}{% set id = 1 %}
+                                {% for key, item in csv_setting.fields_set %}
+                                {% if s == 1 %}
+                                <div class="col-sm-6">
+                                    <table class="table table-hover csvpricepro-field_set form-group-sm">
+                                        <tbody>{% set s = 0 %}
+                                        {% endif %}
+                                        {% if id == k %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-sm-6">
+                                    <table class="table table-hover csvpricepro-field_set form-group-sm">
+                                        <tbody>
+                                        {% endif %}
+                                        {% if fields_set_help[key] is defined %}
+                                            <tr id="row_{{ id }}">
+                                                <td>
+                                                    <input type="hidden" name="csv_setting[fields_set][{{ key }}][status]" value="0"><label class="control-label checkbox-inline"><input id="{{ id }}" {% if item.status %}checked="checked"{% endif %} type="checkbox" name="csv_setting[fields_set][{{ key }}][status]" value="1"> {{ fields_set_help[key] }}
+                                                    </label></td>
+                                                <td>
+                                                    <input class="form-control input-sm" type="text" name="csv_setting[fields_set][{{ key }}][caption]" value="{{ csv_setting.fields_set[key].caption }}">
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                        {% set id = id + 1 %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <a onclick="$('.csvpricepro-field_set').find(':checkbox').prop('checked', true);initFieldsSet();">{{ text_select_all }}</a> /
+                                    <a onclick="$('.csvpricepro-field_set').find(':checkbox').prop('checked', false);initFieldsSet();">{{ text_unselect_all }}</a>
+                                    <hr/>
+                                    <div class="pull-right">
+                                        <button type="button" class="btn btn-primary" style="min-width:120px" onclick="$('#form_order_setting').submit();">{{ button_save }}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="tab_export">
+                        <div class="row">
+                            <div class="col-sm-8 col-md-offset-2">
+                                <div id="wrap_profile_export" class="well well-sm">
+                                    <form id="form_profile_export" class="form-horizontal">
+                                        <div class="form-group form-group-sm">
+                                            <label class="col-sm-4 control-label" data-prop_id="1">{{ text_profile_load }}</label>
+                                            <div class="col-sm-8">
+                                                <div class="input-group">
+                                                    <select name="profile_export_select" id="profile_export_select" class="form-control input-sm"></select>
+                                                    <span class="input-group-btn">
+													<a onclick="loadProfile('profile_export');" data-toggle="tooltip" title="" class="btn btn-info btn-sm" data-original-title="{{ button_load }}"><i class="fa fa-refresh"></i></a>
+													<a onclick="updateProfile('profile_export');" data-toggle="tooltip" title="" class="btn btn-primary btn-sm" data-original-title="{{ button_save }}"><i class="fa fa-save"></i></a>
+													<a onclick="deleteProfile('profile_export');" data-toggle="tooltip" title="" class="btn btn-warning btn-sm" data-original-title="{{ button_delete }}"><i class="fa fa-trash-o"></i></a>
+													</span>
+                                                </div>
+                                                <!-- /input-group -->
+                                            </div>
+                                        </div>
+                                        <div class="form-group form-group-sm">
+                                            <label class="col-sm-4 control-label">{{ text_import_create_profile }}</label>
+                                            <div class="col-sm-8">
+                                                <div class="input-group">
+                                                    <input type="text" name="profile_export_name" id="profile_export_name" value="" class="form-control">
+                                                    <span class="input-group-btn">
+													<a onclick="createProfile('profile_export');" data-toggle="tooltip" title="" class="btn btn-success btn-sm" data-original-title="{{ button_add }}"><i class="fa fa-plus-circle"></i></a>
+													<span style="margin-right:60px;"></span>
+													</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <form action="{{ action_export }}" method="post" id="form_order_export" enctype="multipart/form-data" class="form-horizontal">
+                            <div class="row">
+                                <div class="col-sm-8 col-md-offset-1">
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_order_id }}</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control input-sm" type="text" placeholder="1,2,34,56" name="csv_export[filter_order_id]" value="{{ csv_export.filter_order_id }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_customer }}</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control input-sm" type="text" id="input_filter_customer" name="csv_export[filter_customer]" value="{{ csv_export.filter_customer }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_order_status }}</label>
+                                        <div class="col-sm-7">
+                                            <select class="form-control input-sm" name="csv_export[filter_order_status_id]">
+                                                <option value="*"{% if csv_export.filter_order_status_id == '*' %} selected="selected"{% endif %}>&nbsp;</option>
+                                                <option value="0"{% if csv_export.filter_order_status_id != '*' and csv_export.filter_order_status_id == 0 %} selected="selected"{% endif %}>{{ text_missing }}</option>
+                                                {% for order_status in order_statuses %}
+                                                    {% if order_status.order_status_id == csv_export.filter_order_status_id %}
+                                                        <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+                                                    {% else %}
+                                                        <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_time_interval }}</label>
+                                        <div class="col-sm-7">
+                                            <select class="form-control input-sm" name="csv_export[filter_time_interval]" id="input_time_interval">
+                                                {% if csv_export.filter_time_interval is defined and csv_export.filter_time_interval == 0 %}
+                                                    <option value="0" selected="selected"> {{ text_none }} </option>
+                                                {% else %}
+                                                    <option value="0"> {{ text_none }} </option>
+                                                {% endif %}
+                                                {% if csv_export.filter_time_interval is defined and csv_export.filter_time_interval == 1000 %}
+                                                    <option value="1000" selected="selected"> {{ text_time_interval_day }} </option>
+                                                {% else %}
+                                                    <option value="1000"> {{ text_time_interval_day }} </option>
+                                                {% endif %}
+                                                {% if csv_export.filter_time_interval is defined and csv_export.filter_time_interval == 1007 %}
+                                                    <option value="1007" selected="selected"> {{ text_time_interval_week }} </option>
+                                                {% else %}
+                                                    <option value="1007"> {{ text_time_interval_week }} </option>
+                                                {% endif %}
+                                                {% if csv_export.filter_time_interval is defined and csv_export.filter_time_interval == 1030 %}
+                                                    <option value="1030" selected="selected"> {{ text_time_interval_month }} </option>
+                                                {% else %}
+                                                    <option value="1030"> {{ text_time_interval_month }} </option>
+                                                {% endif %}
+                                                {% for i in 1..48 %}
+                                                    {% if csv_export.filter_time_interval is defined and i == csv_export.filter_time_interval %}
+                                                        <option value="{{ i }}" selected="selected"> {{ i }} </option>
+                                                    {% else %}
+                                                        <option value="{{ i }}"> {{ i }} </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_date_added }}</label>
+                                        <div class="col-sm-7">
+                                            <div class="input-group datetime">
+                                                <input type="text" name="csv_export[filter_date_added_start]" value="{{ csv_export.filter_date_added_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-added-start" class="form-control input-sm"/>
+                                                <span class="input-group-btn"> <button class="btn btn-default btn-sm" type="button"><i class="fa fa-calendar"></i></button> <button class="btn btn-default btn-calendar-check-o  btn-sm" type="button" data-toggle="tooltip" title="{{ text_cur_date }}"><i class="fa fa-refresh"></i></button> <button class="btn btn-default btn-calendar-eraser btn-sm" type="button" data-toggle="tooltip" title="{{ text_clear }}"><i class="fa fa-eraser"></i></button> </span>
+                                            </div>
+                                            <div class="input-group datetime" style="margin-top: 8px;">
+                                                <input type="text" name="csv_export[filter_date_added_end]" value="{{ csv_export.filter_date_added_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-added-end" class="form-control input-sm"/>
+                                                <span class="input-group-btn"> <button class="btn btn-default btn-sm" type="button"><i class="fa fa-calendar"></i></button> <button class="btn btn-default btn-calendar-check-o  btn-sm" type="button" data-toggle="tooltip" title="{{ text_cur_date }}"><i class="fa fa-refresh"></i></button> <button class="btn btn-default btn-calendar-eraser btn-sm" type="button" data-toggle="tooltip" title="{{ text_clear }}"><i class="fa fa-eraser"></i></button> </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_date_modified }}</label>
+                                        <div class="col-sm-7">
+                                            <div class="input-group datetime">
+                                                <input type="text" name="csv_export[filter_date_modified_start]" value="{{ csv_export.filter_date_modified_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control input-sm"/>
+                                                <span class="input-group-btn"> <button class="btn btn-default btn-sm" type="button"><i class="fa fa-calendar"></i></button> <button class="btn btn-default btn-calendar-check-o btn-sm" type="button" data-toggle="tooltip" title="{{ text_cur_date }}"><i class="fa fa-refresh"></i></button> <button class="btn btn-default btn-calendar-eraser btn-sm" type="button" data-toggle="tooltip" title="{{ text_clear }}"><i class="fa fa-eraser"></i></button> </span>
+                                            </div>
+                                            <div class="input-group datetime" style="margin-top: 8px;">
+                                                <input type="text" name="csv_export[filter_date_modified_end]" value="{{ csv_export.filter_date_modified_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control input-sm"/>
+                                                <span class="input-group-btn"> <button class="btn btn-default btn-sm" type="button"><i class="fa fa-calendar"></i></button> <button class="btn btn-default btn-calendar-check-o btn-sm" type="button" data-toggle="tooltip" title="{{ text_cur_date }}"><i class="fa fa-refresh"></i></button> <button class="btn btn-default btn-calendar-eraser btn-sm" type="button" data-toggle="tooltip" title="{{ text_clear }}"><i class="fa fa-eraser"></i></button> </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_total_sum }}</label>
+                                        <div class="col-sm-2">
+                                            <select class="form-control input-sm" name="csv_export[filter_total_prefix]">
+                                                <option value="1"{% if csv_export.filter_total_prefix == 1 %} selected="selected"{% endif %}> =</option>
+                                                <option value="2"{% if csv_export.filter_total_prefix == 2 %} selected="selected"{% endif %}> &rsaquo; =</option>
+                                                <option value="3"{% if csv_export.filter_total_prefix == 3 %} selected="selected"{% endif %}> &lsaquo; =</option>
+                                                <option value="4"{% if csv_export.filter_total_prefix == 4 %} selected="selected"{% endif %}> &lsaquo; &rsaquo;</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <input class="form-control input-sm" type="text" name="csv_export[filter_total_sum]" value="{{ csv_export.filter_total_sum }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_manufacturer }}</label>
+                                        <div class="col-sm-7">
+                                            <input type="text" id="export_input_manufacturer" name="export_input_manufacturer" value="" data-profile_type="export" class="csv-input-manufacturer form-control input-sm">
+                                            <div id="export_manufacturer_list" class="container_fa-minus-circle well well-sm" style="height: 100px; overflow: auto;">
+                                                {% for manufacturer in csv_export.from_manufacturer %}
+                                                    <div id="manufacturer-id{{ manufacturer.manufacturer_id }}">
+                                                        <i class="fa fa-minus-circle"></i> {{ manufacturer.name }}
+                                                        <input type="hidden" name="csv_export[from_manufacturer][]" value="{{ manufacturer.manufacturer_id }}">
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <input type="hidden" name="csv_export[from_store]" value="0">
+                                        <label class="col-sm-5 control-label">{{ entry_store }}</label>
+                                        <div class="col-sm-7">
+                                            <div class="well well-sm" style="height:100px;margin-bottom:4px;overflow:auto;">
+                                                {% for store in stores %}
+                                                    <div class="checkbox">
+                                                        <label>
+                                                            {% if store.store_id in csv_export.from_store %}
+                                                                <input type="checkbox" name="csv_export[from_store][]" value="{{ store.store_id }}" checked="checked"/>
+                                                                {{ store.name }}
+                                                            {% else %}
+                                                                <input type="checkbox" name="csv_export[from_store][]" value="{{ store.store_id }}"/>
+                                                                {{ store.name }}
+                                                            {% endif %}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">&nbsp;</label>
+                                        <div class="col-sm-7">
+                                            <button type="button" class="btn btn-primary" style="min-width:120px" onclick="$('#form_order_export').submit();">{{ button_export }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="tab_import">
+                        <div class="row">
+                            <div class="col-sm-8 col-md-offset-2">
+                                <div id="wrap_profile_export" class="well well-sm">
+                                    <form id="form_profile_import" class="form-horizontal">
+                                        <div class="form-group form-group-sm">
+                                            <label class="col-sm-4 control-label" data-prop_id="1">{{ text_profile_load }}</label>
+                                            <div class="col-sm-8">
+                                                <div class="input-group">
+                                                    <select name="profile_import_select" id="profile_import_select" class="form-control input-sm"></select>
+                                                    <span class="input-group-btn">
+													<a onclick="loadProfile('profile_import');" data-toggle="tooltip" title="" class="btn btn-info btn-sm" data-original-title="{{ button_load }}"><i class="fa fa-refresh"></i></a>
+													<a onclick="updateProfile('profile_import');" data-toggle="tooltip" title="" class="btn btn-primary btn-sm" data-original-title="{{ button_save }}"><i class="fa fa-save"></i></a>
+													<a onclick="deleteProfile('profile_import');" data-toggle="tooltip" title="" class="btn btn-warning btn-sm" data-original-title="{{ button_delete }}"><i class="fa fa-trash-o"></i></a>
+													</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group form-group-sm">
+                                            <label class="col-sm-4 control-label">{{ text_import_create_profile }}</label>
+                                            <div class="col-sm-8">
+                                                <div class="input-group">
+                                                    <input type="text" name="profile_import_name" id="profile_import_name" value="" class="form-control">
+                                                    <span class="input-group-btn">
+													<a onclick="createProfile('profile_import');" data-toggle="tooltip" title="" class="btn btn-success btn-sm" data-original-title="{{ button_add }}"><i class="fa fa-plus-circle"></i></a>
+													<span style="margin-right:60px;"></span>
+													</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <form action="{{ action_import }}" method="post" id="form_order_import" enctype="multipart/form-data" class="form-horizontal">
+                            <div class="row">
+                                <div class="col-sm-8 col-md-offset-1">
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_file_encoding }}</label>
+                                        <div class="col-sm-7">
+                                            <select name="csv_import[file_encoding]" class="form-control input-sm">
+                                                {% for key, item in charsets %}
+                                                    {% if csv_import.file_encoding == key %}
+                                                        <option value="{{ key }}" selected="selected">{{ item }}</option>
+                                                    {% else %}
+                                                        <option value="{{ key }}">{{ item }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_csv_delimiter }}</label>
+                                        <div class="col-sm-7">
+                                            <select name="csv_import[csv_delimiter]" class="form-control input-sm">
+                                                <option value=";"{% if csv_import.csv_delimiter == ';' %} selected="selected"{% endif %}> ;</option>
+                                                <option value=","{% if csv_import.csv_delimiter == ',' %} selected="selected"{% endif %}> ,</option>
+                                                <option value="|"{% if csv_import.csv_delimiter == '|' %} selected="selected"{% endif %}> |</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_order_id }}</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control input-sm" type="text" name="csv_import[field_id]" value="{{ csv_import.field_id ? csv_import.field_id : 'order_id' }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_order_status_id }}</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control input-sm" type="text" name="csv_import[field_status_id]" value="{{ csv_import.field_status_id ? csv_import.field_status_id : 'order_status_id' }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_order_status }}</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control input-sm" type="text" name="csv_import[field_status]" value="{{ csv_import.field_status ? csv_import.field_status : 'order_status' }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_order_comment }}</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control input-sm" type="text" name="csv_import[field_comment]" value="{{ csv_import.field_comment ? csv_import.field_comment : 'comment' }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label" data-prop_id="0">{{ entry_order_notify }}</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control input-sm" type="text" name="csv_import[field_notify]" value="{{ csv_import.field_notify ? csv_import.field_notify : 'notify' }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_api }}</label>
+                                        <div class="col-sm-7">
+                                            <select name="csv_import[api_id]" id="input-api" class="form-control input-sm">
+                                                <option value="0">{{ text_none }}</option>
+                                                {% for api in apis %}
+                                                    <option value="{{ api.api_id }}"{% if csv_import.api_id is defined and api.api_id == csv_import.api_id %} selected="selected"{% endif %}>{{ api.username }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">{{ entry_import_file }}</label>
+                                        <div class="col-sm-7">
+                                            <input type="file" name="import" class="form-control input-sm"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-sm-5 control-label">&nbsp;</label>
+                                        <div class="col-sm-7">
+                                            <button type="button" class="btn btn-primary" style="min-width:120px" onclick="$('#form_order_import').submit();">{{ button_import }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Manufacturer autocomplete
+        $('.csv-input-manufacturer').autocomplete({
+            'source': function (request, response) {
+                e = $(this);
+                h = e.attr('data-profile_type');
+                if (h == 'export') {
+                    i = 'csv_export';
+                    n = 'csv_export[from_manufacturer][]';
+                } else {
+                    i = 'csv_import';
+                    n = 'csv_import[to_manufacturer][]';
+                }
+                $.ajax({
+                    url: 'index.php?route=catalog/manufacturer/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+                    dataType: 'json',
+                    success: function (json) {
+                        response($.map(json, function (item) {
+                            return {
+                                label: item['name'],
+                                value: item['manufacturer_id']
+                            }
+                        }));
+                    }
+                });
+            },
+            'select': function (item) {
+                e.val('');
+                $('#' + i + '_id' + item['value']).remove();
+                $('#' + h + "_manufacturer_list").append('<div id="' + i + '_id' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="' + n + '" value="' + item['value'] + '"></div>');
+            }
+        });
+        var prop_descr = new Array();
+        {{ prop_descr ? prop_descr }}
+
+        // Document Ready
+        jQuery(document).ready(function ($) {
+            $('.csvprice_pro_container .nav-tabs li.active').removeClass('active');
+            $('.csvprice_pro_container .tab-content div.active').removeClass('active');
+            $("#link_{{ tab_selected }}").parent().addClass('active');
+            $("#{{ tab_selected }}").removeClass('fade').addClass('active');
+            initFieldsSet();
+            $('.csvpricepro-field_set input[type=checkbox]').change(function () {
+                setBackgroundColor(this);
+            });
+            $('.datetime').datetimepicker({
+                pickDate: true,
+                pickTime: false,
+                language: '{{ datepicker }}'
+            });
+            $(".btn-calendar-check-o").on("click", function (e) {
+                e.preventDefault();
+                $(this).parent().parent().data('DateTimePicker').setDate(new Date());
+                return false;
+            });
+            $(".btn-calendar-eraser").on("click", function (e) {
+                e.preventDefault();
+                $(this).parent().parent().children("input").val('');
+                return false;
+            });
+            // Profile load
+            getProfile('profile_export', {{ profile_id ? profile_id : 0 }});
+            getProfile('profile_import', {{ profile_id ? profile_id : 0 }});
+        });// END Document Ready
+        function setBackgroundColor(obj) {
+            var row = '#row_' + $(obj).attr('id') + ' td';
+            if ($(obj).prop('checked')) {
+                $(row).addClass('active');
+            } else {
+                $(row).removeClass('active');
+            }
+        }
+
+        function initFieldsSet() {
+            $('.csvpricepro-field_set input[type=checkbox]').each(function () {
+                setBackgroundColor(this);
+            });
+        }
+
+        $('#input_filter_customer').autocomplete({
+            'source': function (request, response) {
+                $.ajax({
+                    url: 'index.php?route=customer/customer/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+                    dataType: 'json',
+                    success: function (json) {
+                        response($.map(json, function (item) {
+                            return {
+                                label: item['name'],
+                                value: item['customer_id']
+                            }
+                        }));
+                    }
+                });
+            },
+            'select': function (item) {
+                $('#input_filter_customer').val(item['label']);
+            }
+        });
+
+        // Profile
+        function getProfile(key, id) {
+            var url = '{{ action_get_profile }}' + '&key=' + key;
+            url = url.replace(/\&amp;/g, '&');
+            var obj = $('#' + key + '_select');
+            $.ajax({
+                type: 'POST',
+                url: url,
+                dataType: 'json',
+                success: function (json) {
+                    obj.get(0).options.length = 0;
+                    $.each(json, function (i, item) {
+                        obj.get(0).options[obj.get(0).options.length] = new Option(item.name, item.id);
+                    });
+                    if (id) {
+                        $('#' + key + '_select option[value="' + id + '"]').attr("selected", "selected");
+                    }
+                },
+                error: function () {
+                    alert("Failed to load profiles!");
+                }
+            });
+        }
+
+        function deleteProfile(key) {
+            if (!confirm('{{ text_confirm_delete }}')) return false;
+            var url = '{{ action_del_profile }}';
+            url = url.replace(/\&amp;/g, '&');
+            var s = '#' + key + '_select';
+            if ($(s).get(0).options.length == 0) {
+                return;
+            }
+            var id = $(s + ' option:selected').val();
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: {profile_id: id},
+                success: function (data) {
+                    getProfile(key);
+                }
+            });
+            return false;
+        }
+
+        function loadProfile(key, u = '') {
+            var s = '#' + key + '_select';
+            if ($(s).get(0).options.length == 0) {
+                return;
+            }
+            if (u != '') {
+                u = '&update=1';
+            }
+            var url = '{{ action }}&profile_id=' + $('#' + key + '_select' + ' option:selected').val() + u;
+            url = url.replace(/\&amp;/g, '&');
+            window.location.href = url;
+
+        }
+
+        function createProfile(key) {
+            var url = '{{ action_add_profile }}';
+            url = url.replace(/\&amp;/g, '&');
+            if ($('#' + key + '_name').val() == '') return false;
+            var data;
+
+            if (key == 'profile_import') {
+                data = $("#form_order_import, #form_profile_import").serialize();
+            } else if (key == 'profile_export') {
+                data = $("#form_order_setting, #form_order_export, #form_profile_export").serialize();
+            } else {
+                return false;
+            }
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                datatype: 'json',
+                success: function (json) {
+                    $('#' + key + '_name').val('');
+                    var obj = jQuery.parseJSON(json);
+                    getProfile(key, obj.id);
+                }
+            });
+            return false;
+        }
+
+        function updateProfile(key) {
+            var url = '{{ action_edit_profile }}', data;
+            url = url.replace(/\&amp;/g, '&');
+
+            if (key == 'profile_import') {
+                data = $("#form_order_import, #form_profile_import").serialize();
+            } else if (key == 'profile_export') {
+                data = $("#form_order_setting, #form_order_export, #form_profile_export").serialize();
+            } else {
+                return false;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                datatype: 'json',
+                success: function (json) {
+                    $('#' + key + '_name').val('');
+                    var obj = jQuery.parseJSON(json);
+                    loadProfile(key, 'update');
+                }
+            });
+            return false;
+        }
+    </script>
+    {{ app_footer }}
+</div>
+{{ footer }}

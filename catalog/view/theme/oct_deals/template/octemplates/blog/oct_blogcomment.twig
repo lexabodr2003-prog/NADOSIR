@@ -1,0 +1,104 @@
+<div class="ds-product-reviews-content" id="comments-container">
+    {% if comments %}
+        {% for comment in comments %}
+            <div class="ds-product-reviews-item-box">
+                <div class="ds-product-reviews-item br-4 p-3">
+                    <div class="ds-product-reviews-item-header d-flex justify-content-between align-items-center pb-3">
+                        <div class="ds-store-reviews-item-author d-flex align-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="29" viewBox="0 0 28 29" fill="none">
+                                <path d="M22.2895 0.346191H5.71053C1.97474 0.346191 0 2.32093 0 6.05672V22.6357C0 26.1106 1.72863 28.0396 4.97368 28.2946C5.03411 28.3108 5.09305 28.3314 5.15789 28.3314C5.18884 28.3314 5.21689 28.3168 5.24784 28.3138C5.40553 28.3212 5.54695 28.3462 5.71053 28.3462H22.2895C22.4531 28.3462 22.5959 28.3212 22.7522 28.3138C22.7831 28.3182 22.8097 28.3314 22.8421 28.3314C22.9069 28.3314 22.9659 28.3108 23.0263 28.2946C26.2714 28.0381 28 26.1106 28 22.6357V6.05672C28 2.32093 26.0253 0.346191 22.2895 0.346191ZM22.1053 26.8725H5.89474V25.9441C5.89474 24.6296 6.29711 20.344 11.4801 20.344H16.5199C21.7029 20.344 22.1053 24.631 22.1053 25.9441V26.8725ZM26.5263 22.6357C26.5263 25.0496 25.5728 26.373 23.5789 26.7473V25.9441C23.5789 22.6813 21.7294 18.8703 16.5199 18.8703H11.4801C6.27058 18.8703 4.42105 22.6813 4.42105 25.9441V26.7473C2.42716 26.3715 1.47368 25.0496 1.47368 22.6357V6.05672C1.47368 3.16682 2.81916 1.81988 5.71053 1.81988H22.2895C25.1808 1.81988 26.5263 3.16682 26.5263 6.05672V22.6357ZM14.0119 6.24093C11.1677 6.24093 8.85398 8.55461 8.85398 11.3988C8.85398 14.243 11.1677 16.5567 14.0119 16.5567C16.8561 16.5567 19.1698 14.243 19.1698 11.3988C19.1698 8.55461 16.8561 6.24093 14.0119 6.24093ZM14.0119 15.083C11.9797 15.083 10.3277 13.4296 10.3277 11.3988C10.3277 9.36809 11.9797 7.71461 14.0119 7.71461C16.0441 7.71461 17.6961 9.36809 17.6961 11.3988C17.6961 13.4296 16.0441 15.083 14.0119 15.083Z" fill="#9CA3AF" />
+                            </svg>
+                            <div class="ds-store-reviews-item-info ms-2 d-flex flex-column">
+                                <span class="dark-text fw-500 fsz-14">{{ comment.author }}</span>
+                            </div>
+                        </div>
+                        <span class="d-inline-flex align-items-center fsz-12 light-text">
+                            <svg class="me-1" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.69231 0.923565H8.92308V0.462027C8.92308 0.207258 8.71631 0.000488281 8.46154 0.000488281C8.20677 0.000488281 8 0.207258 8 0.462027V0.923565H4V0.462027C4 0.207258 3.79323 0.000488281 3.53846 0.000488281C3.28369 0.000488281 3.07692 0.207258 3.07692 0.462027V0.923565H2.30769C0.819692 0.923565 0 1.74326 0 3.23126V9.6928C0 11.1808 0.819692 12.0005 2.30769 12.0005H9.69231C11.1803 12.0005 12 11.1808 12 9.6928V3.23126C12 1.74326 11.1803 0.923565 9.69231 0.923565ZM2.30769 1.84664H3.07692V2.30818C3.07692 2.56295 3.28369 2.76972 3.53846 2.76972C3.79323 2.76972 4 2.56295 4 2.30818V1.84664H8V2.30818C8 2.56295 8.20677 2.76972 8.46154 2.76972C8.71631 2.76972 8.92308 2.56295 8.92308 2.30818V1.84664H9.69231C10.6628 1.84664 11.0769 2.2608 11.0769 3.23126V3.6928H0.923077V3.23126C0.923077 2.2608 1.33723 1.84664 2.30769 1.84664ZM9.69231 11.0774H2.30769C1.33723 11.0774 0.923077 10.6633 0.923077 9.6928V4.61587H11.0769V9.6928C11.0769 10.6633 10.6628 11.0774 9.69231 11.0774ZM4.16617 6.61587C4.16617 6.95557 3.89109 7.23126 3.55078 7.23126C3.21109 7.23126 2.93224 6.95557 2.93224 6.61587C2.93224 6.27618 3.20493 6.00049 3.54462 6.00049H3.55078C3.89047 6.00049 4.16617 6.27618 4.16617 6.61587ZM6.6277 6.61587C6.6277 6.95557 6.35263 7.23126 6.01232 7.23126C5.67263 7.23126 5.39378 6.95557 5.39378 6.61587C5.39378 6.27618 5.66647 6.00049 6.00616 6.00049H6.01232C6.35201 6.00049 6.6277 6.27618 6.6277 6.61587ZM9.08924 6.61587C9.08924 6.95557 8.81417 7.23126 8.47386 7.23126C8.13417 7.23126 7.85532 6.95557 7.85532 6.61587C7.85532 6.27618 8.12801 6.00049 8.4677 6.00049H8.47386C8.81355 6.00049 9.08924 6.27618 9.08924 6.61587ZM4.16617 9.07741C4.16617 9.4171 3.89109 9.6928 3.55078 9.6928C3.21109 9.6928 2.93224 9.4171 2.93224 9.07741C2.93224 8.73772 3.20493 8.46203 3.54462 8.46203H3.55078C3.89047 8.46203 4.16617 8.73772 4.16617 9.07741ZM6.6277 9.07741C6.6277 9.4171 6.35263 9.6928 6.01232 9.6928C5.67263 9.6928 5.39378 9.4171 5.39378 9.07741C5.39378 8.73772 5.66647 8.46203 6.00616 8.46203H6.01232C6.35201 8.46203 6.6277 8.73772 6.6277 9.07741ZM9.08924 9.07741C9.08924 9.4171 8.81417 9.6928 8.47386 9.6928C8.13417 9.6928 7.85532 9.4171 7.85532 9.07741C7.85532 8.73772 8.12801 8.46203 8.4677 8.46203H8.47386C8.81355 8.46203 9.08924 8.73772 9.08924 9.07741Z" fill="#9CA3AF"></path>
+                            </svg>
+                            {{ comment.date_added }}
+                        </span>
+                    </div>
+                    <div class="ds-product-reviews-item-content py-3 fsz-14 fw-300">
+                        {{ comment.text }}
+                    </div>
+                </div>
+                {% if comment.admin_text %}
+                    <div class="ds-product-reviews-item ds-product-reviews-item-answer p-3 mt-3 mt-lg-4 br-4 position-relative">
+                        <div class="ds-product-reviews-item-header d-flex justify-content-between align-items-center pb-3">
+                            <div class="ds-product-reviews-item-answer-title dark-text fw-500 fsz-14">{{ text_admin_title }}</div>
+                        </div>
+                        <div class="ds-product-reviews-item-content py-3 fsz-14 fw-300">
+                            {{ comment.admin_text }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div id="comment-pagination" class="d-none" data-has-more="{{ has_more ? 'true' : 'false' }}" data-next-page="{{ next_page }}"></div>
+        {% if has_more %}
+            <div class="pt-3">
+                <button id="load-more-comments" class="button button-primary br-7">{{ oct_show_more }}</button>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="dark-text fw-500">{{ entry_empty_comments }}</div>
+    {% endif %}
+</div>
+
+<script>
+function loadMoreComments() {
+    if (window.loadingMoreComments) return;
+    window.loadingMoreComments = true;
+    
+    var $pagination = $('#comment-pagination');
+    var hasMore = $pagination.attr('data-has-more');
+    var nextPage = $pagination.attr('data-next-page');
+    
+    if (hasMore === "false" || !nextPage) {
+        $('#load-more-comments').remove();
+        window.loadingMoreComments = false;
+        return;
+    }
+    
+    $.ajax({
+        url: 'index.php?route=octemplates/blog/oct_blogarticle/comment',
+        type: 'GET',
+        data: {
+            blogarticle_id: '{{ blogarticle_id }}',
+            page: nextPage
+        },
+        dataType: 'html',
+        beforeSend: function() {
+            $('#load-more-comments').prop('disabled', true);
+            masked('body', true);
+        },
+        complete: function() {
+            masked('body', false);
+        },
+        success: function(html) {
+            var $temp = $('<div>').html(html);
+
+            var $newComments = $temp.find('#comments-container').children().not('#comment-pagination, #load-more-comments').clone();
+
+            $('#comments-container').append($newComments);
+			$('#load-more-comments').remove();
+            
+            var $newPagination = $temp.find('#comment-pagination');
+            if ($newPagination.length) {
+                $('#comment-pagination').replaceWith($newPagination);
+            } 
+
+            window.loadingMoreComments = false;
+        },
+        error: function() {
+            window.loadingMoreComments = false;
+        }
+    });
+}
+
+$(document).on('click', '#load-more-comments', function(e) {
+    e.preventDefault();
+    loadMoreComments();
+});
+</script>
