@@ -28,7 +28,7 @@ define('DIR_UPLOAD', DIR_STORAGE . 'upload/');
 define('DB_DRIVER', 'mysqli');
 define('DB_HOSTNAME', 'localhost');
 define('DB_USERNAME', 's906333804_nasos');
-define('DB_PASSWORD', 's78SZV$BBF3T5MLK');
+define('DB_PASSWORD', '1RW9VHE3w86^MSRG');
 define('DB_DATABASE', 's906333804_nasos');
 define('DB_PORT', '3306');
 define('DB_PREFIX', 'oc_');

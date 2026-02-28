@@ -18,7 +18,7 @@ if (!isset($_GET['key']) || $_GET['key'] !== 'payment2026') {
 // ── DB credentials ──────────────────────────────────────────────────────────
 define('DB_HOST',   'localhost');
 define('DB_USER',   's906333804_nasos');
-define('DB_PASS',   's78SZV$BBF3T5MLK');
+define('DB_PASS',   '1RW9VHE3w86^MSRG');
 define('DB_NAME',   's906333804_nasos');
 define('DB_PREFIX', 'oc_');
 
