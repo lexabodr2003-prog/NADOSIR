@@ -1,0 +1,81 @@
+/**
+ * kamtek-mobile-fixes.css
+ * Исправления для мобильной версии сайта насосыдаром.рф
+ *
+ * Prompt 6 (пункт 8): Обрезка верхней части баннера слайдера на мобильных.
+ * Логотип KAMTEK PRO занимает верхние ~22% изображения (216px из 978px).
+ * На мобильных скрываем эту часть через object-fit + object-position + clip.
+ *
+ * Структура HTML:
+ *   .ds-slideshow > .ds-slideshow-items.swiper >
+ *     .ds-slideshow-item-full-img.swiper-slide >
+ *       .ds-slideshow-plus-item-fullimg >
+ *         <picture> <source media="(max-width:767px)" srcset="...MOB..."> <img ...>
+ *
+ * Решение: на мобильных устройствах (max-width: 767px):
+ *  - задаём контейнеру изображения фиксированную высоту (вместо auto)
+ *  - применяем object-fit: cover к <img> чтобы изображение заполнило контейнер
+ *  - сдвигаем object-position вниз — скрываем верхнюю часть с логотипом
+ */
+
+@media (max-width: 767px) {
+  /* Контейнер полноэкранного слайда: ограничиваем высоту */
+  .ds-slideshow-plus-item-fullimg {
+    overflow: hidden;
+    max-height: 75vw; /* соотношение ~3:4, достаточно для контента без лого */
+  }
+
+  /* Изображение внутри <picture> в мобильном слайде */
+  .ds-slideshow-plus-item-fullimg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Смещаем вниз на ~24%, скрывая логотип Камтек сверху */
+    object-position: center 24%;
+    display: block;
+  }
+
+  /* Убираем max-height у picture чтобы не мешал */
+  .ds-slideshow-plus-item-fullimg picture {
+    display: block;
+    height: 100%;
+  }
+}
+
+/**
+ * Дополнительно: responsive video wrapper для iframe Rutube
+ * Обеспечивает соотношение 16:9 на всех экранах
+ */
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  overflow: hidden;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+@media (max-width: 767px) {
+  /* На мобильном: company grid — в столбик */
+  .company-grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .company-grid__video {
+    order: 1;
+    margin-bottom: 1rem;
+  }
+
+  .company-grid__content {
+    order: 2;
+  }
+}
