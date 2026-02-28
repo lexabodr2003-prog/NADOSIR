@@ -490,5 +490,7 @@ $(function() {
 {% if footer_swiper %}
 <script src="{{ base}}catalog/view/theme/oct_deals/js/swiper/swiper.min.js" defer></script>
 {% endif %}
+{# OCFilter mobile fix: принудительная инициализация фильтра для Яндекс.Браузера на iPhone #}
+<script defer src="{{ base}}catalog/view/javascript/ocfilter-mobile-fix.js"></script>
 </body>
 </html>
