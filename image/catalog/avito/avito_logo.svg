@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 36" width="120" height="36">
+  <!-- Avito логотип упрощённый -->
+  <rect width="120" height="36" rx="6" fill="#00AAFF"/>
+  <text x="60" y="26" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="22" font-weight="900" fill="#fff" letter-spacing="1">avito</text>
+</svg>

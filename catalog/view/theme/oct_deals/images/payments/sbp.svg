@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="30" viewBox="0 0 50 30">
+  <rect width="50" height="30" rx="5" fill="#fff" stroke="#e5e5e5"/>
+  <!-- Left bar -->
+  <rect x="7" y="5" width="5" height="20" rx="1" fill="#1A1F36"/>
+  <!-- SBP logo bars -->
+  <rect x="14" y="9" width="5" height="12" rx="1" fill="#FF3E2F"/>
+  <rect x="21" y="12" width="5" height="9" rx="1" fill="#2B7EEC"/>
+  <!-- Text -->
+  <text x="29" y="20" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#1A1F36">СБП</text>
+</svg>

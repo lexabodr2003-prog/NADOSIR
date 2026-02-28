@@ -147,25 +147,31 @@
             </div>
 			<div class="col-md-6 col-lg-3 order-1 order-lg-2">
                 <div class="ds-footer-socials">
+                    {# ── Блок «Мы на Авито» ── #}
                     <div class="ds-footer-item-title d-flex align-items-center justify-content-md-center justify-content-lg-start fw-500 dark-text mb-3">
                         <svg class="me-2" width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M13.0062 10.3994L7.20028 5.37356C6.64186 4.88905 5.86992 4.77408 5.19653 5.08614C4.52314 5.3982 4.10431 6.04695 4.10431 6.79425V14.4561C4.10431 15.1049 4.49846 15.6715 5.09794 15.9015C5.2786 15.9672 5.46752 16 5.64818 16C6.08343 16 6.494 15.8193 6.79785 15.4826L8.5963 13.4625C8.79339 13.2407 9.07259 13.1176 9.36001 13.1176H11.9961C12.6449 13.1176 13.2197 12.7234 13.4414 12.1075C13.6714 11.4998 13.4989 10.8264 13.0062 10.3994ZM12.2917 11.6804C12.2671 11.7379 12.1932 11.8857 11.9961 11.8857H9.36001C8.71947 11.8857 8.10357 12.165 7.66833 12.6413L5.86988 14.6614C5.73848 14.8092 5.58247 14.7682 5.52498 14.7436C5.4675 14.7189 5.31968 14.645 5.31968 14.4479V6.78604C5.31968 6.40007 5.60712 6.24404 5.69746 6.20298C5.74673 6.18656 5.84524 6.1455 5.97664 6.1455C6.10803 6.1455 6.24764 6.17834 6.38724 6.30153L12.1932 11.3273C12.341 11.4587 12.3082 11.6147 12.2835 11.6722L12.2917 11.6804ZM7.12635 3.67366C6.98674 3.3616 7.11813 3.00027 7.42197 2.85245L8.90836 2.16263C9.21221 2.02303 9.58175 2.15442 9.72957 2.45827C9.86917 2.77033 9.73779 3.13166 9.43394 3.27948L7.94756 3.96929C7.86544 4.01035 7.7751 4.02678 7.68477 4.02678C7.45483 4.02678 7.23311 3.89538 7.12635 3.67366ZM4.712 2.19548L4.85981 0.561277C4.89265 0.224581 5.20471 -0.0299932 5.52498 0.0028551C5.86168 0.0357034 6.11625 0.331338 6.0834 0.668034L5.93559 2.30224C5.91095 2.62251 5.63995 2.86066 5.31968 2.86066C5.30326 2.86066 5.28683 2.86066 5.26219 2.86066C4.9255 2.82781 4.67093 2.53218 4.70377 2.19548H4.712ZM3.0778 2.95921C3.35701 3.1563 3.4227 3.54226 3.22561 3.81326C3.10243 3.98572 2.91355 4.07605 2.71646 4.07605C2.59328 4.07605 2.47011 4.0432 2.36335 3.96108L1.01656 3.01669C0.737345 2.8196 0.671654 2.43363 0.868744 2.16263C1.06583 1.88342 1.45178 1.81773 1.72278 2.01482L3.06958 2.95921H3.0778ZM2.65897 5.75953C2.79858 6.07159 2.6672 6.43292 2.36335 6.58074L0.876964 7.27055C0.794843 7.31161 0.704504 7.32804 0.614171 7.32804C0.384233 7.32804 0.162513 7.19664 0.0557554 6.97492C-0.08385 6.66286 0.0475313 6.30153 0.351379 6.15371L1.83776 5.46389C2.14161 5.32429 2.51116 5.45568 2.65897 5.75953Z"
                                 fill="#00171F" />
                         </svg>
-                        {{ oct_footer_social_tex }}
+                        Мы на Авито
+                    </div>
+                    {# ── Блок Авито с логотипом, рейтингом и ссылкой ── #}
+                    <div class="ds-footer-avito mb-3">
+                        <a href="https://www.avito.ru/brands/551b24db83074c584dff8c30dbd239c2"
+                           target="_blank" rel="noopener noreferrer"
+                           class="d-inline-flex align-items-center text-decoration-none"
+                           title="Мы на Авито">
+                            <img src="{{ base }}image/catalog/avito/avito_logo.svg"
+                                 alt="Авито" width="90" height="27" loading="lazy"
+                                 style="border-radius:5px;">
+                        </a>
+                        <div class="ds-footer-avito-rating d-flex align-items-center mt-2">
+                            <span style="color:#FFB800;font-size:16px;letter-spacing:1px;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                            <span class="fsz-13 secondary-text ms-2">5.0 &mdash; рейтинг продавца</span>
+                        </div>
                     </div>
                     <div class="d-flex justify-content-md-center justify-content-lg-start">
-						{% if oct_deals_data.socials is defined and oct_deals_data.socials is not empty %}
-							<ul class="list-unstyled fsz-14 secondary-text ds-footer-item">
-								{% for social in oct_deals_data.socials %}
-									<li><a rel="noopener noreferrer" href="{{ (social.link == "#" or social.link is empty) ? 'javascript:;' : social.link }}" class="d-inline-flex align-items-center text-decoration-none ds-footer-socials-item-{{ social.icone|replace({'fa ': "", "fab " : "", "far " : "", "fas " : ""}) }} d-flex align-items-center justify-content-center" target="_blank">
-										<i class="{{ social.icone }} ds-footer-item-icon me-2"></i>
-										<span>{{ social.title }}</span>
-									</a></li>
-								{% endfor %}
-							</ul>
-						{% endif %}
                         <ul class="list-unstyled fsz-14 secondary-text ds-footer-item ms-md-5 ms-xxl-6">
 							{% if oct_deals_data.contact_telegram is defined and oct_deals_data.contact_telegram %}
 								<li>
@@ -272,62 +278,17 @@
                 </div>
             </div>
 			<div class="col-md-6 col-lg-12 mt-md-4 pt-md-4 ds-footer-bordered order-3 d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-center">
-				<div class="ds-footer-payments d-flex align-items-center justify-content-center">				
-					{% if oct_deals_data.payments.privat24 is defined and oct_deals_data.payments.privat24 %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/privat24.svg" alt="Privat 24" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}
-					{% if oct_deals_data.payments.monoplata is defined and oct_deals_data.payments.monoplata %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/monoplata.svg" alt="Mono plata" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}					
-					{% if oct_deals_data.payments.wayforpay is defined and oct_deals_data.payments.wayforpay %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/wayforpay.svg" alt="Wayforpay" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}
-					{% if oct_deals_data.payments.lp is defined and oct_deals_data.payments.lp %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/liqpay.svg" alt="LiqPay" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}
-					{% if oct_deals_data.payments.visa is defined and oct_deals_data.payments.visa %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/visa.svg" alt="Visa" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}
-					{% if oct_deals_data.payments.mc is defined and oct_deals_data.payments.mc %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/mastercard.svg" alt="Mastercard" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}
-					{% if oct_deals_data.payments.maestro is defined and oct_deals_data.payments.maestro %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/maestro.svg" alt="Maestro" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}
-					{% if oct_deals_data.payments.pp is defined and oct_deals_data.payments.pp %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/paypal.svg" alt="PayPal" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}
-					{% if oct_deals_data.payments.skrill is defined and oct_deals_data.payments.skrill %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/skrill.svg" alt="Skrill" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}
-					{% if oct_deals_data.payments.interkassa is defined and oct_deals_data.payments.interkassa %}
-						<div class="ds-footer-payments-item br-4">
-							<img src="{{ base}}catalog/view/theme/oct_deals/images/payments/interkassa.svg" alt="Interkassa" width="50" height="30" loading="lazy">
-						</div>
-					{% endif %}
-					{% for payment_customer in oct_customer_payments %}
-					<div class="ds-footer-payments-item ds-footer-payments-item-custom br-4">
-						<img src="{{ payment_customer }}" alt="Payment icon" width="50" height="30" loading="lazy">
+				<div class="ds-footer-payments d-flex align-items-center justify-content-center">
+					{# ── Принимаем к оплате: SberPay, СБП, Мир ── #}
+					<div class="ds-footer-payments-item br-4">
+						<img src="{{ base }}catalog/view/theme/oct_deals/images/payments/sberpay.svg" alt="SberPay" width="60" height="30" loading="lazy" title="SberPay">
 					</div>
-					{% endfor %}
+					<div class="ds-footer-payments-item br-4">
+						<img src="{{ base }}catalog/view/theme/oct_deals/images/payments/sbp.svg" alt="СБП" width="60" height="30" loading="lazy" title="Система быстрых платежей">
+					</div>
+					<div class="ds-footer-payments-item br-4">
+						<img src="{{ base }}catalog/view/theme/oct_deals/images/payments/mir.svg" alt="Мир" width="60" height="30" loading="lazy" title="Карта Мир">
+					</div>
                 </div>
                 <div class="ds-footer-copyrights fsz-14 light-text text-center pt-4 pt-lg-0">
                     {{ powered }}
