@@ -201,6 +201,37 @@ catalog/language/ru-ru/
 
 ---
 
+## Выполненные задачи (Prompt 4 + 5)
+
+### Prompt 4 — Checkout & способы оплаты
+
+| Задача | Файлы | Детали |
+|--------|-------|--------|
+| **Доставка** | `catalog/language/ru-ru/extension/shipping/pickup.php`, `ru-ru_/...`, `admin/language/...` | `text_title` → «По согласованию с менеджером»; `text_description` → «Самовывоз из г. Лобня или доставка по согласованию с менеджером» |
+| **Оплата (bank_transfer)** | `catalog/language/ru-ru/extension/payment/bank_transfer.php` | Переименован в «Выставление счёта (для юридических лиц)» с инструкцией |
+| **Оплата (tbank)** | `catalog/language/ru-ru/extension/payment/tbank.php` | Переименован в «Оплата картой или СБП онлайн» |
+| **Активация модулей** | `update_payment.php` | PHP-скрипт включает `bank_transfer` и `tbank` в `oc_setting`/`oc_extension`. Запустить: `/update_payment.php?key=payment2026` |
+
+### Prompt 5 — Футер, соцсети
+
+| Задача | Файлы | Детали |
+|--------|-------|--------|
+| **Блок «Мы на Авито»** | `footer.twig` | Заменён блок «Мы в соцсетях»; добавлен логотип Авито, рейтинг ★★★★★, ссылка на профиль |
+| **Иконки оплаты** | `footer.twig`, `payments/sberpay.svg`, `sbp.svg`, `mir.svg` | Убраны все зарубежные/украинские платёжки; оставлены только SberPay, СБП, Мир |
+| **Логотип Авито** | `image/catalog/avito/avito_logo.svg` | SVG-логотип в корпоративном синем цвете |
+| **Копирайт** | `catalog/language/ru-ru/common/footer.php` | Проверен: `© 2026 Kamtek. Продажа скважинных насосов ЭЦВ` — актуален |
+
+### Как применить на сервере
+
+1. **git pull** или загрузить файлы по FTP.
+2. **Запустить** `https://насосыдаром.рф/update_payment.php?key=payment2026`
+   - Активирует `bank_transfer` (выставление счёта) и `tbank` (оплата картой/СБП).
+   - **Удалить файл** после выполнения.
+3. В **AdminPanel → Расширения → Оплата → Т-Банк** ввести Terminal ID и Password.
+4. Очистить кеш: **Расширения → Модификаторы → Обновить**.
+
+---
+
 ## GitHub
 
 - **Репозиторий:** https://github.com/lexabodr2003-prog/NADOSIR
@@ -212,3 +243,5 @@ catalog/language/ru-ru/
   - `af1bda9` — feat: кнопка каталога (Task 15)
   - `d13eac8` — fix: I4кВт → кВт (Task 12)
   - `9b84c04` — feat: страницы контента (Prompt 3)
+  - `1c2470a` — docs: README обновлён
+  - `b7db136` — feat: prompts 4+5 — оплата, доставка, футер
