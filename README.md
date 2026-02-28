@@ -232,21 +232,47 @@ catalog/language/ru-ru/
 
 ---
 
-## GitHub
+## Выполненные задачи (Prompts 6–7) — деплой 28.02.2026
 
-- **Репозиторий:** https://github.com/lexabodr2003-prog/NADOSIR
-- **Ветка:** `main`
-- **Коммиты:**
-  - `a55e6a0` — исходное состояние сайта
-  - `8a69b7c` — README и .gitignore
-  - `ece3c8e` — fix: фильтр iOS Яндекс.Браузер
-  - `af1bda9` — feat: кнопка каталога (Task 15)
-  - `d13eac8` — fix: I4кВт → кВт (Task 12)
-  - `9b84c04` — feat: страницы контента (Prompt 3)
-  - `1c2470a` — docs: README обновлён
-  - `b7db136` — feat: prompts 4+5 — оплата, доставка, футер
-  - `9e75d0d` — docs: README обновлён prompts 4+5
-  - `ce69800` — fix: обновлён пароль БД в config.php (28.02.2026)
+### Prompt 6 — Мобильная версия: обрезка баннера Камтек
+
+| Задача | Файлы | Детали |
+|--------|-------|--------|
+| **Обрезка логотипа** | `catalog/view/theme/oct_deals/stylesheet/kamtek-mobile-fixes.css` | CSS media-query `@media (max-width: 767px)`: скрывает верхние ~22% (логотип KAMTEK PRO) через `object-fit: cover` + `object-position: center 24%` на контейнере `.ds-slideshow-plus-item-fullimg` |
+| **Подключение CSS** | `catalog/view/theme/oct_deals/template/common/header.twig` | `<link rel="stylesheet" href="...kamtek-mobile-fixes.css">` добавлен перед `</head>` |
+| **Responsive видео** | `kamtek-mobile-fixes.css` | `.video-wrapper` с `padding-bottom: 56.25%` для корректного 16:9 iframe на всех экранах |
+
+**Логика обрезки:** Мобильные баннеры (`*MOB*.PNG`, 1108×978px) имеют логотип KAMTEK PRO в верхних ~216px (~22%). Через `max-height: 75vw` на контейнере и `object-position: center 24%` на `<img>` логотип скрывается, показывая только контентную часть насоса.
+
+---
+
+### Prompt 7 — Яндекс.Метрика, Rutube видео, Фавикон
+
+| # | Задача | Файлы | Детали |
+|---|--------|-------|--------|
+| **7.10** | Яндекс.Метрика | `header.twig` | Счётчик ID=106173077, добавлен перед `</head>`. Параметры: webvisor, clickmap, ecommerce, accurateTrackBounce |
+| **7.11** | Видео Rutube | `oc_module.setting` (module_id=33) | Заменён src iframe: новый ID `492f623d6991c245c71702d6fdae7f75?skinColor=7CB342`; модуль включён (status=1). HTML-контент записан в БД через `write_video.php` |
+| **7.17** | Фавикон | `image/favicon.ico` (645B), `image/favicon.svg` (961B) | ICO-файл создан из логотипа logo-kamtek.webp (300×41px); SVG-favicon с K-образным символом. Теги подключены в `header.twig`: `rel="icon"` (ICO+SVG), `rel="shortcut icon"`, `rel="apple-touch-icon"` |
+
+**Структура видео-блока на главной (модуль 33):**
+```html
+<section class="company-grid">
+  <div class="company-grid__video">
+    <div class="video-wrapper">
+      <iframe src="https://rutube.ru/play/embed/492f623d6991c245c71702d6fdae7f75?skinColor=7CB342" ...></iframe>
+    </div>
+  </div>
+  <div class="company-grid__content">...</div>
+</section>
+```
+
+### Новые файлы (Prompts 6–7)
+
+| Файл | Назначение |
+|------|-----------|
+| `catalog/view/theme/oct_deals/stylesheet/kamtek-mobile-fixes.css` | Мобильные CSS-фиксы (баннер + видео) |
+| `image/favicon.ico` | Фавикон ICO (645 bytes) |
+| `image/favicon.svg` | Фавикон SVG (961 bytes) |
 
 ---
 
@@ -264,3 +290,50 @@ catalog/language/ru-ru/
 5. Запущен и выполнен `fix_units.php` — исправлена единица «I4кВт» → «кВт» в БД
 6. Удалены временные PHP-скрипты с сервера
 7. Очищен кеш OpenCart
+
+---
+
+## Деплой на сервер (28.02.2026) — Prompts 6–7
+
+### Что было сделано
+1. **Мобильный баннер** — создан `kamtek-mobile-fixes.css` с обрезкой логотипа KAMTEK PRO ✅
+2. **Яндекс.Метрика** — счётчик 106173077 добавлен в `header.twig` ✅
+3. **Rutube видео** — обновлён src iframe в HTML-модуле №33 (новый ID `492f623d...`), модуль включён ✅
+4. **Фавикон** — добавлены `favicon.ico` и `favicon.svg`, теги подключены в `header.twig` ✅
+5. Все файлы загружены на сервер через SCP ✅
+6. Временные PHP-скрипты удалены с сервера ✅
+7. Кеш OpenCart очищен ✅
+
+### Статус проверок после деплоя
+
+| URL | Статус |
+|-----|--------|
+| `https://насосыдаром.рф/` | ✅ 200 OK |
+| `https://насосыдаром.рф/contact` | ✅ 200 OK |
+| `https://насосыдаром.рф/admin/` | ✅ 200 OK |
+| `https://насосыдаром.рф/image/favicon.ico` | ✅ 200 OK |
+| `https://насосыдаром.рф/image/favicon.svg` | ✅ 200 OK |
+| `.../stylesheet/kamtek-mobile-fixes.css` | ✅ 200 OK |
+| Яндекс.Метрика в HTML | ✅ 1 вхождение |
+| favicon теги в HTML | ✅ ICO×3, SVG×1 |
+| Rutube iframe на главной | ✅ ID 492f623d |
+
+---
+
+## GitHub
+
+- **Репозиторий:** https://github.com/lexabodr2003-prog/NADOSIR
+- **Ветка:** `main`
+- **Последние коммиты:**
+  - `a55e6a0` — исходное состояние сайта
+  - `8a69b7c` — README и .gitignore
+  - `ece3c8e` — fix: фильтр iOS Яндекс.Браузер
+  - `af1bda9` — feat: кнопка каталога (Task 15)
+  - `d13eac8` — fix: I4кВт → кВт (Task 12)
+  - `9b84c04` — feat: страницы контента (Prompt 3)
+  - `1c2470a` — docs: README обновлён
+  - `b7db136` — feat: prompts 4+5 — оплата, доставка, футер
+  - `9e75d0d` — docs: README prompts 4+5
+  - `ce69800` — fix: пароль БД (28.02.2026)
+  - `39f1215` — docs: README деплой 28.02.2026
+  - `a7a74a2` — feat: prompts 6-7 (баннер, метрика, видео, фавикон)
