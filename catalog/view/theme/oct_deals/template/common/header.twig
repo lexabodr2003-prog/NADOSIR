@@ -9,6 +9,20 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ title }}</title>
+<meta property="og:site_name" content="КАМТЕК" />
+<meta property="og:title" content="{{ title }}" />
+{% if description is defined and description %}
+<meta property="og:description" content="{{ description }}" />
+{% else %}
+<meta property="og:description" content="КАМТЕК — производитель и поставщик погружных скважинных насосов ЭЦВ серий 4, 5, 6, 8, 10. Доставка по России." />
+{% endif %}
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{% if canonical is defined and canonical %}{{ canonical }}{% else %}{{ base }}{% endif %}" />
+{% if thumb is defined and thumb %}
+<meta property="og:image" content="{{ thumb }}" />
+{% else %}
+<meta property="og:image" content="{{ base }}image/catalog/product/1.png" />
+{% endif %}
 {% if (oct_deals_data.open_graph is defined and oct_deals_data.open_graph) and octOpenGraphs is not empty %}
 {% for octOpenGraph in octOpenGraphs %}
 {% if octOpenGraph.content is not empty %}
