@@ -4,6 +4,7 @@ class ModelCatalogReview extends Model {
 		$this->db->query("INSERT INTO " . DB_PREFIX . "review SET author = '" . $this->db->escape($data['name']) . "', customer_id = '" . (int)$this->customer->getId() . "', product_id = '" . (int)$product_id . "', text = '" . $this->db->escape($data['text']) . "', rating = '" . (int)$data['rating'] . "', date_added = NOW()");
 
 		$review_id = $this->db->getLastId();
+
 			$this->load->model('octemplates/helper');
 
 			$additional_data = [
@@ -56,7 +57,7 @@ class ModelCatalogReview extends Model {
 		}
 	}
 
-	
+
 			public function getOCTReviewsByProductId($product_id) {
 				$oct_reviews = [];
 				$query = $this->db->query("SELECT rating FROM " . DB_PREFIX . "review WHERE product_id ='". (int)$product_id ."' AND status = '1'");
@@ -75,7 +76,8 @@ class ModelCatalogReview extends Model {
 
 				return $oct_reviews;
 			}
-			public function getReviewsByProductId($product_id, $start = 0, $limit = 20) {
+			
+	public function getReviewsByProductId($product_id, $start = 0, $limit = 20) {
 		if ($start < 0) {
 			$start = 0;
 		}

@@ -493,8 +493,10 @@ class ControllerCatalogProduct extends Controller {
 	}
 
 	protected function getForm() {
+
 	        $data['oct_product_main_image_option_status'] = $oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
 			
+
 			$data['oct_deals_seo_title_data'] = $this->config->get('theme_oct_deals_seo_title_data');
 			
 		$data['text_form'] = !isset($this->request->get['product_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
@@ -657,7 +659,7 @@ class ControllerCatalogProduct extends Controller {
 			$data['mpn'] = '';
 		}
 
-		
+
 			$data['product_oct_stickers'] = [];
 
 			if ($this->config->get('oct_stickers_status')) {
@@ -681,7 +683,8 @@ class ControllerCatalogProduct extends Controller {
 					}
 				}
 			}
-			if (isset($this->request->post['location'])) {
+			
+		if (isset($this->request->post['location'])) {
 			$data['location'] = $this->request->post['location'];
 		} elseif (!empty($product_info)) {
 			$data['location'] = $product_info['location'];
@@ -979,9 +982,10 @@ class ControllerCatalogProduct extends Controller {
 			$product_options = array();
 		}
 
-		
+
 	        $this->load->model('tool/image');
-			$data['product_options'] = array();
+			
+		$data['product_options'] = array();
 
 		foreach ($product_options as $product_option) {
 			$product_option_value_data = array();
@@ -989,6 +993,7 @@ class ControllerCatalogProduct extends Controller {
 			if (isset($product_option['product_option_value'])) {
 				foreach ($product_option['product_option_value'] as $product_option_value) {
 					$product_option_value_data[] = array(
+
 	        'image' => (isset($product_option_value['image'])) ? $product_option_value['image'] : '',
 	        'thumb' => (isset($product_option_value['image']) && is_file(DIR_IMAGE.$product_option_value['image'])) ? $this->model_tool_image->resize($product_option_value['image'], 100, 100) : $this->model_tool_image->resize('no_image.png', 100, 100),
 			
@@ -1105,6 +1110,7 @@ class ControllerCatalogProduct extends Controller {
 		$data['product_images'] = array();
 
 		foreach ($product_images as $product_image) {
+
 			if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
 				@$image_by_option = $this->model_catalog_product->getProductOptionsToImage($this->request->get['product_id'], $product_image['product_image_id']);
 			} else {
@@ -1122,6 +1128,7 @@ class ControllerCatalogProduct extends Controller {
 			$data['product_images'][] = array(
 				'image'      => $image,
 				'thumb'      => $this->model_tool_image->resize($thumb, 100, 100),
+
 	        'image_by_option' => $image_by_option,
 			
 				'sort_order' => $product_image['sort_order']
@@ -1205,12 +1212,13 @@ class ControllerCatalogProduct extends Controller {
 			$data['product_layout'] = array();
 		}
 
-		
+
     // OCFilter start
     $this->document->addStyle('view/stylesheet/ocfilter/ocfilter.css?v=' . OCF_VERSION);
     $this->document->addScript('view/javascript/ocfilter/ocfilter.js?v=' . OCF_VERSION);
     // OCFilter end
       
+
             $data['oct_product_tabs_status'] = $this->config->get('oct_product_tabs_status');
             $oct_product_tabs_status = $this->config->get('oct_product_tabs_status');
 
@@ -1239,7 +1247,8 @@ class ControllerCatalogProduct extends Controller {
                     }
                 }
             }
-          $this->load->model('design/layout');
+          
+		$this->load->model('design/layout');
 
 		$data['layouts'] = $this->model_design_layout->getLayouts();
 
@@ -1323,9 +1332,10 @@ class ControllerCatalogProduct extends Controller {
 	public function autocomplete() {
 		$json = array();
 
-		
+
 	        $this->load->model('tool/image');
-			if (isset($this->request->get['filter_name']) || isset($this->request->get['filter_model'])) {
+			
+		if (isset($this->request->get['filter_name']) || isset($this->request->get['filter_model'])) {
 			$this->load->model('catalog/product');
 			$this->load->model('catalog/option');
 
@@ -1372,6 +1382,7 @@ class ControllerCatalogProduct extends Controller {
 
 							if ($option_value_info) {
 								$product_option_value_data[] = array(
+
 	        'image' => (isset($product_option_value['image'])) ? $product_option_value['image'] : '',
 	        'thumb' => (isset($product_option_value['image']) && is_file(DIR_IMAGE.$product_option_value['image'])) ? $this->model_tool_image->resize($product_option_value['image'], 100, 100) : $this->model_tool_image->resize('no_image.png', 100, 100),
 			

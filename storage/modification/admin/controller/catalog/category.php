@@ -202,13 +202,14 @@ class ControllerCatalogCategory extends Controller {
 
 		$category_total = $this->model_catalog_category->getTotalCategories();
 
-		
+
       // OCFilter start
       if (isset($filter_data['filter_name']) && isset($filter_data['limit']) && $filter_data['limit'] == 5) {
         $filter_data['limit'] = 15;
       }
       // OCFilter end
-      $results = $this->model_catalog_category->getCategories($filter_data);
+      
+		$results = $this->model_catalog_category->getCategories($filter_data);
 
 		foreach ($results as $result) {
 			$data['categories'][] = array(
@@ -286,6 +287,7 @@ class ControllerCatalogCategory extends Controller {
 	}
 
 	protected function getForm() {
+
 			$data['oct_deals_seo_title_data'] = $this->config->get('theme_oct_deals_seo_title_data');
 			
 		$data['text_form'] = !isset($this->request->get['category_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
@@ -363,6 +365,7 @@ class ControllerCatalogCategory extends Controller {
 		$this->load->model('localisation/language');
 
 		$data['languages'] = $this->model_localisation_language->getLanguages();
+
 			$oct_deals_data = $this->config->get('theme_oct_deals_data');
 
 			if (isset($oct_deals_data['category_page']) && $oct_deals_data['category_page']) {
@@ -470,6 +473,7 @@ class ControllerCatalogCategory extends Controller {
 		}
 
 		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+
 			if (isset($this->request->post['oct_image'])) {
 				$data['oct_image'] = $this->request->post['oct_image'];
 			} elseif (!empty($category_info)) {
@@ -638,13 +642,14 @@ class ControllerCatalogCategory extends Controller {
 				'limit'       => 5
 			);
 
-			
+
       // OCFilter start
       if (isset($filter_data['filter_name']) && isset($filter_data['limit']) && $filter_data['limit'] == 5) {
         $filter_data['limit'] = 15;
       }
       // OCFilter end
-      $results = $this->model_catalog_category->getCategories($filter_data);
+      
+			$results = $this->model_catalog_category->getCategories($filter_data);
 
 			foreach ($results as $result) {
 				$json[] = array(

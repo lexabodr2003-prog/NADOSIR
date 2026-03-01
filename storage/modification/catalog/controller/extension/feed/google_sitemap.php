@@ -1,6 +1,6 @@
 <?php
 class ControllerExtensionFeedGoogleSitemap extends Controller {
-	
+
 			protected function getBlogCategories($parent_id, $current_path = '') {
 				$output = '';
 
@@ -24,7 +24,8 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 
 				return $output;
 			}
-			public function index() {
+			
+	public function index() {
 		if ($this->config->get('feed_google_sitemap_status')) {
 			$output  = '<?xml version="1.0" encoding="UTF-8"?>';
 			$output .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">';
@@ -68,7 +69,7 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 				$output .= '</url>';
 			}
 
-			
+
 			if ($this->config->get('oct_blogsettings_status')) {
 				$this->load->model('octemplates/blog/oct_blogarticle');
 				$oct_blogsettings_data = $this->config->get('oct_blogsettings_data');
@@ -97,6 +98,7 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 
 				$output .= $this->getBlogCategories(0);
 			}
+			
 			$this->load->model('catalog/information');
 
 			$informations = $this->model_catalog_information->getInformations();

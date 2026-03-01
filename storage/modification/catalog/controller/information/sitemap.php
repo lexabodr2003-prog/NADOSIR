@@ -19,7 +19,7 @@ class ControllerInformationSitemap extends Controller {
 
 		$this->load->model('catalog/category');
 
-		
+
 			$data['blog_categories'] = [];
 
 			if ($this->config->get('oct_blogsettings_status')) {
@@ -58,7 +58,8 @@ class ControllerInformationSitemap extends Controller {
 					);
 				}
 			}
-			$data['categories'] = array();
+			
+		$data['categories'] = array();
 
 		$categories_1 = $this->model_catalog_category->getCategories(0);
 

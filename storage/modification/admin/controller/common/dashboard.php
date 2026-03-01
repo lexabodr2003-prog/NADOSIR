@@ -1,6 +1,6 @@
 <?php
 class ControllerCommonDashboard extends Controller {
-	
+
 	public function longlife() {
 		$json = [];
 		if (isset($this->session->data['user_token'])) {
@@ -9,7 +9,8 @@ class ControllerCommonDashboard extends Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
-			public function index() {
+			
+	public function index() {
 		$this->load->language('common/dashboard');
 
 		$this->document->setTitle($this->language->get('heading_title'));

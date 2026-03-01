@@ -5,7 +5,7 @@ class ModelCatalogProduct extends Model {
 
 		$product_id = $this->db->getLastId();
 
-		
+
 			if ($this->config->get('oct_stickers_status')) {
 				$this->db->query("UPDATE " . DB_PREFIX . "product SET oct_stickers = '' WHERE product_id = '" . (int)$product_id . "'");
 
@@ -31,7 +31,8 @@ class ModelCatalogProduct extends Model {
 						}
 				}
 			}
-			if (isset($data['image'])) {
+			
+		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "product SET image = '" . $this->db->escape($data['image']) . "' WHERE product_id = '" . (int)$product_id . "'");
 		}
 
@@ -45,7 +46,7 @@ class ModelCatalogProduct extends Model {
 			}
 		}
 
-		
+
 			if ($this->config->get('oct_product_tabs_status') && isset($data['oct_product_extra_tab'])) {
 				foreach ($data['oct_product_extra_tab'] as $oct_product_extra_tab) {
 					if ($oct_product_extra_tab['extra_tab_id']) {
@@ -55,7 +56,8 @@ class ModelCatalogProduct extends Model {
 					}
 				}
 			}
-			if (isset($data['product_attribute'])) {
+			
+		if (isset($data['product_attribute'])) {
 			foreach ($data['product_attribute'] as $product_attribute) {
 				if ($product_attribute['attribute_id']) {
 					// Removes duplicates
@@ -113,11 +115,13 @@ class ModelCatalogProduct extends Model {
 
 		if (isset($data['product_image'])) {
 			foreach ($data['product_image'] as $product_image) {
-				
+
 			if (!empty($product_image['image']) && file_exists(DIR_IMAGE . $product_image['image'])) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "product_image
+			
+				$this->db->query("INSERT INTO " . DB_PREFIX . "product_image SET product_id = '" . (int)$product_id . "', image = '" . $this->db->escape($product_image['image']) . "', sort_order = '" . (int)$product_image['sort_order'] . "'");
+
 			}
-			 SET product_id = '" . (int)$product_id . "', image = '" . $this->db->escape($product_image['image']) . "', sort_order = '" . (int)$product_image['sort_order'] . "'");
+			
 			}
 		}
 
@@ -161,7 +165,9 @@ class ModelCatalogProduct extends Model {
 			foreach ($data['product_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
-						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'product_id=" . (int)$product_id . "', keyword = '" . $this->db->escape(
+						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'product_id=" . (int)$product_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+					}
+
 			else {
 				if ($this->config->get('theme_oct_deals_seo_url_status')) {
 					$this->load->model('octemplates/widgets/oct_seogeneration');
@@ -169,19 +175,19 @@ class ModelCatalogProduct extends Model {
 					$this->model_octemplates_widgets_oct_seogeneration->seoUrlGenerator('product', (int)$language_id, (int)$store_id, $data, (int)$product_id);
 				}
 			}
-			$keyword) . "'");
-					}
+			
 				}
 			}
 		}
 		
-		
+
     // OCFilter start
     $this->load->model('extension/module/ocfilter/filter');
 
     $this->model_extension_module_ocfilter_filter->setOCFilterFilter($product_id, $data, (isset($ocf_product_info) ? $ocf_product_info : null));
     // OCFilter end
-      if (isset($data['product_layout'])) {
+      
+		if (isset($data['product_layout'])) {
 			foreach ($data['product_layout'] as $store_id => $layout_id) {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "product_to_layout SET product_id = '" . (int)$product_id . "', store_id = '" . (int)$store_id . "', layout_id = '" . (int)$layout_id . "'");
 			}
@@ -194,6 +200,7 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function editProduct($product_id, $data) {
+
     // OCFilter start
     $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product WHERE product_id = '" . $this->db->escape((string)$product_id) . "'");
 
@@ -202,7 +209,7 @@ class ModelCatalogProduct extends Model {
       
 		$this->db->query("UPDATE " . DB_PREFIX . "product SET model = '" . $this->db->escape($data['model']) . "', sku = '" . $this->db->escape($data['sku']) . "', upc = '" . $this->db->escape($data['upc']) . "', ean = '" . $this->db->escape($data['ean']) . "', jan = '" . $this->db->escape($data['jan']) . "', isbn = '" . $this->db->escape($data['isbn']) . "', mpn = '" . $this->db->escape($data['mpn']) . "', location = '" . $this->db->escape($data['location']) . "', quantity = '" . (int)$data['quantity'] . "', minimum = '" . (int)$data['minimum'] . "', subtract = '" . (int)$data['subtract'] . "', stock_status_id = '" . (int)$data['stock_status_id'] . "', date_available = '" . $this->db->escape($data['date_available']) . "', manufacturer_id = '" . (int)$data['manufacturer_id'] . "', shipping = '" . (int)$data['shipping'] . "', price = '" . (float)$data['price'] . "', points = '" . (int)$data['points'] . "', weight = '" . (float)$data['weight'] . "', weight_class_id = '" . (int)$data['weight_class_id'] . "', length = '" . (float)$data['length'] . "', width = '" . (float)$data['width'] . "', height = '" . (float)$data['height'] . "', length_class_id = '" . (int)$data['length_class_id'] . "', status = '" . (int)$data['status'] . "', tax_class_id = '" . (int)$data['tax_class_id'] . "', sort_order = '" . (int)$data['sort_order'] . "', date_modified = NOW() WHERE product_id = '" . (int)$product_id . "'");
 
-		
+
 			if ($this->config->get('oct_stickers_status')) {
 				$this->db->query("UPDATE " . DB_PREFIX . "product SET oct_stickers = '' WHERE product_id = '" . (int)$product_id . "'");
 
@@ -228,7 +235,8 @@ class ModelCatalogProduct extends Model {
 						}
 				}
 			}
-			if (isset($data['image'])) {
+			
+		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "product SET image = '" . $this->db->escape($data['image']) . "' WHERE product_id = '" . (int)$product_id . "'");
 		}
 
@@ -246,7 +254,7 @@ class ModelCatalogProduct extends Model {
 			}
 		}
 
-		
+
 			$oct_product_tabs_status = $this->config->get('oct_product_tabs_status');
 
 			if (isset($oct_product_tabs_status) && $oct_product_tabs_status) {
@@ -263,12 +271,7 @@ class ModelCatalogProduct extends Model {
 				}
 			}
 			
-			$oct_product_tabs_status = $this->config->get('oct_product_tabs_status');
-
-			if (isset($oct_product_tabs_status) && $oct_product_tabs_status) {
-				$this->db->query("DELETE FROM " . DB_PREFIX . "oct_product_extra_tabs WHERE product_id = '" . (int)$product_id . "'");
-			}
-			$this->db->query("DELETE FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "'");
 
 		if (!empty($data['product_attribute'])) {
 			foreach ($data['product_attribute'] as $product_attribute) {
@@ -333,11 +336,7 @@ class ModelCatalogProduct extends Model {
 		}
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "'");
-			$oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
-			if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
-				$this->db->query("DELETE FROM " . DB_PREFIX . "oct_product_image_by_option WHERE product_id = '" . (int)$product_id . "'");
-			}
-			
+
 	        $oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
 	        if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
 	          $this->db->query("DELETE FROM " . DB_PREFIX . "oct_product_image_by_option WHERE product_id = '" . (int)$product_id . "'");
@@ -346,11 +345,24 @@ class ModelCatalogProduct extends Model {
 
 		if (isset($data['product_image'])) {
 			foreach ($data['product_image'] as $product_image) {
-				
+
 			if (!empty($product_image['image']) && file_exists(DIR_IMAGE . $product_image['image'])) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "product_image
+			
+				$this->db->query("INSERT INTO " . DB_PREFIX . "product_image SET product_id = '" . (int)$product_id . "', image = '" . $this->db->escape($product_image['image']) . "', sort_order = '" . (int)$product_image['sort_order'] . "'");
+
+			if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
+				$product_image_id = $this->db->getLastId();
+				
+				if (isset($product_image['image_by_option'])) {
+					foreach ($product_image['image_by_option'] as $option_value_id) {
+						$this->db->query("INSERT INTO " . DB_PREFIX . "oct_product_image_by_option SET product_id = '" . (int)$product_id . "', product_image_id = '" . (int)$product_image_id . "', option_value_id = '" . (int)$option_value_id . "'");
+					}
+				}
 			}
-			 SET product_id = '" . (int)$product_id . "', image = '" . $this->db->escape($product_image['image']) . "', sort_order = '" . (int)$product_image['sort_order'] . "'");
+			
+
+			}
+			
 			}
 		}
 
@@ -407,7 +419,9 @@ class ModelCatalogProduct extends Model {
 			foreach ($data['product_seo_url']as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
-						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'product_id=" . (int)$product_id . "', keyword = '" . $this->db->escape(
+						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'product_id=" . (int)$product_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+					}
+
 			else {
 				if ($this->config->get('theme_oct_deals_seo_url_status')) {
 					$this->load->model('octemplates/widgets/oct_seogeneration');
@@ -415,21 +429,21 @@ class ModelCatalogProduct extends Model {
 					$this->model_octemplates_widgets_oct_seogeneration->seoUrlGenerator('product', (int)$language_id, (int)$store_id, $data, (int)$product_id);
 				}
 			}
-			$keyword) . "'");
-					}
+			
 				}
 			}
 		}
 		
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_layout WHERE product_id = '" . (int)$product_id . "'");
 
-		
+
     // OCFilter start
     $this->load->model('extension/module/ocfilter/filter');
 
     $this->model_extension_module_ocfilter_filter->setOCFilterFilter($product_id, $data, (isset($ocf_product_info) ? $ocf_product_info : null));
     // OCFilter end
-      if (isset($data['product_layout'])) {
+      
+		if (isset($data['product_layout'])) {
 			foreach ($data['product_layout'] as $store_id => $layout_id) {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "product_to_layout SET product_id = '" . (int)$product_id . "', store_id = '" . (int)$store_id . "', layout_id = '" . (int)$layout_id . "'");
 			}
@@ -438,7 +452,7 @@ class ModelCatalogProduct extends Model {
 		$this->cache->delete('product');
 	}
 
-	
+
 			public function getProductOptionsToImage($product_id, $product_image_id) {
 				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "oct_product_image_by_option WHERE product_id = '" . (int)$product_id . "' AND product_image_id = '" . (int)$product_image_id . "'");
 				$option_value_id_data = array();
@@ -451,7 +465,8 @@ class ModelCatalogProduct extends Model {
           
 				return $option_value_id_data;
 			}
-			public function copyProduct($product_id) {
+			
+	public function copyProduct($product_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "product p WHERE p.product_id = '" . (int)$product_id . "'");
 
 		if ($query->num_rows) {
@@ -464,6 +479,7 @@ class ModelCatalogProduct extends Model {
 			$data['status'] = '0';
 
 			$data['product_attribute'] = $this->getProductAttributes($product_id);
+
     // OCFilter start
     $this->load->model('extension/module/ocfilter/filter');
 
@@ -489,47 +505,29 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function deleteProduct($product_id) {
-		
+
     // OCFilter start
     $this->db->query("DELETE FROM " . DB_PREFIX . "ocfilter_filter_value_to_product WHERE product_id = '" . $this->db->escape((string)$product_id) . "'");
     // OCFilter end
-      $this->db->query("DELETE FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
-		
+      
+		$this->db->query("DELETE FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
+
 			$oct_product_tabs_status = $this->config->get('oct_product_tabs_status');
 
 			if (isset($oct_product_tabs_status) && $oct_product_tabs_status) {
 				$this->db->query("DELETE FROM " . DB_PREFIX . "oct_product_extra_tabs WHERE product_id = '" . (int)$product_id . "'");
-
-				if (isset($data['oct_product_extra_tab']) && !empty($data['oct_product_extra_tab'])) {
-					foreach ($data['oct_product_extra_tab'] as $oct_product_extra_tab) {
-						if ($oct_product_extra_tab['extra_tab_id']) {
-							foreach ($oct_product_extra_tab['oct_product_extra_tab_description'] as $language_id => $oct_product_extra_tab_description) {
-								$this->db->query("INSERT INTO " . DB_PREFIX . "oct_product_extra_tabs SET product_id = '" . (int)$product_id . "', extra_tab_id = '" . (int)$oct_product_extra_tab['extra_tab_id'] . "', language_id = '" . (int)$language_id . "', text = '" .  $this->db->escape($oct_product_extra_tab_description['text']) . "'");
-							}
-						}
-					}
-				}
 			}
 			
-			$oct_product_tabs_status = $this->config->get('oct_product_tabs_status');
-
-			if (isset($oct_product_tabs_status) && $oct_product_tabs_status) {
-				$this->db->query("DELETE FROM " . DB_PREFIX . "oct_product_extra_tabs WHERE product_id = '" . (int)$product_id . "'");
-			}
-			$this->db->query("DELETE FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_description WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_filter WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "'");
+
 			$oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
 			if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
 				$this->db->query("DELETE FROM " . DB_PREFIX . "oct_product_image_by_option WHERE product_id = '" . (int)$product_id . "'");
 			}
-			
-	        $oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
-	        if (isset($oct_product_main_image_option_status) && $oct_product_main_image_option_status) {
-	          $this->db->query("DELETE FROM " . DB_PREFIX . "oct_product_image_by_option WHERE product_id = '" . (int)$product_id . "'");
-	        }
 			
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_option WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . (int)$product_id . "'");
@@ -667,7 +665,7 @@ class ModelCatalogProduct extends Model {
 		return $product_filter_data;
 	}
 
-	
+
 			public function getProductExtraTabs($product_id) {
 				$oct_product_extra_tab_data = [];
 
@@ -690,7 +688,8 @@ class ModelCatalogProduct extends Model {
 
 				return $oct_product_extra_tab_data;
 			}
-			public function getProductAttributes($product_id) {
+			
+	public function getProductAttributes($product_id) {
 		$product_attribute_data = array();
 
 		$product_attribute_query = $this->db->query("SELECT attribute_id FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "' GROUP BY attribute_id");

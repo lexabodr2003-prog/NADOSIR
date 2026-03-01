@@ -21,7 +21,8 @@ $_['heading_title']         = 'Order History';
             $_['text_order_sms_shortcodes'] = 'Available shortcodes for SMS:';
             $_['text_edit_sms_message'] = 'Edit SMS message';
             $_['text_email_notify'] = 'Also send a message to e-mail (standard when changing status)';
-			// Text
+			
+// Text
 $_['text_account']          = 'Account';
 $_['text_order']            = 'Order Information';
 $_['text_order_detail']     = 'Order Details';

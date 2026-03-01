@@ -6,6 +6,10 @@ $_['text_move']        = 'Copying files!';
 $_['text_xml']         = 'Applying modifications!';
 $_['text_remove']      = 'Removing temporary files!';
 
+		  		$_['text_sql']             = 'Running SQL!';
+		  		$_['text_php']             = 'Running PHP!';
+            
+
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify extensions!';
 $_['error_install']    = 'Extension installation taking place please wait a few seconds before trying to install!';

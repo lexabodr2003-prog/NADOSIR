@@ -9,12 +9,13 @@ class ControllerCommonFooter extends Controller {
 			$data['text_version'] = '';
 		}
 
-		
+
 			if (isset($this->session->data['user_token'])) {
 			$data['longlife'] = str_replace('&amp;','&',$this->url->link('common/dashboard/longlife','user_token='. $this->session->data['user_token'], 'SSL'));
 			} else {
 			$data['longlife'] = false;
 			}
-			return $this->load->view('common/footer', $data);
+			
+		return $this->load->view('common/footer', $data);
 	}
 }

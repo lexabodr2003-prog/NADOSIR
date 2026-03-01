@@ -120,7 +120,7 @@ class ModelAccountOrder extends Model {
 		return $query->row;
 	}
 
-	
+
                 public function getOrderTTNNumber($order_id) {
                     $fields_to_check = [
                         'novaposhta_cn_number',
@@ -148,7 +148,8 @@ class ModelAccountOrder extends Model {
 
                     return $result ?: [];
                 }
-			public function getOrderProducts($order_id) {
+			
+	public function getOrderProducts($order_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)$order_id . "'");
 
 		return $query->rows;

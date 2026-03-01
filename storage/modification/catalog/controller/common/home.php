@@ -9,9 +9,10 @@ class ControllerCommonHome extends Controller {
 			$this->document->addLink($this->config->get('config_url'), 'canonical');
 		}
 
-		
+
 			$this->config->set('oct_deals_vars', array('is_home' => true));
 			
+
             $oct_deals_data = $this->config->get('theme_oct_deals_data');
 			$oct_seo_title = $this->config->get('config_meta_title');
 			$oct_seo_description = $this->config->get('config_meta_description');
@@ -78,7 +79,8 @@ class ControllerCommonHome extends Controller {
                 $this->document->setOCTOpenGraph('og:image:alt', htmlspecialchars(strip_tags(str_replace("\r", " ", str_replace("\n", " ", str_replace("\\", "/", str_replace("\"", "", $this->config->get('config_meta_title'))))))));
                 $this->document->setOCTOpenGraph('og:type', 'website');
             }
-			$data['column_left'] = $this->load->controller('common/column_left');
+			
+		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
 		$data['content_top'] = $this->load->controller('common/content_top');
 		$data['content_bottom'] = $this->load->controller('common/content_bottom');

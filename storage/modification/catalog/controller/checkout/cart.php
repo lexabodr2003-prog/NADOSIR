@@ -56,6 +56,7 @@ class ControllerCheckoutCart extends Controller {
 			$data['products'] = array();
 
 			$products = $this->cart->getProducts();
+
 			if (($this->config->get('config_checkout_guest') && $this->config->get('oct_popup_purchase_byoneclick_status')) && $products) {
 				$oct_byoneclick_data = $this->config->get('oct_popup_purchase_byoneclick_data');
 				$oct_data['oct_byoneclick_status'] = isset($oct_byoneclick_data['cart']) ? 1 : 0;
@@ -86,6 +87,39 @@ class ControllerCheckoutCart extends Controller {
 				}
 
 				$option_data = array();
+
+				$this->load->model('catalog/product');
+
+				$options_arr = [];
+
+				foreach ($product['option'] as $value_opt) {
+					array_push($options_arr, $value_opt['product_option_value_id']);
+				}
+
+				if ($options_arr) {
+					$opt_array = [];
+					
+					foreach ($options_arr as $value) {
+						if (is_array($value)) {
+							foreach ($value as $val) {
+								if ($val) {
+									$opt_array[] = $this->model_catalog_product->getProductOptionValueId($product['product_id'], $val);
+								}
+							}
+						} else {
+							if ($value) {
+								$opt_array[] = $this->model_catalog_product->getProductOptionValueId($product['product_id'], $value);
+							}
+						}
+					}
+
+					$results_opts = $this->model_catalog_product->getProductImagesByOptionValueId($product['product_id'], $opt_array);
+
+					if (isset($results_opts[0]['image']) AND $results_opts[0]['image']) {
+						$image = $this->model_tool_image->resize($results_opts[0]['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_height'));
+					}
+				}
+	  
 
 				foreach ($product['option'] as $option) {
 					if ($option['type'] != 'file') {
@@ -326,8 +360,7 @@ class ControllerCheckoutCart extends Controller {
 				}
 			}
 
-			if (!$json) {
-				
+
 			if ((!$product_info['quantity'] || ($product_info['quantity'] < $quantity)) && (!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning'))) {
 				if	($product_info['quantity'] < 1) {
 					$json['error']['error_warning'] = $this->language->get('error_no_stock');
@@ -335,7 +368,9 @@ class ControllerCheckoutCart extends Controller {
 					$json['error']['error_warning'] = sprintf($this->language->get('error_limited_stock'), $product_info['quantity']);
 				}
 			}
-			$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
+			
+			if (!$json) {
+				$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
 
 				$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
 
@@ -390,10 +425,12 @@ class ControllerCheckoutCart extends Controller {
 				}
 
 				$json['total'] = sprintf($this->language->get('text_items'), $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency']));
+
 			$json['oct_cart_ids'] = $this->load->controller('octemplates/events/helper/allCartProducts');
 			$json['isPopup'] = ($this->config->get('theme_oct_deals_popup_cart_status') && $this->config->get('theme_oct_deals_isPopup')) ? 1 : 0;
 			$json['total_products'] = $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0);
 			$json['total_amount'] = $this->currency->format($total, $this->session->data['currency']);
+
 			} elseif (isset($json['error']['error_warning']) && $json['error']['error_warning']) {
 				$json['error']['error_warning'];
 			
@@ -496,12 +533,11 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			$json['total'] = sprintf($this->language->get('text_items'), $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency']));
+
 			$json['oct_cart_ids'] = $this->load->controller('octemplates/events/helper/allCartProducts');
 			$json['isPopup'] = ($this->config->get('theme_oct_deals_popup_cart_status') && $this->config->get('theme_oct_deals_isPopup')) ? 1 : 0;
 			$json['total_products'] = $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0);
 			$json['total_amount'] = $this->currency->format($total, $this->session->data['currency']);
-			} elseif (isset($json['error']['error_warning']) && $json['error']['error_warning']) {
-				$json['error']['error_warning'];
 			
 		}
 

@@ -14,7 +14,9 @@ class ControllerMailAffiliate extends Controller {
 		if ($this->customer->isLogged()) {
 			$customer_group_id = $this->customer->getGroupId();
 		} else {
+			
 			$customer_group_id = $this->config->get('config_affiliate_group_id');
+		
 		}
 		
 		$customer_group_info = $this->model_account_customer_group->getCustomerGroup($customer_group_id);
@@ -70,7 +72,9 @@ class ControllerMailAffiliate extends Controller {
 				$data['email'] = $this->customer->getEmail();
 				$data['telephone'] = $this->customer->getTelephone();
 			} else {	
-				$customer_group_id = $args[1]['customer_group_id'];
+				
+			$customer_group_id = $this->config->get('config_affiliate_group_id');
+		
 				
 				$data['firstname'] = $args[1]['firstname'];
 				$data['lastname'] = $args[1]['lastname'];	

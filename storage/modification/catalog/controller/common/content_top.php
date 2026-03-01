@@ -11,6 +11,21 @@ class ControllerCommonContentTop extends Controller {
 
 		$layout_id = 0;
 
+
+			if ($route == 'octemplates/blog/oct_blogcategory' && isset($this->request->get['blog_path'])) {
+				$this->load->model('octemplates/blog/oct_blogcategory');
+
+				$blog_path = explode('_', (string)$this->request->get['blog_path']);
+
+				$layout_id = $this->model_octemplates_blog_oct_blogcategory->getBlogCategoryLayoutId(end($blog_path));
+			}
+
+			if ($route == 'octemplates/blog/oct_blogarticle' && isset($this->request->get['blogarticle_id'])) {
+				$this->load->model('octemplates/blog/oct_blogarticle');
+
+				$layout_id = $this->model_octemplates_blog_oct_blogarticle->getArticleLayoutId($this->request->get['blogarticle_id']);
+			}
+			
 		if ($route == 'product/category' && isset($this->request->get['path'])) {
 			$this->load->model('catalog/category');
 
@@ -39,6 +54,15 @@ class ControllerCommonContentTop extends Controller {
 			$layout_id = $this->config->get('config_layout_id');
 		}
 
+
+    // OCFilter start
+    if (isset($route) && $route == 'product/category' && isset($this->request->get['ocfilter_page_id']) && $this->registry->get('ocfilter') && $this->ocfilter->startup()) {
+      if ($_layout_id = $this->ocfilter->api->getSeoPageLayoutId()) {
+        $layout_id = $_layout_id;
+      }
+    }
+    // OCFilter end
+      
 		$this->load->model('setting/module');
 
 		$data['modules'] = array();
@@ -59,7 +83,10 @@ class ControllerCommonContentTop extends Controller {
 			if (isset($part[1])) {
 				$setting_info = $this->model_setting_module->getModule($part[1]);
 
-				if ($setting_info && $setting_info['status']) {
+				
+			if ($setting_info && isset($setting_info['status']) && $setting_info['status']) {
+			
+
 			$setting_info['module_id'] = $part[1];
 			$setting_info['position'] = 'content_top';
 			

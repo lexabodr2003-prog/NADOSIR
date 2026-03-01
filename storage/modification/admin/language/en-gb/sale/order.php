@@ -21,7 +21,8 @@ $_['heading_title']              = 'Orders';
             $_['text_order_sms_shortcodes'] = 'Available shortcodes for SMS:';
             $_['text_edit_sms_message'] = 'Edit SMS message';
             $_['text_email_notify'] = 'Also send a message to e-mail (standard when changing status)';
-			// Text
+			
+// Text
 $_['text_success']               = 'Success: You have modified orders!';
 $_['text_list']                  = 'Order List';
 $_['text_add']                   = 'Add Order';

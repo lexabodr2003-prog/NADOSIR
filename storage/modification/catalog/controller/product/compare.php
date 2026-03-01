@@ -50,6 +50,7 @@ class ControllerProductCompare extends Controller {
 		$data['products'] = array();
 
 		$data['attribute_groups'] = array();
+
 			// Stock Notify
 			if ($this->config->get('oct_stock_notifier_status')) {
 				$data['oct_stock_notifier_status'] = $this->config->get('oct_stock_notifier_status');
@@ -87,6 +88,7 @@ class ControllerProductCompare extends Controller {
 				}
 
 				$attribute_data = array();
+
 			    $can_buy = true;
 
                 if ($product_info['quantity'] <= 0 && !$this->config->get('config_stock_checkout')) {
@@ -110,6 +112,7 @@ class ControllerProductCompare extends Controller {
 					'thumb'        => $image,
 					'price'        => $price,
 					'special'      => $special,
+
 			    'can_buy'     => $can_buy,
 			
 					'description'  => utf8_substr(strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8')), 0, 200) . '..',
@@ -183,6 +186,7 @@ class ControllerProductCompare extends Controller {
 			$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']), $product_info['name'], $this->url->link('product/compare'));
 
 			$json['total'] = sprintf($this->language->get('text_compare'), (isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0));
+
 			$json['total_compare'] = (isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0);
 			
 		}

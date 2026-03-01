@@ -1,6 +1,21 @@
 <?php
 class ControllerProductSearch extends Controller {
 	public function index() {
+
+			$data['oct_deals_data'] = $oct_deals_data = $this->config->get('theme_oct_deals_data');
+
+			$data['oct_infinite_scroll_status'] = isset($oct_deals_data['category_infinite_scroll']) ? $oct_deals_data['category_infinite_scroll'] : 0;
+
+			if (isset($oct_deals_data['category_view_sort_oder']) && $oct_deals_data['category_view_sort_oder']) {
+				$oct_deals_sort_data = $this->config->get('theme_oct_deals_sort_data');
+
+				if (isset($oct_deals_sort_data['deff_sort']) && $oct_deals_sort_data['deff_sort']) {
+					$sort_order = explode('-', $oct_deals_sort_data['deff_sort']);
+				}
+			}
+
+			$ikey = 1;
+			
 		$this->load->language('product/search');
 
 		$this->load->model('catalog/category');
@@ -44,13 +59,17 @@ class ControllerProductSearch extends Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
-			$sort = 'p.sort_order';
+			
+			$sort = (isset($sort_order) && !empty($sort_order) && isset($sort_order[0])) ? $sort_order[0] : 'p.sort_order';
+			
 		}
 
 		if (isset($this->request->get['order'])) {
 			$order = $this->request->get['order'];
 		} else {
-			$order = 'ASC';
+			
+			$order = (isset($sort_order) && !empty($sort_order) && isset($sort_order[1])) ? $sort_order[1] : 'ASC';
+			
 		}
 
 		if (isset($this->request->get['page'])) {
@@ -171,6 +190,13 @@ class ControllerProductSearch extends Controller {
 
 		$data['products'] = array();
 
+	        $oct_deals_data_atributes = $this->config->get('theme_oct_deals_data_atributes');
+			$data['oct_stock_notifier_status'] = $this->config->get('oct_stock_notifier_status');  
+			
+
+			$data['oct_popup_view_status'] = $this->config->get('oct_popup_view_status');
+			
+
 		if (isset($this->request->get['search']) || isset($this->request->get['tag'])) {
 			$filter_data = array(
 				'filter_name'         => $search,
@@ -188,6 +214,21 @@ class ControllerProductSearch extends Controller {
 
 			$results = $this->model_catalog_product->getProducts($filter_data);
 
+			$oct_product_stickers = [];
+
+			if ($this->config->get('oct_stickers_status')) {
+				$oct_stickers = $this->config->get('oct_stickers_data');
+
+				$data['oct_sticker_you_save'] = false;
+
+				if ($oct_stickers) {
+					$data['oct_sticker_you_save'] = isset($oct_stickers['stickers']['special']['persent']) ? true : false;
+				}
+
+				$this->load->model('octemplates/stickers/oct_stickers');
+			}
+			
+
 			foreach ($results as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
@@ -195,6 +236,13 @@ class ControllerProductSearch extends Controller {
 					$image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
 				}
 
+
+			if (isset($oct_deals_data['preload_images']) && $oct_deals_data['preload_images'] && $ikey <= 1) {
+				$this->document->setOCTPreload($image);
+			}
+
+			$ikey++;
+			
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 					$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
 				} else {
@@ -221,16 +269,75 @@ class ControllerProductSearch extends Controller {
 					$rating = false;
 				}
 
+
+			$oct_atributes = false;
+
+			if (isset($oct_deals_data_atributes) && $oct_deals_data_atributes) {
+				$limit_attr  = $this->config->get('theme_oct_deals_data_cat_atr_limit') ? $this->config->get('theme_oct_deals_data_cat_atr_limit') : 5;
+
+				$oct_atributes = $this->model_catalog_product->getOctProductAttributes(isset($product_info) ? $product_info['product_id'] : $result['product_id'], $limit_attr);
+			}
+
+			
+
+			$result = (isset($product_info) && $product_info) ? $product_info : $result;
+
+			if ($result['quantity'] <= 0) {
+				$stock = $result['stock_status'];
+			} else {
+				$stock = false;
+			}
+
+			$can_buy = true;
+
+			if ($result['quantity'] <= 0 && !$this->config->get('config_stock_checkout')) {
+				$can_buy = false;
+			} elseif ($result['quantity'] <= 0 && $this->config->get('config_stock_checkout')) {
+				$can_buy = true;
+			}
+
+			$oct_grayscale = ($this->config->get('theme_oct_deals_no_quantity_grayscale') && !$can_buy) ? true : false;
+			
+
+			if (isset($oct_stickers) && $oct_stickers) {
+				$oct_stickers_data = $this->model_octemplates_stickers_oct_stickers->getOCTStickers($result);
+
+				$oct_product_stickers = [];
+
+				if (isset($oct_stickers_data) && $oct_stickers_data) {
+					$oct_product_stickers = $oct_stickers_data['stickers'];
+				}
+			}
+			
 				$data['products'][] = array(
 					'product_id'  => $result['product_id'],
+
+			'oct_stickers'  => $oct_product_stickers,
+			'you_save'	  	=> $result['you_save'],
+			
 					'thumb'       => $image,
+
+			'oct_atributes'       => $oct_atributes,
+			
 					'name'        => $result['name'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
 					'special'     => $special,
+
+			'stock'     => $stock,
+			'can_buy'   => $can_buy,
+			'oct_grayscale'  => $oct_grayscale,
+			
 					'tax'         => $tax,
 					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
-					'rating'      => $result['rating'],
+					'rating'      => 
+			$this->config->get('config_review_status') ? $result['rating'] : false,
+			'oct_model'	  => $this->config->get('theme_oct_deals_data_model') ? $result['model'] : '',
+			'reviews'	  => $result['reviews'],
+			'quantity'	  => $result['quantity'] <= 0 ? true : false,
+			'width'		  => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'),
+			'height'	  => $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'),
+			
 					'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
 				);
 			}
@@ -261,6 +368,17 @@ class ControllerProductSearch extends Controller {
 				$url .= '&limit=' . $this->request->get['limit'];
 			}
 
+
+      // OCFilter start
+      if (isset($url) && $this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+        $url .= '&' . $this->ocfilter->api->getParamsIndex() . '=' . $this->ocfilter->api->getParamsString();
+
+        if (isset($this->request->get['ocfilter_placement'])) {
+          $url .= '&ocfilter_placement=' . $this->request->get['ocfilter_placement'];
+        }
+      }
+      // OCFilter end
+      
 			$data['sorts'] = array();
 
 			$data['sorts'][] = array(
@@ -317,6 +435,8 @@ class ControllerProductSearch extends Controller {
 				'text'  => $this->language->get('text_model_desc'),
 				'value' => 'p.model-DESC',
 				'href'  => $this->url->link('product/search', 'sort=p.model&order=DESC' . $url)
+			);
+
 			if ((isset($oct_deals_sort_data) && !empty($oct_deals_sort_data)) && (isset($oct_deals_sort_data['sort']) && !empty($oct_deals_sort_data['sort']))) {
 				$data['sorts'] = [];
 
@@ -337,7 +457,6 @@ class ControllerProductSearch extends Controller {
 				}
 			}
 			
-			);
 
 			$url = '';
 
@@ -369,6 +488,17 @@ class ControllerProductSearch extends Controller {
 				$url .= '&order=' . $this->request->get['order'];
 			}
 
+
+      // OCFilter start
+      if (isset($url) && $this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+        $url .= '&' . $this->ocfilter->api->getParamsIndex() . '=' . $this->ocfilter->api->getParamsString();
+
+        if (isset($this->request->get['ocfilter_placement'])) {
+          $url .= '&ocfilter_placement=' . $this->request->get['ocfilter_placement'];
+        }
+      }
+      // OCFilter end
+      
 			$data['limits'] = array();
 
 			$limits = array_unique(array($this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit'), 25, 50, 75, 100));
@@ -417,6 +547,17 @@ class ControllerProductSearch extends Controller {
 				$url .= '&limit=' . $this->request->get['limit'];
 			}
 
+
+      // OCFilter start
+      if (isset($url) && $this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+        $url .= '&' . $this->ocfilter->api->getParamsIndex() . '=' . $this->ocfilter->api->getParamsString();
+
+        if (isset($this->request->get['ocfilter_placement'])) {
+          $url .= '&ocfilter_placement=' . $this->request->get['ocfilter_placement'];
+        }
+      }
+      // OCFilter end
+      
 			$pagination = new Pagination();
 			$pagination->total = $product_total;
 			$pagination->page = $page;
@@ -464,6 +605,13 @@ class ControllerProductSearch extends Controller {
 		$data['sort'] = $sort;
 		$data['order'] = $order;
 		$data['limit'] = $limit;
+
+      // OCFilter Start
+      if ($this->registry->get('ocfilter') && $this->ocfilter->startup()) {
+        $this->ocfilter->api->setProductListControllerData($data, (isset($product_total) ? $product_total : null));
+      }
+      // OCFilter End
+      
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');

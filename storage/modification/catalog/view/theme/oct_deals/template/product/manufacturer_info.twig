@@ -54,6 +54,8 @@
             {% endif %}
             <div id="content" class="{{ class }}">
                 {% if products %}
+                    {% if oct_deals_data.category_view_sort_oder is defined and(oct_deals_data.category_view_sort_oder or oct_deals_data.category_view_sort_oder == 'on') %}
+
 		  <!-- OCFilter Start -->      
 		  {% if ocfilter_mobile_button %}
 		  <div class="ocf-btn-mobile-static ocf-mobile d-xl-none ds-filter-btn sticky-top ds-sticky-column">
@@ -72,7 +74,6 @@
 		  {% endif %}   
 		  <!-- /OCFilter End -->
 		  
-                    {% if oct_deals_data.category_view_sort_oder is defined and(oct_deals_data.category_view_sort_oder or oct_deals_data.category_view_sort_oder == 'on') %}
                         <div class="ds-category-sort d-flex justify-content-between content-block mb-3">
                             <div class="ds-category-sort-limit d-flex align-items-center flex-grow-1 justify-content-between justify-content-md-start">
                                 <div class="ds-category-sort-title fw-700 dark-text d-none d-md-block flex-grow-1 flex-md-grow-0">{{ text_sort }}</div>

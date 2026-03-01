@@ -42,6 +42,8 @@ class ModelOCTemplatesBlogOCTBlogCategory extends Model {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
 						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'blogcategory_id=" . (int)$blogcategory_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+					}
+
 			else {
 				if ($this->config->get('theme_oct_deals_seo_url_status')) {
 					$this->load->model('octemplates/widgets/oct_seogeneration');
@@ -50,7 +52,6 @@ class ModelOCTemplatesBlogOCTBlogCategory extends Model {
 				}
 			}
 			
-					}
 				}
 			}
 		}
@@ -146,6 +147,8 @@ class ModelOCTemplatesBlogOCTBlogCategory extends Model {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
 						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'blogcategory_id=" . (int)$blogcategory_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+					}
+
 			else {
 				if ($this->config->get('theme_oct_deals_seo_url_status')) {
 					$this->load->model('octemplates/widgets/oct_seogeneration');
@@ -154,7 +157,6 @@ class ModelOCTemplatesBlogOCTBlogCategory extends Model {
 				}
 			}
 			
-					}
 				}
 			}
 		}

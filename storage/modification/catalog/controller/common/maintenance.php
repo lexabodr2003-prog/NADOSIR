@@ -20,9 +20,10 @@ class ControllerCommonMaintenance extends Controller {
 			'href' => $this->url->link('common/maintenance')
 		);
 
-		
+
 			$data['title'] = $this->language->get('text_maintenance');
-			$data['message'] = $this->language->get('text_message');
+			
+		$data['message'] = $this->language->get('text_message');
 
 		
 			//$data['header'] = $this->load->controller('common/header');

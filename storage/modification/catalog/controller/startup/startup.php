@@ -207,6 +207,7 @@ class ControllerStartupStartup extends Controller {
 		
 		// Cart
 		$this->registry->set('cart', new Cart\Cart($this->registry));
+
 			require_once DIR_SYSTEM. 'library/octemplates/Mobile_Detect.php';
 
 			$this->registry->set('oct_mobiledetect', new OCTMobile_Detect());

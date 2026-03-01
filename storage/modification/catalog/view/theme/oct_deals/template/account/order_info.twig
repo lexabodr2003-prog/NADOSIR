@@ -1,0 +1,238 @@
+{{ header }}
+<div id="account-order" class="container-fluid container-xl flex-grow-1">
+	<nav aria-label="breadcrumb">
+        <ul class="breadcrumb ds-breadcrumb fsz-12">
+        {% for breadcrumb in breadcrumbs %}
+            {% if loop.last %}
+                <li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+            {% else %}
+                <li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </nav>
+    <main>
+        <div class="row">
+            <div class="col-12 ds-page-title pb-3">
+                <h1>{{ heading_title }}</h1>
+            </div>
+        </div>
+        <div class="content-top-box">{{ content_top }}</div>
+        {% if success %}
+            <script>
+                scNotify('success', '{{ success }}');
+            </script>
+        {% endif %}
+        {% if error_warning %}
+            <script>
+                scNotify('warning', '{{ error_warning }}');
+            </script>
+        {% endif %}
+        <div class="ds-account row g-3">
+            {{ column_left }}
+            {% if column_left and column_right %}
+                {% set class = 'col-xl-6' %}
+            {% elseif column_left or column_right %}
+                {% set class = 'col-xl-9' %}
+            {% else %}
+                {% set class = 'col-xl-12' %}
+            {% endif %}
+            <div id="content" class="{{ class }}">
+                <div class="content-block h-100">
+                    <div class="h3 mt-0 mb-1">{{ text_order_detail }}</div>
+                    <div class="ds-account-order">
+                        {% if invoice_no %}
+                        	<div class="ds-account-text-order">{{ text_invoice_no }}<span class="dark-text"> {{ invoice_no }}</span></div>
+                        {% endif %}
+                        <div class="ds-account-text-order">{{ text_order_id }}<span class="dark-text"> #{{ order_id }}</span></div>
+                        <div class="ds-account-text-order">{{ text_date_added }}<span class="dark-text"> {{ date_added }}</span>
+                        </div>
+                        <div class="ds-account-text-order">{{ text_payment_method }}<span class="dark-text"> {{ payment_method }}</span></div>
+                        {% if shipping_method %}
+                            <div class="ds-account-text-order">{{ text_shipping_method }}<span class="dark-text"> {{ shipping_method }}</span></div>
+                        {% endif %}
+                    </div>
+                    {% if module_account_payment_address_view %}
+                        <div class="h3 mt-3 mb-1">{{ text_payment_address }}</div>
+                        <div class="ds-account-text">
+                            <div class="ds-account-text-order">
+                                {{ payment_address }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if shipping_address %}
+                        <div class="h3 mt-3 mb-1">{{ text_shipping_address }}</div>
+                        <div class="ds-account-text mb-3">
+                            <div class="ds-account-text-order">
+                                {{ shipping_address }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if shipping_ttn %}
+                    <!-- START Shipping TTN -->
+                    <div class="d-flex flex-column flex-md-row align-items-md-center my-3 gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" width="24" height="24"/>
+                            {% endif %}
+                            <span class="dark-text">{{ text_shipping_ttn }}: <b>{{ shipping_ttn }}</b></span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 flex-grow-1 justify-content-md-end">
+                            <a class="button button-primary br-7" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" data-clipboard-text="{{ shipping_ttn }}" role="button" rel="noopener noreferrer">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="16" viewBox="0 0 19 16" fill="none">
+                                    <path d="M18.0244 6.22877C16.8124 4.199 14.0921 0.793945 9.5 0.793945C4.90786 0.793945 2.18755 4.199 0.975598 6.22877C0.341467 7.28842 0.341467 8.60571 0.975598 9.66629C2.18755 11.6961 4.90786 15.1011 9.5 15.1011C14.0921 15.1011 16.8124 11.6961 18.0244 9.66629C18.6585 8.60571 18.6585 7.28934 18.0244 6.22877ZM16.8363 8.95553C15.7748 10.7333 13.4091 13.7165 9.5 13.7165C5.59091 13.7165 3.22515 10.7342 2.16366 8.95553C1.79259 8.3334 1.79259 7.56076 2.16366 6.93863C3.22515 5.16085 5.59091 2.17761 9.5 2.17761C13.4091 2.17761 15.7748 5.15992 16.8363 6.93863C17.2083 7.56168 17.2083 8.3334 16.8363 8.95553ZM9.5 4.0246C7.33639 4.0246 5.57707 5.78484 5.57707 7.94753C5.57707 10.1102 7.33639 11.8705 9.5 11.8705C11.6636 11.8705 13.4229 10.1102 13.4229 7.94753C13.4229 5.78484 11.6636 4.0246 9.5 4.0246ZM9.5 10.4859C8.09974 10.4859 6.96163 9.34778 6.96163 7.94753C6.96163 6.54727 8.09974 5.40916 9.5 5.40916C10.9003 5.40916 12.0384 6.54727 12.0384 7.94753C12.0384 9.34778 10.9003 10.4859 9.5 10.4859Z" fill="var(--ds-white-color)"></path>
+                                </svg>
+                                <span class="button-text">{{ button_ttn_tracking }}</span>
+                            </a>
+                            <buttton type="button" class="button button-outline button-outline-primary br-7" data-clipboard-text="{{ shipping_ttn }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button">
+                                <svg width="18" height="21" viewBox="0 0 18 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.7863 6.06681L12.9083 1.18876C12.7707 1.0512 12.5853 0.974121 12.3911 0.974121H7.90325C5.95008 0.974121 4.83017 2.09412 4.83017 4.04729V4.87656H4.00081C2.04764 4.87656 0.927734 5.99655 0.927734 7.94973V17.901C0.927734 19.8532 2.04764 20.9741 4.00081 20.9741H11.0244C12.9776 20.9741 14.0975 19.8541 14.0975 17.901V17.0717H14.9269C16.88 17.0717 18 15.9517 18 13.9985V6.58388C18.0009 6.38973 17.9239 6.20339 17.7863 6.06681ZM13.1229 3.47266L15.5023 5.85217H14.8302C13.6009 5.85217 13.1229 5.37315 13.1229 4.14485V3.47266ZM12.6351 17.901C12.6351 19.059 12.1834 19.5107 11.0254 19.5107H4.00176C2.84274 19.5107 2.3921 19.059 2.3921 17.901V7.94973C2.3921 6.79168 2.84371 6.33997 4.00176 6.33997H4.83113V13.9985C4.83113 15.9507 5.95103 17.0717 7.9042 17.0717H12.636V17.901H12.6351ZM14.9278 15.6083H7.9042C6.74518 15.6083 6.29454 15.1566 6.29454 13.9985V4.04729C6.29454 2.88924 6.74615 2.43754 7.9042 2.43754H11.6604V4.14485C11.6604 6.18973 12.7862 7.31558 14.8311 7.31558H16.5384V13.9985C16.5375 15.1566 16.0859 15.6083 14.9278 15.6083Z" fill="var(--ds-white-color)"></path>
+                                </svg>
+                                <span class="button-text">{{ button_ttn_copy }}</span>
+                            </buttton>
+                        </div>
+                    </div>
+                    <script>
+                    $(document).ready(function() {
+                        $('[data-clipboard-text]').on('click', function() {
+                            var $button = $(this);
+                            var textToCopy = $button.data('clipboard-text');
+                            
+                            navigator.clipboard.writeText(textToCopy).then(function() {
+                            var originalText = $button.find('.button-text').text();
+                            $button.find('.button-text').text('{{ text_copied }}');
+                            $button.removeClass('button-outline-primary').addClass('button-success');
+                            
+                            setTimeout(function() {
+                                $button.find('.button-text').text(originalText);
+                                $button.removeClass('button-success').addClass('button-outline-primary');
+                            }, 2600);
+                            }).catch(function(err) {
+                            console.error('Failed to copy:', err);
+                            });
+                        });
+                    });
+                    </script>
+                    <!-- END Shipping TTN -->
+                    {% endif %}
+                
+                    <div class="table-responsive fsz-14 fw-300">
+                        <table class="table table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>{{ column_name }}</th>
+                                    <th>{{ column_model }}</th>
+                                    <th>{{ column_price }}</th> 
+                                    <th style="text-align: right;">{{ column_quantity }}</th>
+                                    <th style="text-align: right;">{{ column_total }}</th>
+                                    {% if products %}
+                                        <th style="width: 20px;"></th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex gap-3">
+                                                {% if product.image %}
+                                                    <a href="{{ product.href }}">
+                                                        <img src="{{ product.image }}" alt="{{ product.name }}" width="{{ product.image_width }}" height="{{ product.image_height }}" class="img-thumbnail"/>
+                                                    </a>
+                                                {% endif %}
+                                                <div>
+                                                    <a href="{{ product.href }}"><strong>{{ product.name }}</strong></a>
+                                                    {% for option in product.option %}
+                                                        <br/><small>- {{ option.name }}: {{ option.value }}</small>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="text-align: center;">{{ product.model }}</td>
+                                        <td style="text-align: right;">{{ product.price }}</td>
+                                        <td style="text-align: right;">{{ product.quantity }}</td>
+                                        <td style="text-align: right;">{{ product.total }}</td>
+                                        <td style="white-space: nowrap;">
+                                            {% if product.reorder %}
+                                                <a href="{{ product.reorder }}" data-bs-toggle="tooltip" title="{{ button_reorder }}" class="button button-outline button-outline-primary br-8 p-2">
+                                                    <svg class="me-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M13.3333 4.10256H11.4872V3.48718C11.4872 1.5639 9.92328 0 8 0C6.07672 0 4.51282 1.5639 4.51282 3.48718V4.10256H2.66666C1.64923 4.10256 0.820511 4.93046 0.820511 5.94872V12.9231C0.820511 14.9071 1.91343 16 3.89743 16H12.1026C14.0866 16 15.1795 14.9071 15.1795 12.9231V5.94872C15.1795 4.93046 14.3508 4.10256 13.3333 4.10256ZM5.74359 3.48718C5.74359 2.24246 6.75528 1.23077 8 1.23077C9.24472 1.23077 10.2564 2.24246 10.2564 3.48718V4.10256H5.74359V3.48718ZM13.9487 12.9231C13.9487 14.217 13.3965 14.7692 12.1026 14.7692H3.89743C2.60349 14.7692 2.05128 14.217 2.05128 12.9231V5.94872C2.05128 5.60903 2.32779 5.33333 2.66666 5.33333H4.51282V7.17949C4.51282 7.51918 4.78851 7.79487 5.1282 7.79487C5.4679 7.79487 5.74359 7.51918 5.74359 7.17949V5.33333H10.2564V7.17949C10.2564 7.51918 10.5321 7.79487 10.8718 7.79487C11.2115 7.79487 11.4872 7.51918 11.4872 7.17949V5.33333H13.3333C13.6722 5.33333 13.9487 5.60903 13.9487 5.94872V12.9231Z" fill="#00A8E8"></path>
+                                                    </svg>
+                                                </a>
+                                            {% endif %}
+                                           <a href="{{ product.return }}" data-bs-toggle="tooltip" title="{{ button_return }}" class="button button-danger br-7 p-2 ms-2">
+                                                <svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none">
+                                                    <path d="M19 3.25H15.441C14.54 3.25 14.502 3.136 14.255 2.396L14.053 1.789C13.746 0.869001 12.889 0.25 11.919 0.25H8.08099C7.11099 0.25 6.253 0.868001 5.947 1.789L5.745 2.396C5.498 3.137 5.46 3.25 4.559 3.25H1C0.586 3.25 0.25 3.586 0.25 4C0.25 4.414 0.586 4.75 1 4.75H2.298L3.065 16.249C3.213 18.474 4.57701 19.75 6.80701 19.75H13.194C15.423 19.75 16.787 18.474 16.936 16.249L17.703 4.75H19C19.414 4.75 19.75 4.414 19.75 4C19.75 3.586 19.414 3.25 19 3.25ZM7.37 2.263C7.473 1.956 7.75799 1.75 8.08099 1.75H11.919C12.242 1.75 12.528 1.956 12.63 2.263L12.832 2.87C12.876 3.001 12.92 3.128 12.968 3.25H7.03C7.078 3.127 7.12301 3 7.16701 2.87L7.37 2.263ZM15.438 16.149C15.343 17.582 14.629 18.25 13.193 18.25H6.806C5.37 18.25 4.657 17.583 4.561 16.149L3.801 4.75H4.558C4.683 4.75 4.787 4.737 4.899 4.729C4.933 4.734 4.964 4.75 4.999 4.75H14.999C15.035 4.75 15.065 4.734 15.099 4.729C15.211 4.737 15.315 4.75 15.44 4.75H16.197L15.438 16.149ZM12.75 9V14C12.75 14.414 12.414 14.75 12 14.75C11.586 14.75 11.25 14.414 11.25 14V9C11.25 8.586 11.586 8.25 12 8.25C12.414 8.25 12.75 8.586 12.75 9ZM8.75 9V14C8.75 14.414 8.414 14.75 8 14.75C7.586 14.75 7.25 14.414 7.25 14V9C7.25 8.586 7.586 8.25 8 8.25C8.414 8.25 8.75 8.586 8.75 9Z" fill="#FFFFFF"/>
+                                                </svg>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% for voucher in vouchers %}
+                                    <tr>
+                                        <td>{{ voucher.description }}</td>
+                                        <td></td>
+                                        <td>1</td>
+                                        <td>{{ voucher.amount }}</td>
+                                        <td>{{ voucher.amount }}</td>
+                                        {% if products %}
+                                            <td></td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                {% for total in totals %}
+                                    <tr>
+                                        {% if products %}
+                                            <td></td>
+                                        {% endif %}
+                                        <td colspan="3"></td>
+                                        <td class="text-end">{{ total.title }}</td>
+                                        <td class="dark-text fw-500 text-end">{{ total.text }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if comment %}
+                        <div class="h3 mt-3 mb-1">{{ text_comment }}</div>
+                        <div class="ds-account-text">{{ comment }}</div>
+                    {% endif %}
+                    {% if histories %}
+                        <div class="h3 mt-3 mb-1">{{ text_history }}</div>
+                        <div class="table-responsive fsz-14 fw-300">
+                            <table class="table table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>{{ column_date_added }}</th>
+                                        <th>{{ column_status }}</th>
+                                        <th>{{ column_comment }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if histories %}
+                                        {% for history in histories %}
+                                            <tr>
+                                                <td>{{ history.date_added }}</td>
+                                                <td>{{ history.status }}</td>
+                                                <td>{{ history.comment }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="3" class="text-center">{{ text_no_results }}</td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                    <a href="{{ continue }}" class="button button-primary br-7 ds-account-login-button mt-3">{{ button_continue }}</a>
+                </div>
+            </div>
+            {{ column_right }}
+        </div>
+        {{ content_bottom }}
+    </main>
+</div>
+{{ footer }}

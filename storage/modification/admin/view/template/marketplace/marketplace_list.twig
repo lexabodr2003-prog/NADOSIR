@@ -47,8 +47,12 @@
         <div class="row">
           <div class="col-sm-9 col-xs-7">
             <div class="btn-group">{% for license in licenses %}
-              {% if license.value == filter_license %}<a href="{{ license.href }}" class="btn btn-default active">{{ license.text }}</a>{% else %}<a href="{{ license.href }}" class="btn btn-default">{{ license.text }}</a>{% endif %}
-              {% endfor %}</div>
+              
+			{% if license.value == filter_license %}<a href="{{ license.href }}" class="btn btn-default active">{{ license.text }}</a>{% else %}<a href="{{ license.href }}" class="btn btn-default">{{ license.text }}</a>{% endif %}
+			{% endfor %}
+			<a href="https://shop.opencart-russia.ru/" target="_blank" class="btn btn-default">Расширения c opencart-russia.ru</a>
+			</div>
+			
           </div>
           <div class="col-sm-3 col-xs-5">
             <div class="input-group pull-right">

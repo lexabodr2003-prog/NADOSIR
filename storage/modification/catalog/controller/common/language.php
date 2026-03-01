@@ -10,6 +10,7 @@ class ControllerCommonLanguage extends Controller {
 		$this->load->model('localisation/language');
 
 		$data['languages'] = array();
+
 			$base = $this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url');
 			
 
@@ -19,6 +20,7 @@ class ControllerCommonLanguage extends Controller {
 			if ($result['status']) {
 				$data['languages'][] = array(
 					'name' => $result['name'],
+
 			'oct_template_code' => substr(str_replace("uk", "ua", $result['code']), 0, 2),
 			'store_url' => $base,
 			

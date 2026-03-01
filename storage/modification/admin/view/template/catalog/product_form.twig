@@ -27,6 +27,7 @@
           <ul class="nav nav-tabs">
             <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
             <li><a href="#tab-data" data-toggle="tab">{{ tab_data }}</a></li>
+
 			{% if oct_product_tabs_status is defined and oct_product_tabs_status %}
 				<li><a href="#tab-extra_tabs" data-toggle="tab">{{ tab_extra_tabs }}</a></li>
 	        {% endif %}
@@ -34,7 +35,7 @@
             <li><a href="#tab-links" data-toggle="tab">{{ tab_links }}</a></li>
             <li><a href="#tab-attribute" data-toggle="tab">{{ tab_attribute }}</a></li>
             <li><a href="#tab-option" data-toggle="tab">{{ tab_option }}</a></li>
-            <li><a href="#tab-recurring" data-toggle="tab">{{ tab_recurring }}</a></li>
+             
             <li><a href="#tab-discount" data-toggle="tab">{{ tab_discount }}</a></li>
             <li><a href="#tab-special" data-toggle="tab">{{ tab_special }}</a></li>
             <li><a href="#tab-image" data-toggle="tab">{{ tab_image }}</a></li>
@@ -101,8 +102,7 @@
             <div class="tab-pane" id="tab-data">
               
 			<div class="form-group {% if oct_deals_seo_title_data.product.title_empty is not defined and oct_deals_seo_title_data.product.title_empty %}required{% endif %}">
-			
-                
+
 			{% if product_oct_stickers is not empty %}
 			<div class="form-group">
 				<label class="col-sm-2 control-label">{{ enter_oct_product_stickers }}</label>
@@ -119,15 +119,28 @@
 				</div>
 			</div>
 			{% endif %}
-			<label class="col-sm-2 control-label" for="input-model">{{ entry_model }}</label>
-                <div class="col-sm-10">
+			
+			
+                <label class="col-sm-2 control-label" for="input-model">{{ entry_model }}</label>
+                  
+                <div class="col-sm-9">
                   <input type="text" name="model" value="{{ model }}" placeholder="{{ entry_model }}" id="input-model" class="form-control"/>
+		
                   {% if error_model %}
                     <div class="text-danger">{{ error_model }}</div>
                   {% endif %}</div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-sku"><span data-toggle="tooltip" title="{{ help_sku }}">{{ entry_sku }}</span></label>
+                
+
+ 				<div class="col-sm-1 text-right">
+					<a type="button"  title="Показать/Скрыть - Дополнительные поля " class="btn btn-info " data-toggle="collapse" data-parent="#accordion" href="#pcollapse"><i class="fa fa-arrows-v"></i></a>
+				</div>
+			 </div>
+			  
+              <div class="collapse" id="pcollapse">
+			  <div class="form-group">
+		
+			   <label class="col-sm-2 control-label" for="input-sku"><span data-toggle="tooltip" title="{{ help_sku }}">{{ entry_sku }}</span></label>
+		
                 <div class="col-sm-10">
                   <input type="text" name="sku" value="{{ sku }}" placeholder="{{ entry_sku }}" id="input-sku" class="form-control"/>
                 </div>
@@ -162,6 +175,9 @@
                   <input type="text" name="mpn" value="{{ mpn }}" placeholder="{{ entry_mpn }}" id="input-mpn" class="form-control"/>
                 </div>
               </div>
+
+			  </div>
+		
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-location">{{ entry_location }}</label>
                 <div class="col-sm-10">
@@ -502,7 +518,7 @@
                 </table>
               </div>
             </div>
-            
+
 			{% if oct_product_tabs_status is defined and oct_product_tabs_status %}
 	        <div class="tab-pane" id="tab-extra_tabs">
 	          <div class="col-sm-2">
@@ -683,7 +699,8 @@
 
 	          </script>
 	        {% endif %}
-			<div class="tab-pane" id="tab-option">
+			
+            <div class="tab-pane" id="tab-option">
               <div class="row">
                 <div class="col-sm-2">
                   <ul class="nav nav-pills nav-stacked" id="option">
@@ -1200,6 +1217,7 @@
                   <thead>
                     <tr>
                       <td class="text-left">{{ entry_additional_image }}</td>
+
 					{% if oct_product_main_image_option_status is defined and oct_product_main_image_option_status %}
                       <td class="text-left">{{ entry_option_value }}</td>
 					{% endif %}
@@ -1214,8 +1232,7 @@
                     {% for product_image in product_images %}
                       <tr id="image-row{{ image_row }}">
                         <td class="text-left"><a href="" id="thumb-image{{ image_row }}" data-toggle="image" class="img-thumbnail"><img src="{{ product_image.thumb }}" alt="" title="" data-placeholder="{{ placeholder }}"/></a> <input type="hidden" name="product_image[{{ image_row }}][image]" value="{{ product_image.image }}" id="input-image{{ image_row }}"/></td>
-                        <td class="text-right"><input type="text" name="product_image[{{ image_row }}][sort_order]" value="{{ product_image.sort_order }}" placeholder="{{ entry_sort_order }}" class="form-control"/></td>
-                        
+
 	        {% if oct_product_main_image_option_status is defined and oct_product_main_image_option_status %}
 	          <td class="text-right">
             {% for product_option in product_options %}
@@ -1239,7 +1256,9 @@
 	            {% endfor %}
 	          </td>
 	        {% endif %}
-			<td class="text-left"><button type="button" onclick="$('#image-row{{ image_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+			
+                        <td class="text-right"><input type="text" name="product_image[{{ image_row }}][sort_order]" value="{{ product_image.sort_order }}" placeholder="{{ entry_sort_order }}" class="form-control"/></td>
+                        <td class="text-left"><button type="button" onclick="$('#image-row{{ image_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
                       </tr>
                       {% set image_row = image_row + 1 %}
                     {% endfor %}
@@ -1248,9 +1267,10 @@
                   <tfoot>
                     <tr>
                       <td colspan="2"></td>
-                      
+
 			<td></td>
-			<td class="text-left"><button type="button" onclick="addImage();" data-toggle="tooltip" title="{{ button_image_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+			
+                      <td class="text-left"><button type="button" onclick="addImage();" data-toggle="tooltip" title="{{ button_image_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
                     </tr>
                   </tfoot>
                 </table>
@@ -1804,7 +1824,7 @@
   function addImage() {
 	  html = '<tr id="image-row' + image_row + '">';
 	  html += '  <td class="text-left"><a href="" id="thumb-image' + image_row + '"data-toggle="image" class="img-thumbnail"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a><input type="hidden" name="product_image[' + image_row + '][image]" value="" id="input-image' + image_row + '" /></td>';
-	  
+
 				html += '{% if oct_product_main_image_option_status is defined and oct_product_main_image_option_status %}';
 				html += '  <td class="text-right">';
 				html += '  {% for product_option in product_options %}';
@@ -1822,7 +1842,8 @@
 				html += '  {% endfor %}';
 				html += '  </td>';
 				html += '{% endif %}';
-			html += '  <td class="text-right"><input type="text" name="product_image[' + image_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
+			
+	  html += '  <td class="text-right"><input type="text" name="product_image[' + image_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
 	  html += '  <td class="text-left"><button type="button" onclick="$(\'#image-row' + image_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
 	  html += '</tr>';
 

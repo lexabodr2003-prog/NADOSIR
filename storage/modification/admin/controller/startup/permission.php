@@ -17,21 +17,23 @@ class ControllerStartupPermission extends Controller {
 			// If a 3rd part is found we need to check if its under one of the extension folders.
 			$extension = array(
 				'extension/advertise',
-				'extension/dashboard','extension/csvprice_pro',
+				'extension/dashboard',
+'extension/csvprice_pro',
 				'extension/analytics',
 				'extension/captcha',
 				'extension/currency',
 				'extension/extension',
 				'extension/feed',
 				'extension/fraud',
-				
+
 			'octemplates/stickers',
 			'octemplates/blog',
 			'octemplates/design',
 			'octemplates/faq',
 			'octemplates/module',
 			'octemplates/menu',
-			'extension/module',
+			
+				'extension/module',
 				'extension/payment',
 				'extension/shipping',
 				'extension/theme',

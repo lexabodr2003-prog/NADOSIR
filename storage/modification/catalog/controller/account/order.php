@@ -230,7 +230,7 @@ class ControllerAccountOrder extends Controller {
 				'country'   => $order_info['shipping_country']
 			);
 
-			
+
                 $ttns = $this->model_account_order->getOrderTTNNumber((int)$this->request->get['order_id']);
 
                 $data['text_shipping_ttn'] = '';
@@ -264,6 +264,7 @@ class ControllerAccountOrder extends Controller {
                         break;
                     }
                 }
+			
 			$data['shipping_address'] = str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
 
 			$data['shipping_method'] = $order_info['shipping_method'];
@@ -308,12 +309,21 @@ class ControllerAccountOrder extends Controller {
 					$reorder = '';
 				}
 
-				
+
 				$this->load->model('tool/image');
-			$data['products'][] = array(
+			
+				$data['products'][] = array(
 					'name'     => $product['name'],
 					'model'    => $product['model'],
 					'option'   => $option_data,
+
+				'image'    => isset($product_info['image']) && is_file(DIR_IMAGE . $product_info['image'])
+					? $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_oct_deals_image_additional_width') ?? 80, $this->config->get('theme_oct_deals_image_additional_height') ?? 80)
+					: $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_oct_deals_image_additional_width') ?? 80, $this->config->get('theme_oct_deals_image_additional_height') ?? 80),
+				'href'     => $this->url->link('product/product', 'product_id=' . $product['product_id']),
+                'image_width' => $this->config->get('theme_oct_deals_image_additional_width') ?? 80,
+                'image_height' => $this->config->get('theme_oct_deals_image_additional_height') ?? 80,
+			
 					'quantity' => $product['quantity'],
 					'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),

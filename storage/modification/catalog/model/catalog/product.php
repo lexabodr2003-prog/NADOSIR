@@ -31,6 +31,7 @@ class ModelCatalogProduct extends Model {
 				'manufacturer'     => $query->row['manufacturer'],
 				'price'            => ($query->row['discount'] ? $query->row['discount'] : $query->row['price']),
 				'special'          => $query->row['special'],
+
 			'oct_stickers'		=> isset($query->row['oct_stickers']) ? unserialize($query->row['oct_stickers']) : false,
 			'you_save'          => ($query->row['price'] != 0 && $query->row['special']) ? '-' . ($query->row['discount'] ? number_format(((float)$query->row['discount'] - (float)$query->row['special']) / (float)$query->row['discount'] * 100, 0) : number_format(((float)$query->row['price'] - (float)$query->row['special']) / (float)$query->row['price'] * 100, 0)) . '%' : false,
 			'you_save_price'	=> $query->row['special'] ? ($query->row['discount'] ? ((float)$query->row['discount'] - (float)$query->row['special']) : ((float)$query->row['price'] - (float)$query->row['special'])) : false,
@@ -60,7 +61,7 @@ class ModelCatalogProduct extends Model {
 		}
 	}
 
-	
+
 			public function getOCTProductPrice($product_id, $quantity) {
 				$query = $this->db->query("
 					SELECT
@@ -114,7 +115,9 @@ class ModelCatalogProduct extends Model {
 
 				return $query->row;
 			}
-			public function getProducts($data = array()) {
+			
+	public function getProducts($data = array()) {
+
     // OCFilter start
     if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
       $data['ocf'] = $this->ocfilter->api->getParamsString();
@@ -213,13 +216,14 @@ class ModelCatalogProduct extends Model {
 			$sql .= ")";
 		}
 
-		
+
     // OCFilter start (reset caching by sql string key)
     if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
       $sql .= " /* " . crc32($this->ocfilter->api->getParamsString()) . " */ ";
     }
     // OCFilter end
-      if (!empty($data['filter_manufacturer_id'])) {
+      
+		if (!empty($data['filter_manufacturer_id'])) {
 			$sql .= " AND p.manufacturer_id = '" . (int)$data['filter_manufacturer_id'] . "'";
 		}
 
@@ -235,7 +239,7 @@ class ModelCatalogProduct extends Model {
 			'p.date_added'
 		);
 
-		
+
 			$sort_data = [
 				'p.sort_order',
 				'pd.name',
@@ -247,7 +251,8 @@ class ModelCatalogProduct extends Model {
 				'p.date_added',
 				'rating',
 			];
-			if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
 			if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
 				
 			$sql .= " ORDER BY ";
@@ -311,13 +316,14 @@ class ModelCatalogProduct extends Model {
 
 		$product_data = array();
 
-		
+
     // OCFilter start
     if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
       $this->ocfilter->api->setProductSQL(__FUNCTION__, $sql);
     }
     // OCFilter end
-      $query = $this->db->query($sql);
+      
+		$query = $this->db->query($sql);
 
 		foreach ($query->rows as $result) {
 			$product_data[$result['product_id']] = $this->getProduct($result['product_id']);
@@ -337,7 +343,7 @@ class ModelCatalogProduct extends Model {
 			'p.sort_order'
 		);
 
-		
+
 			$sort_data = [
 				'p.sort_order',
 				'pd.name',
@@ -349,7 +355,8 @@ class ModelCatalogProduct extends Model {
 				'p.date_added',
 				'rating',
 			];
-			if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
 			if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
 				
 			$sql .= " ORDER BY ";
@@ -403,13 +410,14 @@ class ModelCatalogProduct extends Model {
 
 		$product_data = array();
 
-		
+
     // OCFilter start
     if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
       $this->ocfilter->api->setProductSQL(__FUNCTION__, $sql);
     }
     // OCFilter end
-      $query = $this->db->query($sql);
+      
+		$query = $this->db->query($sql);
 
 		foreach ($query->rows as $result) {
 			$product_data[$result['product_id']] = $this->getProduct($result['product_id']);
@@ -470,7 +478,7 @@ class ModelCatalogProduct extends Model {
 		return $product_data;
 	}
 
-	
+
 	        public function getOctProductAttributes($product_id, $limit = 5) {
 		        $product_attribute_data = [];
 
@@ -486,7 +494,8 @@ class ModelCatalogProduct extends Model {
 
 				return $product_attribute_data;
 			}
-			public function getProductAttributes($product_id) {
+			
+	public function getProductAttributes($product_id) {
 		$product_attribute_group_data = array();
 
 		$product_attribute_group_query = $this->db->query("SELECT ag.attribute_group_id, agd.name FROM " . DB_PREFIX . "product_attribute pa LEFT JOIN " . DB_PREFIX . "attribute a ON (pa.attribute_id = a.attribute_id) LEFT JOIN " . DB_PREFIX . "attribute_group ag ON (a.attribute_group_id = ag.attribute_group_id) LEFT JOIN " . DB_PREFIX . "attribute_group_description agd ON (ag.attribute_group_id = agd.attribute_group_id) WHERE pa.product_id = '" . (int)$product_id . "' AND agd.language_id = '" . (int)$this->config->get('config_language_id') . "' GROUP BY ag.attribute_group_id ORDER BY ag.sort_order, agd.name");
@@ -559,7 +568,7 @@ class ModelCatalogProduct extends Model {
 		return $query->rows;
 	}
 
-	
+
 			public function getProductImagesByOptionValueId($product_id, $options) {
 				$sql = "SELECT * FROM " . DB_PREFIX . "product_image pi LEFT JOIN " . DB_PREFIX . "oct_product_image_by_option pito ON (pi.product_image_id = pito.product_image_id) WHERE pi.product_id = '" . (int)$product_id . "'";
 				
@@ -589,7 +598,8 @@ class ModelCatalogProduct extends Model {
 					return $query->row['option_value_id'];
 				}
 			}
-			public function getProductImages($product_id) {
+			
+	public function getProductImages($product_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "' ORDER BY sort_order ASC");
 
 		return $query->rows;
@@ -716,23 +726,25 @@ class ModelCatalogProduct extends Model {
 			$sql .= ")";
 		}
 
-		
+
     // OCFilter start (reset caching by sql string key)
     if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
       $sql .= " /* " . crc32($this->ocfilter->api->getParamsString()) . " */ ";
     }
     // OCFilter end
-      if (!empty($data['filter_manufacturer_id'])) {
+      
+		if (!empty($data['filter_manufacturer_id'])) {
 			$sql .= " AND p.manufacturer_id = '" . (int)$data['filter_manufacturer_id'] . "'";
 		}
 
-		
+
     // OCFilter start
     if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
       $this->ocfilter->api->setProductSQL(__FUNCTION__, $sql);
     }
     // OCFilter end
-      $query = $this->db->query($sql);
+      
+		$query = $this->db->query($sql);
 
 		return $query->row['total'];
 	}
@@ -750,6 +762,7 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function getTotalProductSpecials() {
+
     // OCFilter start
     if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
       return $this->ocfilter->api->getTotalProductSpecials();

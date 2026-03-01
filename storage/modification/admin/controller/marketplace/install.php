@@ -160,11 +160,12 @@ class ControllerMarketplaceInstall extends Controller {
 						}
 					}
 					
-					
+
       
       		$safe = true;
       
-      		if ($safe) {
+      		
+					if ($safe) {
 						// Check if the copy location exists or not
 						if (substr($destination, 0, 5) == 'admin') {
 							$destination = DIR_APPLICATION . substr($destination, 6);
@@ -212,7 +213,7 @@ class ControllerMarketplaceInstall extends Controller {
 							$path = DIR_SYSTEM . substr($destination, 7);
 						}
 	
-								
+		
 		
 			if ($path == '') {
 				$application_path = explode('/', DIR_APPLICATION);
@@ -224,7 +225,8 @@ class ControllerMarketplaceInstall extends Controller {
 				$path = $application_path.$destination;
 			}
 
-			if (is_dir($file) && !is_dir($path)) {
+			
+						if (is_dir($file) && !is_dir($path)) {
 							if (mkdir($path, 0777)) {
 								$this->model_setting_extension->addExtensionPath($extension_install_id, $destination);
 							}
@@ -359,12 +361,101 @@ class ControllerMarketplaceInstall extends Controller {
 			$json['text'] = $this->language->get('text_remove');
 
 			$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/remove', 'user_token=' . $this->session->data['user_token'], true));
+
+		  		$json['text'] = $this->language->get('text_sql');
+		  		$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/sql', 'user_token=' . $this->session->data['user_token'] . '&extension_install_id=' . $extension_install_id, true));
+            
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
 
+
+				public function php() {
+					$this->load->language('marketplace/install');
+					$json = array();
+					if (isset($this->request->get['extension_install_id'])) {
+						$extension_install_id = $this->request->get['extension_install_id'];
+					} else {
+						$extension_install_id = 0;
+					}
+					if (!$this->user->hasPermission('modify', 'marketplace/install')) {
+						$json['error'] = $this->language->get('error_permission');
+					}
+					if (!isset($this->session->data['install'])) {
+						$json['error'] = $this->language->get('error_directory');
+					} elseif (!is_dir(DIR_UPLOAD . 'tmp-' . $this->session->data['install'] . '/')) {
+						$json['error'] = $this->language->get('error_directory');
+					}
+					if (!$json) {
+						$file = DIR_UPLOAD . 'tmp-' . $this->session->data['install'] . '/install.php';
+						if (is_file($file)) {
+							try {
+								include($file);
+							} catch(Exception $exception) {
+								$json['error'] = sprintf($this->language->get('error_exception'), $exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine());
+							}
+						}
+					}
+					if (!$json) {
+						$json['text'] = $this->language->get('text_remove');
+						$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/remove', 'user_token=' . $this->session->data['user_token'], true));
+					}
+					$this->response->addHeader('Content-Type: application/json');
+					$this->response->setOutput(json_encode($json));
+				}
+
+				public function sql() {
+					$this->load->language('marketplace/install');
+					$json = array();
+					if (isset($this->request->get['extension_install_id'])) {
+						$extension_install_id = $this->request->get['extension_install_id'];
+					} else {
+						$extension_install_id = 0;
+					}
+					if (!$this->user->hasPermission('modify', 'marketplace/install')) {
+						$json['error'] = $this->language->get('error_permission');
+					}
+					if (!isset($this->session->data['install'])) {
+						$json['error'] = $this->language->get('error_directory');
+					} elseif (!is_dir(DIR_UPLOAD . 'tmp-' . $this->session->data['install'] . '/')) {
+						$json['error'] = $this->language->get('error_directory');
+					}
+
+					if (!$json) {
+						$file = DIR_UPLOAD . 'tmp-' . $this->session->data['install'] . '/install.sql';
+						if (is_file($file)) {
+							$lines = file($file);
+							if ($lines) {
+								try {
+									$sql = '';
+									foreach ($lines as $line) {
+										if ($line && (substr($line, 0, 2) != '--') && (substr($line, 0, 1) != '#')) {
+											$sql .= $line;
+											if (preg_match('/;\s*$/', $line)) {
+												$sql = str_replace(" `oc_", " `" . DB_PREFIX, $sql);
+												$this->db->query($sql);
+												$sql = '';
+											}
+										}
+									}
+								} catch(Exception $exception) {
+									$json['error'] = sprintf($this->language->get('error_exception'), $exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine());
+								}
+							}					
+						}
+					}
+
+					if (!$json) {
+						$json['text'] = $this->language->get('text_php');
+						$json['next'] = str_replace('&amp;', '&', $this->url->link('marketplace/install/php', 'user_token=' . $this->session->data['user_token'] . '&extension_install_id=' . $extension_install_id, true));
+					}
+
+					$this->response->addHeader('Content-Type: application/json');
+					$this->response->setOutput(json_encode($json));
+				}
+            
 	public function remove() {
 		$this->load->language('marketplace/install');
 

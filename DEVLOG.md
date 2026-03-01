@@ -160,3 +160,42 @@ git push origin main
 | .htaccess | SEO URL + Apache настройки |
 | config.php | НЕ В GIT - содержит пароли БД |
 | admin/config.php | НЕ В GIT - admin конфиг |
+
+---
+
+## Session 2: 2026-03-01 18:28 - Fix product cards & filter
+
+### Problems found
+1. HTTP 500: Cannot redeclare Document:: in modification/document.php
+2. Cause: OCT methods added manually in session 1 to system/library/document.php,
+   then OCMod regenerated and added them again to modification/document.php
+
+### Fixes applied
+
+#### 1. Cleaned system/library/document.php
+- Removed manually added OCT methods (now only OCMod adds them)
+
+#### 2. Fixed storage/modification/system/library/document.php
+- Removed duplicate block at lines 111-173 (duplicate OCT properties+methods)
+- File reduced from 317 to 254 lines
+
+#### 3. Restored admin password
+- Restored original password hash (Levit.Dm@1989!)
+
+#### 4. Uploaded ocfilter-mobile-fix.js v4.0
+- Multiple init attempts with delays: 0, 100, 300, 500, 800, 1200, 2000, 3000, 5000ms
+- pageshow/bfcache handling (back button)
+- Watchdog for stuck loading state (12s reset)
+- Removed defer from script tag in footer.twig
+
+### Test results
+- HTTP 200 on main page
+- Product cards use correct OCT Deals template (ds-module-item product-layout)
+- OCFilter present on catalog pages (ocf-container ocf-category-1)
+- SEO URLs work: /skvazhinnye-nasosy-ecv -> 200
+
+### Remaining tasks
+- [ ] Banner size issues
+- [ ] Email order notifications
+- [ ] Payment flow testing
+- [ ] Final iOS/Yandex Browser testing

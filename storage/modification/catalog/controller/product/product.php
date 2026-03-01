@@ -2,7 +2,7 @@
 class ControllerProductProduct extends Controller {
 	private $error = array();
 
-	
+
 			public function getPImages() {
             	$json = array();
 				$this->load->model('catalog/product');
@@ -80,7 +80,20 @@ class ControllerProductProduct extends Controller {
 	            $this->response->addHeader('Content-Type: application/json');
 	            $this->response->setOutput(json_encode($json));
 			}
-			public function index() {
+			
+	public function index() {
+
+			if ($this->registry->has('oct_mobiledetect')) {
+		        if ($this->oct_mobiledetect->isMobile() && !$this->oct_mobiledetect->isTablet()) {
+		            $data['oct_isMobile'] = $this->oct_mobiledetect->isMobile();
+		        }
+
+		        if ($this->oct_mobiledetect->isTablet()) {
+		            $data['oct_isTablet'] = $this->oct_mobiledetect->isTablet();
+		        }
+		    }
+			
+
 			$data['oct_product_main_image_option_status'] = $oct_product_main_image_option_status = $this->config->get('oct_product_main_image_option_status');
 	        
 			$data['oct_allow_autoselect_option'] = false;
@@ -104,6 +117,7 @@ class ControllerProductProduct extends Controller {
 
 	        }
 			
+
 			$data['oct_deals_data'] = $oct_deals_data = $this->config->get('theme_oct_deals_data');
 			$this->load->model('tool/image');
 			
@@ -263,6 +277,7 @@ class ControllerProductProduct extends Controller {
 		$product_info = $this->model_catalog_product->getProduct($product_id);
 
 		//check product page open from cateory page
+
 			if (!isset($oct_deals_data['category_subcat_products'])) {
 			
 		if (isset($this->request->get['path'])) {
@@ -273,9 +288,10 @@ class ControllerProductProduct extends Controller {
 			}
 		}
 
-		
+
 			}
-			//check product page open from manufacturer page
+			
+		//check product page open from manufacturer page
 		if (isset($this->request->get['manufacturer_id']) && !empty($product_info)) {
 			if($product_info['manufacturer_id'] !=  $this->request->get['manufacturer_id']) {
 				$product_info = array();
@@ -283,6 +299,7 @@ class ControllerProductProduct extends Controller {
 		}
 
 		if ($product_info) {
+
 			$data['oct_product_stickers'] = [];
 			$data['you_save'] = $product_info['you_save'];
 			$data['you_save_price'] = $this->currency->format($this->tax->calculate($product_info['you_save_price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
@@ -385,7 +402,7 @@ class ControllerProductProduct extends Controller {
 
 			$data['heading_title'] = $product_info['name'];
 
-			
+
 			if ($this->config->get('theme_oct_deals_seo_title_status')) {
 				$oct_seo_title_data = $this->config->get('theme_oct_deals_seo_title_data');
 
@@ -452,6 +469,7 @@ class ControllerProductProduct extends Controller {
 					}
 				}
 			}
+			
 			$data['text_minimum'] = sprintf($this->language->get('text_minimum'), $product_info['minimum']);
 			$data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
 
@@ -461,13 +479,15 @@ class ControllerProductProduct extends Controller {
 
 			$data['product_id'] = (int)$this->request->get['product_id'];
 			$data['manufacturer'] = $product_info['manufacturer'];
-		
+
 			$data['manufacturer_id'] = (int)$product_info['manufacturer_id'];
+		
 			$data['manufacturers'] = $this->url->link('product/manufacturer/info', 'manufacturer_id=' . $product_info['manufacturer_id']);
 			$data['model'] = $product_info['model'];
 			$data['reward'] = $product_info['reward'];
 			$data['points'] = $product_info['points'];
 			$data['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
+
 			if (isset($oct_deals_data['preload_images']) && $oct_deals_data['preload_images'] && $product_info['image'] && is_file(DIR_IMAGE . $product_info['image'])) {
 				$this->document->setOCTPreload($this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height')));
 			}
@@ -508,14 +528,16 @@ class ControllerProductProduct extends Controller {
 			
 			}
 
-			
+
 			$data['popup_width'] = $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width');
 			$data['popup_height'] = $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height');
 			$data['thumb_width'] = $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width');
 			$data['thumb_height'] = $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height');
+			
 			$data['images'] = array();
 
 			$results = $this->model_catalog_product->getProductImages($this->request->get['product_id']);
+
 			if ($data['popup'] && $data['thumb'] && !empty($results)) {
 				$data['images'][0] = array(
 					'popup' => $data['thumb'],
@@ -559,7 +581,7 @@ class ControllerProductProduct extends Controller {
 				$data['tax'] = false;
 			}
 
-			
+
 			if ($product_info['quantity'] <= 0) {
 				$data['is_stock'] = $product_info['stock_status'];
 			} else {
@@ -573,6 +595,7 @@ class ControllerProductProduct extends Controller {
 			} elseif ($product_info['quantity'] <= 0 && $this->config->get('config_stock_checkout')) {
 				$data['can_buy'] = true;
 			}
+			
 			$discounts = $this->model_catalog_product->getProductDiscounts($this->request->get['product_id']);
 
 			$data['discounts'] = array();
@@ -626,6 +649,7 @@ class ControllerProductProduct extends Controller {
 			}
 
 			$data['review_status'] = $this->config->get('config_review_status');
+
 			$data['oct_reviews_list'] = $data['review_status'] ? $this->review() : '';
 			
 
@@ -653,7 +677,7 @@ class ControllerProductProduct extends Controller {
 
 			$data['share'] = $this->url->link('product/product', 'product_id=' . (int)$this->request->get['product_id']);
 
-			
+
 
 			$this->config->set('footer_swiper', true);
 
@@ -709,11 +733,16 @@ class ControllerProductProduct extends Controller {
 				'raiting' => isset($oct_review['rating'][1]) ? round(count($oct_review['rating'][1])/$data['total_reviews']*100) : 0,
 				'sum' => isset($oct_review['rating'][1]) ? (int)count($oct_review['rating'][1]) : 0
 			];
+			
 			$data['attribute_groups'] = $this->model_catalog_product->getProductAttributes($this->request->get['product_id']);
 
 			$data['products'] = array();
 
+			$data['oct_popup_view_status'] = $this->config->get('oct_popup_view_status');
+			
+
 			$results = $this->model_catalog_product->getProductRelated($this->request->get['product_id']);
+
 			$oct_product_stickers = [];
 
 			if ($this->config->get('oct_stickers_status')) {
@@ -762,7 +791,7 @@ class ControllerProductProduct extends Controller {
 					$rating = false;
 				}
 
-				
+
 			if ($result['quantity'] <= 0) {
 				$stock = $result['stock_status'];
 			} else {
@@ -778,13 +807,30 @@ class ControllerProductProduct extends Controller {
 			}
 
 			$oct_grayscale = ($this->config->get('theme_oct_deals_no_quantity_grayscale') && !$can_buy) ? true : false;
-			$data['products'][] = array(
+			
+
+			if (isset($oct_stickers) && $oct_stickers) {
+				$oct_stickers_data = $this->model_octemplates_stickers_oct_stickers->getOCTStickers($result);
+
+				$oct_product_stickers = [];
+
+				if (isset($oct_stickers_data) && $oct_stickers_data) {
+					$oct_product_stickers = $oct_stickers_data['stickers'];
+				}
+			}
+			
+				$data['products'][] = array(
 					'product_id'  => $result['product_id'],
+
+			'oct_stickers'  => $oct_product_stickers,
+			'you_save'	  	=> $result['you_save'],
+			
 					'thumb'       => $image,
 					'name'        => $result['name'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
 					'special'     => $special,
+
 			'stock'     => $stock,
 			'can_buy'   => $can_buy,
 			'oct_grayscale'  => $oct_grayscale,
@@ -792,6 +838,7 @@ class ControllerProductProduct extends Controller {
 					'tax'         => $tax,
 					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 					'rating'      => $rating,
+
 			'reviews'	  => $result['reviews'],
 			'oct_model'	  => $this->config->get('theme_oct_deals_data_model') ? $result['model'] : '',
 			'quantity'	  => $result['quantity'] <= 0 ? 0 : $result['quantity'],
@@ -802,8 +849,9 @@ class ControllerProductProduct extends Controller {
 				);
 			}
 
-			
+
             $data['products'] = $this->load->controller('octemplates/module/oct_products_modules', $data);
+			
 			$data['tags'] = array();
 
 			if ($product_info['tag']) {
@@ -819,7 +867,7 @@ class ControllerProductProduct extends Controller {
 
 			$data['recurrings'] = $this->model_catalog_product->getProfiles($this->request->get['product_id']);
 
-			
+
             if (isset($oct_deals_data['open_graph']) && $oct_deals_data['open_graph']) {
                 $site_link = $this->request->server['HTTPS'] ? HTTPS_SERVER : HTTP_SERVER;
 
@@ -861,15 +909,17 @@ class ControllerProductProduct extends Controller {
                 $this->document->setOCTOpenGraph('og:image:alt', htmlspecialchars(strip_tags(str_replace("\r", " ", str_replace("\n", " ", str_replace("\\", "/", str_replace("\"", "", $data['heading_title'])))))));
                 $this->document->setOCTOpenGraph('og:type', 'product');
             }
+			
 			$this->model_catalog_product->updateViewed($this->request->get['product_id']);
 			
-			
+
       // OCFilter Start
       if ($this->registry->get('ocfilter') && $this->ocfilter->startup()) {
         $this->ocfilter->api->setProductItemControllerData($data);
       }
       // OCFilter End
-      $data['column_left'] = $this->load->controller('common/column_left');
+      
+			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
 			$data['content_bottom'] = $this->load->controller('common/content_bottom');
@@ -939,13 +989,14 @@ class ControllerProductProduct extends Controller {
 
 			$this->response->addHeader($this->request->server['SERVER_PROTOCOL'] . ' 404 Not Found');
 
-			
+
       // OCFilter Start
       if ($this->registry->get('ocfilter') && $this->ocfilter->startup()) {
         $this->ocfilter->api->setProductItemControllerData($data);
       }
       // OCFilter End
-      $data['column_left'] = $this->load->controller('common/column_left');
+      
+			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
 			$data['content_bottom'] = $this->load->controller('common/content_bottom');
@@ -957,6 +1008,7 @@ class ControllerProductProduct extends Controller {
 	}
 
 	public function review() {
+
 			if (isset($this->request->post['product_id']) && !empty($this->request->post['product_id'])) {
 				$this->request->get['product_id'] = $this->request->post['product_id'];
 			}
@@ -972,6 +1024,7 @@ class ControllerProductProduct extends Controller {
 		}
 
 		$data['reviews'] = array();
+
 			$this->load->model('octemplates/helper');
 			
 
@@ -980,10 +1033,12 @@ class ControllerProductProduct extends Controller {
 		$results = $this->model_catalog_review->getReviewsByProductId($this->request->get['product_id'], ($page - 1) * 5, 5);
 
 		foreach ($results as $result) {
-			
+
 			$oct_review_data = $this->model_octemplates_helper->getOctReviewData($result['review_id']);
+			
 			$data['reviews'][] = array(
 				'author'     => $result['author'],
+
 			'positive_text' => isset($oct_review_data['positive_text']) ? $oct_review_data['positive_text'] : '',
             'negative_text' => isset($oct_review_data['negative_text']) ? $oct_review_data['negative_text'] : '',
             'admin_answer'  => isset($oct_review_data['admin_answer']) ? nl2br($oct_review_data['admin_answer']) : '',

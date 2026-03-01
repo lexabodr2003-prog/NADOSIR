@@ -85,6 +85,7 @@ class ControllerMailOrder extends Controller {
 		$data['text_price'] = $language->get('text_price');
 		$data['text_total'] = $language->get('text_total');
 		$data['text_footer'] = $language->get('text_footer');
+
 				$data['text_comment'] = $language->get('text_comment');
 				$data['text_image'] = $language->get('text_image');
 				
@@ -123,7 +124,8 @@ class ControllerMailOrder extends Controller {
 			$data['comment'] = '';
 		}
 
-		if($order_info['comment']) $data['comment'] .= "<br /><br /><strong>". $data['text_comment'] . "</strong><br />" . strip_tags($order_info['comment']);if ($order_info['payment_address_format']) {
+if($order_info['comment']) $data['comment'] .= "<br /><br /><strong>". $data['text_comment'] . "</strong><br />" . strip_tags($order_info['comment']);
+		if ($order_info['payment_address_format']) {
 			$format = $order_info['payment_address_format'];
 		} else {
 			$format = '{firstname} {lastname}' . "\n" . '{company}' . "\n" . '{address_1}' . "\n" . '{address_2}' . "\n" . '{city} {postcode}' . "\n" . '{zone}' . "\n" . '{country}';
@@ -195,6 +197,7 @@ class ControllerMailOrder extends Controller {
 
 		// Products
 		$data['products'] = array();
+
 			$this->load->model('tool/image');
 			$this->load->model('catalog/product');
 
@@ -243,18 +246,22 @@ class ControllerMailOrder extends Controller {
 				);
 			}
 
-			
+
 			$product_info = $this->model_catalog_product->getProduct($order_product['product_id']);
 			
+
 			        $this->load->model('tool/image');
                     $allert_product_image = $this->db->query("SELECT image FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$order_product['product_id'] . "'");
                     $product_image = $allert_product_image->row['image'];  
+			
 			$data['products'][] = array(
+
 			'image' => ($product_info['image']) ? $this->model_tool_image->resize($product_info['image'], 100, 100) : '',
 			'href'  => $this->url->link('product/product', 'product_id=' . $order_product['product_id']),
 			
 				'name'     => $order_product['name'],
 				'model'    => $order_product['model'],
+
 				    'href'        => $this->url->link('product/product', 'product_id=' . $order_product['product_id']),
                     'thumb'       => $this->model_tool_image->resize($product_image, 90, 90), 
 				
@@ -310,7 +317,8 @@ class ControllerMailOrder extends Controller {
 		$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(html_entity_decode(sprintf($language->get('text_subject'), $order_info['store_name'], $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
 		$mail->setHtml($this->load->view('mail/order_add', $data));
-		$mail->send();	
+		$mail->send();
+	
 				if (in_array('order', (array)$this->config->get('config_mail_alert'))) {  
 			        $this->load->language('mail/order_alert');
 					$data['text_greeting'] = $this->language->get('text_received');
@@ -343,9 +351,6 @@ class ControllerMailOrder extends Controller {
 		$data['text_link'] = $language->get('text_link');
 		$data['text_comment'] = $language->get('text_comment');
 		$data['text_footer'] = $language->get('text_footer');
-				$data['text_comment'] = $language->get('text_comment');
-				$data['text_image'] = $language->get('text_image');
-				
 
 		$data['order_id'] = $order_info['order_id'];
 		$data['date_added'] = date($language->get('date_format_short'), strtotime($order_info['date_added']));
@@ -387,30 +392,12 @@ class ControllerMailOrder extends Controller {
 		$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(html_entity_decode(sprintf($language->get('text_subject'), $order_info['store_name'], $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
 		$mail->setText($this->load->view('mail/order_edit', $data));
-		$mail->send();	
-				if (in_array('order', (array)$this->config->get('config_mail_alert'))) {  
-			        $this->load->language('mail/order_alert');
-					$data['text_greeting'] = $this->language->get('text_received');
-					$data['text_footer'] = '';
-					$mail->setTo($this->config->get('config_email'));
-					$mail->setFrom($this->config->get('config_email'));
-					$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
-					$mail->setSubject(html_entity_decode(sprintf($this->language->get('text_subject'), $this->config->get('config_name'), $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
-					$mail->setHtml($this->load->view('mail/order_add', $data));
-					$mail->send();
-					$emails = explode(',', $this->config->get('config_mail_alert_email'));
-					foreach ($emails as $email) {
-						if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-							$mail->setTo($email);
-							$mail->send();
-						}
-					}
-				}
-			
+		$mail->send();
 	}
 	
 	// Admin Alert Mail
-	public function alert(&$route, &$args) {return false;
+	public function alert(&$route, &$args) {
+return false;
 		if (isset($args[0])) {
 			$order_id = $args[0];
 		} else {
@@ -439,6 +426,7 @@ class ControllerMailOrder extends Controller {
 		
 		if ($order_info && !$order_info['order_status_id'] && $order_status_id && in_array('order', (array)$this->config->get('config_mail_alert'))) {	
 			$this->load->language('mail/order_alert');
+
 			$download_status = false;
 
 			$order_products = $this->model_checkout_order->getOrderProducts($order_info['order_id']);
@@ -464,7 +452,7 @@ class ControllerMailOrder extends Controller {
 			$data['order_id'] = $order_info['order_id'];
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($order_info['date_added']));
 
-			
+
 			$this->load->language('mail/order_add');
 			// HTML Mail
 			$data['title'] = sprintf($this->language->get('text_subject'), $order_info['store_name'], $order_info['order_id']);
@@ -495,14 +483,17 @@ class ControllerMailOrder extends Controller {
                 $this->load->model('tool/simplecustom');
                 $customInfo = $this->model_tool_simplecustom->getCustomFields('order', $order_info['order_id'], $order_info['language_code']);
 			}
+			
 			$order_status_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int)$order_status_id . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
 			if ($comment && $notify) {
 				$data['comment'] = nl2br($comment);
 			} else {
 				$data['comment'] = '';
 			}
 
-			if($order_info['comment']) $data['comment'] .= "<br /><br /><strong>". $data['text_comment'] . "</strong><br />" . strip_tags($order_info['comment']);if ($order_info['payment_address_format']) {
+if($order_info['comment']) $data['comment'] .= "<br /><br /><strong>". $data['text_comment'] . "</strong><br />" . strip_tags($order_info['comment']);
+			if ($order_info['payment_address_format']) {
 				$format = $order_info['payment_address_format'];
 			} else {
 				$format = '{firstname} {lastname}' . "\n" . '{company}' . "\n" . '{address_1}' . "\n" . '{address_2}' . "\n" . '{city} {postcode}' . "\n" . '{zone}' . "\n" . '{country}';
@@ -580,6 +571,7 @@ class ControllerMailOrder extends Controller {
 			$this->load->model('tool/upload');
 			
 			$data['products'] = array();
+
 			$this->load->model('tool/image');
 			$this->load->model('catalog/product');
 
@@ -630,26 +622,31 @@ class ControllerMailOrder extends Controller {
 					);					
 				}
 					
-				
+
 			$product_info = $this->model_catalog_product->getProduct($order_product['product_id']);
 			
+
 			        $this->load->model('tool/image');
                     $allert_product_image = $this->db->query("SELECT image FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$order_product['product_id'] . "'");
                     $product_image = $allert_product_image->row['image'];  
-			$data['products'][] = array(
+			
+				$data['products'][] = array(
+
 			'image' => ($product_info['image']) ? $this->model_tool_image->resize($product_info['image'], 100, 100) : '',
 			'href'  => $this->url->link('product/product', 'product_id=' . $order_product['product_id']),
 			
 					'name'     => $order_product['name'],
 					'model'    => $order_product['model'],
+
 				    'href'        => $this->url->link('product/product', 'product_id=' . $order_product['product_id']),
                     'thumb'       => $this->model_tool_image->resize($product_image, 90, 90), 
 				
 					'quantity' => $order_product['quantity'],
 					'option'   => $option_data,
-					
+
 			'price'    => html_entity_decode($this->currency->format($order_product['price'] + ($this->config->get('config_tax') ? $order_product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value'])),
-			'total'    => html_entity_decode($this->currency->format($order_product['total'] + ($this->config->get('config_tax') ? ($order_product['tax'] * $order_product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']), ENT_NOQUOTES, 'UTF-8')
+			
+					'total'    => html_entity_decode($this->currency->format($order_product['total'] + ($this->config->get('config_tax') ? ($order_product['tax'] * $order_product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']), ENT_NOQUOTES, 'UTF-8')
 				);
 			}
 			
@@ -692,26 +689,7 @@ class ControllerMailOrder extends Controller {
 			
 			$mail->setHtml($this->load->view('mail/order_alert', $data));
 			
-			$mail->send();	
-				if (in_array('order', (array)$this->config->get('config_mail_alert'))) {  
-			        $this->load->language('mail/order_alert');
-					$data['text_greeting'] = $this->language->get('text_received');
-					$data['text_footer'] = '';
-					$mail->setTo($this->config->get('config_email'));
-					$mail->setFrom($this->config->get('config_email'));
-					$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
-					$mail->setSubject(html_entity_decode(sprintf($this->language->get('text_subject'), $this->config->get('config_name'), $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
-					$mail->setHtml($this->load->view('mail/order_add', $data));
-					$mail->send();
-					$emails = explode(',', $this->config->get('config_mail_alert_email'));
-					foreach ($emails as $email) {
-						if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-							$mail->setTo($email);
-							$mail->send();
-						}
-					}
-				}
-			
+			$mail->send();
 
 			// Send to additional alert emails
 			$emails = explode(',', $this->config->get('config_mail_alert_email'));
@@ -720,26 +698,7 @@ class ControllerMailOrder extends Controller {
 				$email = trim($email);
 				if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
 					$mail->setTo($email);
-					$mail->send();	
-				if (in_array('order', (array)$this->config->get('config_mail_alert'))) {  
-			        $this->load->language('mail/order_alert');
-					$data['text_greeting'] = $this->language->get('text_received');
-					$data['text_footer'] = '';
-					$mail->setTo($this->config->get('config_email'));
-					$mail->setFrom($this->config->get('config_email'));
-					$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
-					$mail->setSubject(html_entity_decode(sprintf($this->language->get('text_subject'), $this->config->get('config_name'), $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
-					$mail->setHtml($this->load->view('mail/order_add', $data));
 					$mail->send();
-					$emails = explode(',', $this->config->get('config_mail_alert_email'));
-					foreach ($emails as $email) {
-						if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-							$mail->setTo($email);
-							$mail->send();
-						}
-					}
-				}
-			
 				}
 			}
 		}

@@ -46,7 +46,7 @@ class ControllerCommonHeader extends Controller {
 
 			$this->load->model('tool/image');
 
-			
+
 		// CSV Price Pro import/export
 		$data['module_csvprice_pro_status'] = $this->config->get('module_csvprice_pro_status');
 
@@ -95,6 +95,7 @@ class ControllerCommonHeader extends Controller {
 			'title' => 'ocmod.costaslabs.com',
 			'target' => 1
 		);
+			
 			$user_info = $this->model_user_user->getUser($this->user->getId());
 
 			if ($user_info) {

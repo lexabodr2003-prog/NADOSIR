@@ -48,6 +48,7 @@ class ControllerCommonCart extends Controller {
 		}
 
 		$data['text_items'] = sprintf($this->language->get('text_items'), $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency']));
+
 			$data['total_products'] = $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0);
 			$data['total_amount'] = $this->currency->format($total, $this->session->data['currency']);
 			$data['oct_popup_cart_status'] = $this->config->get('theme_oct_deals_popup_cart_status');
@@ -62,6 +63,7 @@ class ControllerCommonCart extends Controller {
 		$data['products'] = array();
 
 		foreach ($this->cart->getProducts() as $product) {
+
 			 $product_ids[] = $product['product_id'];
 			
 			if ($product['image']) {
@@ -142,11 +144,12 @@ class ControllerCommonCart extends Controller {
 		$data['cart'] = $this->url->link('checkout/cart');
 		$data['checkout'] = $this->url->link('checkout/checkout', '', true);
 
-		
+
 			$data['cart_product_ids'] = implode(",", $product_ids);
 			$data['oct_deals_data'] = $this->config->get('theme_oct_deals_data');
 			$data['isbuttoninteractive'] = isset($data['oct_deals_data']['isbuttoninteractive']) ? true : false;
-			return $this->load->view('common/cart', $data);
+			
+		return $this->load->view('common/cart', $data);
 	}
 
 	public function info() {

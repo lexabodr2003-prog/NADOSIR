@@ -21,7 +21,8 @@ $_['heading_title']         = 'История заказов';
             $_['text_order_sms_shortcodes'] = 'Доступные шорткоды для SMS:';
             $_['text_edit_sms_message'] = 'Текст сообщения (можно изменить)';
             $_['text_email_notify'] = 'Отправить также сообщение на e-mail (стандартное при изменении статуса)';
-			// Text
+			
+// Text
 $_['text_account']          = 'Личный Кабинет';
 $_['text_order']            = 'Заказ';
 $_['text_order_detail']     = 'Детали заказа';

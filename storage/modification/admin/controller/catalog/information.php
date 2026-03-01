@@ -455,7 +455,7 @@ class ControllerCatalogInformation extends Controller {
 		return !$this->error;
 	}
 
-	
+
 			public function octAutocomplete() {
 				$json = array();
 
@@ -493,7 +493,8 @@ class ControllerCatalogInformation extends Controller {
 				$this->response->addHeader('Content-Type: application/json');
 				$this->response->setOutput(json_encode($json));
 			}
-			protected function validateDelete() {
+			
+	protected function validateDelete() {
 		if (!$this->user->hasPermission('modify', 'catalog/information')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}

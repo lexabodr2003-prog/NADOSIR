@@ -5,11 +5,12 @@ class ModelCatalogCategory extends Model {
 
 		$category_id = $this->db->getLastId();
 
-		
+
 			if (isset($data['oct_image'])) {
 				$this->db->query("UPDATE " . DB_PREFIX . "category SET oct_image = '" . $this->db->escape($data['oct_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
 			}
 			
+
 			$oct_deals_data = $this->config->get('theme_oct_deals_data');
 
 			if (isset($oct_deals_data['category_page']) && $oct_deals_data['category_page']) {
@@ -21,7 +22,8 @@ class ModelCatalogCategory extends Model {
 
 				$this->cache->delete('octemplates');
 			}
-			if (isset($data['image'])) {
+			
+		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET image = '" . $this->db->escape($data['image']) . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
@@ -58,7 +60,9 @@ class ModelCatalogCategory extends Model {
 			foreach ($data['category_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
-						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'category_id=" . (int)$category_id . "', keyword = '" . $this->db->escape(
+						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'category_id=" . (int)$category_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+					}
+
 			else {
 				if ($this->config->get('theme_oct_deals_seo_url_status')) {
 					$this->load->model('octemplates/widgets/oct_seogeneration');
@@ -66,8 +70,7 @@ class ModelCatalogCategory extends Model {
 					$this->model_octemplates_widgets_oct_seogeneration->seoUrlGenerator('category', (int)$language_id, (int)$store_id, $data, (int)$category_id);
 				}
 			}
-			$keyword) . "'");
-					}
+			
 				}
 			}
 		}
@@ -87,11 +90,12 @@ class ModelCatalogCategory extends Model {
 	public function editCategory($category_id, $data) {
 		$this->db->query("UPDATE " . DB_PREFIX . "category SET parent_id = '" . (int)$data['parent_id'] . "', `top` = '" . (isset($data['top']) ? (int)$data['top'] : 0) . "', `column` = '" . (int)$data['column'] . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (int)$data['status'] . "', date_modified = NOW() WHERE category_id = '" . (int)$category_id . "'");
 
-		
+
 			if (isset($data['oct_image'])) {
 				$this->db->query("UPDATE " . DB_PREFIX . "category SET oct_image = '" . $this->db->escape($data['oct_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
 			}
 			
+
 			$oct_deals_data = $this->config->get('theme_oct_deals_data');
 
 			if (isset($oct_deals_data['category_page']) && $oct_deals_data['category_page']) {
@@ -103,7 +107,8 @@ class ModelCatalogCategory extends Model {
 
 				$this->cache->delete('octemplates');
 			}
-			if (isset($data['image'])) {
+			
+		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET image = '" . $this->db->escape($data['image']) . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
@@ -187,7 +192,9 @@ class ModelCatalogCategory extends Model {
 			foreach ($data['category_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
-						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'category_id=" . (int)$category_id . "', keyword = '" . $this->db->escape(
+						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'category_id=" . (int)$category_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+					}
+
 			else {
 				if ($this->config->get('theme_oct_deals_seo_url_status')) {
 					$this->load->model('octemplates/widgets/oct_seogeneration');
@@ -195,8 +202,7 @@ class ModelCatalogCategory extends Model {
 					$this->model_octemplates_widgets_oct_seogeneration->seoUrlGenerator('category', (int)$language_id, (int)$store_id, $data, (int)$category_id);
 				}
 			}
-			$keyword) . "'");
-					}
+			
 				}
 			}
 		}
@@ -378,13 +384,14 @@ class ModelCatalogCategory extends Model {
 		return $category_layout_data;
 	}
 
-	
+
 			public function getOCTCatPages($category_id) {
 				$query = $this->db->query("SELECT page_group_links FROM " . DB_PREFIX . "category WHERE category_id = '". (int) $category_id ."'");
 
 				return unserialize($query->row['page_group_links']);
 			}
-			public function getTotalCategories() {
+			
+	public function getTotalCategories() {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "category");
 
 		return $query->row['total'];

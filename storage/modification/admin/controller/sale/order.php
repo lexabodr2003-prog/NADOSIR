@@ -926,7 +926,7 @@ class ControllerSaleOrder extends Controller {
 				'country'   => $order_info['shipping_country']
 			);
 
-			
+
                 $data['can_edit'] = $this->user->hasPermission('modify', 'sale/order');
                 $this->document->addScript('view/javascript/octemplates/bootstrap-notify/bootstrap-notify.min.js');
                 $this->document->addScript('view/javascript/octemplates/oct_main.js');
@@ -992,6 +992,7 @@ class ControllerSaleOrder extends Controller {
                 $data['oct_sms_settings'] = $sms_module_settings;
                 $data['current_lang_id'] = (int)$this->config->get('config_language_id');
                 $data['order_sms_edit'] = $this->config->get('oct_sms_settings')['order_sms_edit'] ?? 0;
+			
 			$data['shipping_address'] = str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
 
 			// Uploaded files

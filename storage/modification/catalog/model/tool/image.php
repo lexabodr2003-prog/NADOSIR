@@ -6,12 +6,11 @@ class ModelToolImage extends Model {
 		}
 
 		$extension = pathinfo($filename, PATHINFO_EXTENSION);
-			if (strtolower($extension) == 'svg') {
+if (strtolower($extension) == 'svg') {
 				$oct_webp_image = $octWebpIs = false;
 
 				$image_new = $filename;
 			} else {
-			
 
 		$image_old = $filename;
 		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . '.' . $extension;
@@ -48,7 +47,7 @@ class ModelToolImage extends Model {
 			}
 		}
 		
-		
+
 			$oct_webp_image = $octWebpIs = false;
 
 			$gd = gd_info();
@@ -101,11 +100,11 @@ class ModelToolImage extends Model {
 					}
 				}
 			}
-			$image_new = str_replace(' ', '%20', $image_new);  // fix bug when attach image on email (gmail.com). it is automatic changing space " " to +
-		
-		if ($this->request->server['HTTPS']) {
 			
-			}
+		$image_new = str_replace(' ', '%20', $image_new);  // fix bug when attach image on email (gmail.com). it is automatic changing space " " to +
+		
+}
+		if ($this->request->server['HTTPS']) {
 			return $this->config->get('config_ssl') . 'image/' . ((isset($oct_webp_image) && $oct_webp_image) ? $oct_webp_image : $image_new);
 		} else {
 			return $this->config->get('config_url') . 'image/' . ((isset($oct_webp_image) && $oct_webp_image) ? $oct_webp_image : $image_new);

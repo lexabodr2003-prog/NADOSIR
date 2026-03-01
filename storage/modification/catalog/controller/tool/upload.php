@@ -1,5 +1,13 @@
 <?php
 class ControllerToolUpload extends Controller {
+
+			function translit ($text) {
+				$rus = array("а","А","б","Б","в","В","г","Г","д","Д","е","Е","ё","Ё","ж", "Ж", "з","З","и","И","й","Й","к","К","л","Л","м","М","н","Н","о","О","п","П","р","Р", "с","С","т","Т","у","У","ф","Ф","х","Х","ц","Ц","ч", "Ч", "ш", "Ш", "щ",  "Щ", "ъ","Ъ", "ы","Ы","ь","Ь","э","Э","ю", "Ю", "я","Я",'/',' ','—');
+				$eng =array("a","A","b","B","v","V","g","G","d","D","e","E","e","E", "zh","ZH","z","Z","i","I","j","J","k","K","l","L","m","M","n","N","o","O", "p","P","r","R","s","S","t","T","u","U","f","F","h","H","c","C","ch","CH", "sh","SH","sch","SCH","", "", "i","I","","","e","E","yu","YU","ya","YA",'','','-');
+				$text = str_replace($rus,$eng,$text);
+				return $text;
+			}
+		
 	public function index() {
 		$this->load->language('tool/upload');
 
@@ -7,7 +15,9 @@ class ControllerToolUpload extends Controller {
 
 		if (!empty($this->request->files['file']['name']) && is_file($this->request->files['file']['tmp_name'])) {
 			// Sanitize the filename
-			$filename = basename(preg_replace('/[^a-zA-Z0-9\.\-\s+]/', '', html_entity_decode($this->request->files['file']['name'], ENT_QUOTES, 'UTF-8')));
+			
+			$filename = basename(preg_replace('/[^a-zA-Z0-9\.\-\s+]/', '', html_entity_decode($this->translit($this->request->files['file']['name']), ENT_QUOTES, 'UTF-8')));
+		
 
 			// Validate the filename length
 			if ((utf8_strlen($filename) < 3) || (utf8_strlen($filename) > 64)) {

@@ -89,7 +89,7 @@ class ControllerExtensionModuleCarousel extends Controller {
 			$data['name'] = '';
 		}
 
-		
+
 			$this->load->language('octemplates/oct_deals');
 
 			$this->load->model('localisation/language');
@@ -102,7 +102,8 @@ class ControllerExtensionModuleCarousel extends Controller {
 			} else {
 				$data['title'] = [];
 			}
-			if (isset($this->request->post['banner_id'])) {
+			
+		if (isset($this->request->post['banner_id'])) {
 			$data['banner_id'] = $this->request->post['banner_id'];
 		} elseif (!empty($module_info)) {
 			$data['banner_id'] = $module_info['banner_id'];

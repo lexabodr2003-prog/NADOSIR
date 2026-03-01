@@ -3,6 +3,7 @@ class ControllerInformationContact extends Controller {
 	private $error = array();
 
 	public function index() {
+
 			$oct_deals_data = $this->config->get('theme_oct_deals_data');
 			$this->load->model('octemplates/microdata');
 
@@ -126,6 +127,13 @@ class ControllerInformationContact extends Controller {
 			'href' => $this->url->link('information/contact')
 		);
 
+
+		if (isset($this->error['warning'])) {
+			$data['error_warning'] = $this->error['warning'];
+		} else {
+			$data['error_warning'] = '';
+		}
+		
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
@@ -144,13 +152,14 @@ class ControllerInformationContact extends Controller {
 			$data['error_enquiry'] = '';
 		}
 
-		
+
 			if (isset($this->error['scales'])) {
 				$data['error_oct_terms'] = $this->error['scales'];
 			} else {
 				$data['error_oct_terms'] = '';
 			}
-			$data['button_submit'] = $this->language->get('button_submit');
+			
+		$data['button_submit'] = $this->language->get('button_submit');
 
 		$data['action'] = $this->url->link('information/contact', '', true);
 
@@ -170,6 +179,27 @@ class ControllerInformationContact extends Controller {
 		$data['fax'] = $this->config->get('config_fax');
 		$data['open'] = nl2br($this->config->get('config_open'));
 		$data['comment'] = $this->config->get('config_comment');
+
+		if ($this->config->get('config_account_id')) {
+			$this->load->model('catalog/information');
+
+			$information_info = $this->model_catalog_information->getInformation($this->config->get('config_account_id'));
+
+			if ($information_info) {
+				$data['text_agree'] = sprintf($this->language->get('text_agree'), $this->url->link('information/information/agree', 'information_id=' . $this->config->get('config_account_id'), true), $information_info['title'], $information_info['title']);
+			} else {
+				$data['text_agree'] = '';
+			}
+		} else {
+			$data['text_agree'] = '';
+		}
+
+		if (isset($this->request->post['agree'])) {
+			$data['agree'] = $this->request->post['agree'];
+		} else {
+			$data['agree'] = false;
+		}
+		
 
 		$data['locations'] = array();
 
@@ -256,7 +286,7 @@ class ControllerInformationContact extends Controller {
 			}
 		}
 
-		
+
 	        if ($this->config->get('config_account_id') && !isset($this->request->post['scales'])) {
 	            $this->load->model('catalog/information');
 
@@ -264,7 +294,20 @@ class ControllerInformationContact extends Controller {
 
 	            $this->error['scales'] = sprintf($this->language->get('error_oct_terms'), $information_info['title']);
 	        }
-			return !$this->error;
+			
+
+		// Agree to terms
+		if ($this->config->get('config_account_id')) {
+			$this->load->model('catalog/information');
+
+			$information_info = $this->model_catalog_information->getInformation($this->config->get('config_account_id'));
+
+			if ($information_info && !isset($this->request->post['agree'])) {
+				$this->error['warning'] = sprintf($this->language->get('error_agree'), $information_info['title']);
+			}
+		}
+		
+		return !$this->error;
 	}
 
 	public function success() {
@@ -286,9 +329,10 @@ class ControllerInformationContact extends Controller {
 
  		$data['text_message'] = $this->language->get('text_message'); 
 
-		
+
 			$data['text_message'] = $this->language->get('text_message_contact');
-			$data['continue'] = $this->url->link('common/home');
+			
+		$data['continue'] = $this->url->link('common/home');
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');

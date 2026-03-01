@@ -725,7 +725,7 @@ class ControllerSettingSetting extends Controller {
 			'value' => 'contact'
 		);
 
-		
+
 			$this->load->language('octemplates/theme/oct_deals');
 
 			$data['captcha_pages'][] = array(
@@ -737,7 +737,8 @@ class ControllerSettingSetting extends Controller {
 				'text'  => $this->language->get('entry_captcha_sreview_reviews'),
 				'value' => 'oct_sreview_reviews'
 			);
-			if (isset($this->request->post['config_logo'])) {
+			
+		if (isset($this->request->post['config_logo'])) {
 			$data['config_logo'] = $this->request->post['config_logo'];
 		} else {
 			$data['config_logo'] = $this->config->get('config_logo');

@@ -47,3 +47,4 @@ RewriteRule ^([^?]*) index.php?_route_=$1 [L,QSA]
 
 # 5. Disable open_basedir limitations. Most hosts will limit this and not allow it to be overridden but you can try.
 # php_value open_basedir none
+

@@ -4,6 +4,13 @@ class ControllerStartupSeoUrl extends Controller {
 		// Add rewrite to url class
 		if ($this->config->get('config_seo_url')) {
 			$this->url->addRewrite($this);
+
+      // OCFilter start
+      if ($this->registry->get('ocfilter')) {
+        $this->url->addRewrite($this->ocfilter->seo);
+      }
+      // OCFilter end
+      
 		}
 
 		// Decode URL
@@ -25,7 +32,7 @@ class ControllerStartupSeoUrl extends Controller {
 						$this->request->get['product_id'] = $url[1];
 					}
 
-					
+
 			if ($url[0] == 'blogarticle_id') {
 				$this->request->get['blogarticle_id'] = $url[1];
 			}
@@ -37,7 +44,8 @@ class ControllerStartupSeoUrl extends Controller {
 					$this->request->get['blog_path'] .= '_' . $url[1];
 				}
 			}
-			if ($url[0] == 'category_id') {
+			
+					if ($url[0] == 'category_id') {
 						if (!isset($this->request->get['path'])) {
 							$this->request->get['path'] = $url[1];
 						} else {
@@ -49,11 +57,20 @@ class ControllerStartupSeoUrl extends Controller {
 						$this->request->get['manufacturer_id'] = $url[1];
 					}
 
+
+          // OCFilter start
+          if ($url[0] == 'ocfilter_page_id') {
+            $this->request->get['ocfilter_page_id'] = $url[1];
+
+            continue;
+          }
+          // OCFilter end
+      
 					if ($url[0] == 'information_id') {
 						$this->request->get['information_id'] = $url[1];
 					}
 
-					if ($query->row['query'] && $url[0] != 'information_id' && $url[0] != 'manufacturer_id' && $url[0] != 'category_id'&& $url[0] != 'product_id' && $url[0] != 'blogcategory_id' && $url[0] != 'blogarticle_id') {
+					if ($query->row['query'] && $url[0] != 'information_id' && $url[0] != 'manufacturer_id' && $url[0] != 'category_id' && $url[0] != 'product_id' && $url[0] != 'blogcategory_id' && $url[0] != 'blogarticle_id') {
 						$this->request->get['route'] = $query->row['query'];
 					}
 				} else {
@@ -66,12 +83,13 @@ class ControllerStartupSeoUrl extends Controller {
 			if (!isset($this->request->get['route'])) {
 				if (isset($this->request->get['product_id'])) {
 					$this->request->get['route'] = 'product/product';
-				
+
 			} elseif (isset($this->request->get['blogarticle_id'])) {
 				$this->request->get['route'] = 'octemplates/blog/oct_blogarticle';
 			} elseif (isset($this->request->get['blog_path'])) {
 				$this->request->get['route'] = 'octemplates/blog/oct_blogcategory';
-			} elseif (isset($this->request->get['path'])) {
+			
+				} elseif (isset($this->request->get['path'])) {
 					$this->request->get['route'] = 'product/category';
 				} elseif (isset($this->request->get['manufacturer_id'])) {
 					$this->request->get['route'] = 'product/manufacturer/info';
@@ -144,7 +162,7 @@ class ControllerStartupSeoUrl extends Controller {
 
 						unset($data[$key]);
 					}
-				
+
 			} elseif ($key == 'blog_path') {
 				$blog_categories = explode('_', $value);
 
@@ -161,7 +179,8 @@ class ControllerStartupSeoUrl extends Controller {
 				}
 
 				unset($data[$key]);
-			} elseif ($key == 'path') {
+			
+				} elseif ($key == 'path') {
 					$categories = explode('_', $value);
 
 					foreach ($categories as $category) {

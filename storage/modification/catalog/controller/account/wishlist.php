@@ -16,6 +16,7 @@ class ControllerAccountWishList extends Controller {
 		$this->load->model('catalog/product');
 
 		$this->load->model('tool/image');
+
 				// Stock Notify
 				if ($this->config->get('oct_stock_notifier_status')) {
 					$data['oct_stock_notifier_status'] = $this->config->get('oct_stock_notifier_status');
@@ -23,6 +24,7 @@ class ControllerAccountWishList extends Controller {
 			
 
 		if (isset($this->request->get['remove'])) {
+
 			if ($this->customer->isLogged()) {
 			
 			// Remove Wishlist
@@ -31,6 +33,7 @@ class ControllerAccountWishList extends Controller {
 			$this->session->data['success'] = $this->language->get('text_remove');
 
 			$this->response->redirect($this->url->link('account/wishlist'));
+
 			} else {
 				if (isset($this->session->data['wishlist'])) {
 					$oct_w_key = array_keys($this->session->data['wishlist'], $this->request->get['remove']);
@@ -106,7 +109,7 @@ class ControllerAccountWishList extends Controller {
 					$price = false;
 				}
 
-				
+
 				$can_buy = true;
 
                 if ($product_info['quantity'] <= 0 && !$this->config->get('config_stock_checkout')) {
@@ -114,7 +117,8 @@ class ControllerAccountWishList extends Controller {
                 } elseif ($product_info['quantity'] <= 0 && $this->config->get('config_stock_checkout')) {
                     $can_buy = true;
                 }
-			if ((float)$product_info['special']) {
+			
+				if ((float)$product_info['special']) {
 					$special = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
 				} else {
 					$special = false;
@@ -126,6 +130,7 @@ class ControllerAccountWishList extends Controller {
 					'name'       => $product_info['name'],
 					'model'      => $product_info['model'],
 					'stock'      => $stock,
+
 			    'can_buy'     => $can_buy,
 			
 					'price'      => $price,
@@ -175,6 +180,7 @@ class ControllerAccountWishList extends Controller {
 				$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . (int)$this->request->post['product_id']), $product_info['name'], $this->url->link('account/wishlist'));
 
 				$json['total'] = sprintf($this->language->get('text_wishlist'), $this->model_account_wishlist->getTotalWishlist());
+
 			$json['total_wishlist'] = $this->model_account_wishlist->getTotalWishlist();
 			
 			} else {
@@ -191,6 +197,7 @@ class ControllerAccountWishList extends Controller {
 			
 
 				$json['total'] = sprintf($this->language->get('text_wishlist'), (isset($this->session->data['wishlist']) ? count($this->session->data['wishlist']) : 0));
+
 			$json['total_wishlist'] = (isset($this->session->data['wishlist']) ? count($this->session->data['wishlist']) : 0);
 			
 			}
