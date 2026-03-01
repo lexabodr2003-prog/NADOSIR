@@ -31,3 +31,26 @@ php.ini.backup
 
 # System
 .DS_Store
+
+# Vendor libraries (too large for GitHub)
+system/storage/vendor/
+storage/csvprice_pro/
+
+# OCFilter summernote (large JS files)
+admin/view/javascript/ocfilter/summernote/
+
+# Image files (except /image directory structure)
+image/cache/
+*.webp
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+*.ico
+*.mp4
+*.mov
+*.avi
+
+# Other large files
+sql_patches/
