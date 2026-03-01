@@ -306,3 +306,68 @@ Problem: OCFilter worked on Android tablet but NOT on two iPhones (confirmed by 
 ### Modified Files
 - catalog/view/theme/default/template/extension/module/ocfilter48/module.twig
 - catalog/view/javascript/ocfilter-mobile-fix.js (upgraded to v5.0)
+
+---
+
+## Session 5 - iOS Safari Fix Deep Debug (OCFilter v6.0)
+Date: 2026-03-01
+Problem: Client confirmed filter STILL fails on two iPhones after v5.0 fix
+
+### Root Cause Analysis (v6.0)
+Thorough investigation of rendered HTML revealed:
+
+1. **s.async = false does NOT make dynamically injected scripts synchronous**
+   - Setting async=false on createElement('script') only affects scripts in the parser
+   - For dynamically appended scripts, this attribute is ignored by WebKit
+   - onload event may not fire reliably in iOS Safari 15+ with cached resources
+
+2. **ocfilter.js onload callback is unreliable on iOS Safari**
+   - iOS Safari aggressive disk cache: if file is cached, onload may fire before
+     $.fn.ocfilter is actually registered (execution timing issue)
+   - forceReloadAndInit() in v5.0 searched script[src*='ocfilter'] but found nothing
+     because the dynamically added tag was not in DOM at the time of check
+
+3. **v5.0 _ocf_config did not include textLoad and textSelect**
+   - Config was saved AFTER ocfilter() call - too late for external reinit
+   - Now cfg variable is defined first, then saved, then passed to ocfilter()
+
+4. **XHR is the only reliable way to load scripts on iOS Safari**
+   - Same-origin XHR always works (no CORS issue - same domain)
+   - eval(responseText) executes immediately and synchronously
+   - $.fn.ocfilter is defined immediately after eval, before callback fires
+
+### Fixes Applied
+
+[module.twig v6.0 - full loadScript rewrite]
+- loadViaXHR() as primary method: XMLHttpRequest + eval/new Function()
+- loadViaTag() as fallback: <script> tag injection
+- Absolute URL construction: window.location.protocol + host + path
+- Existing script detection: checks src contains 'ocfilter48/ocfilter'
+- Config saved BEFORE ocfilter() call: window['_ocf_config_N'] = cfg
+- window['_ocf_js_url_N'] saved for mobile-fix.js to use on reinit
+- textLoad and textSelect NOW included in saved config
+
+[ocfilter-mobile-fix.js v6.0 - full rewrite]
+- getOCFilterScriptUrl(): reads _ocf_js_url_N, falls back to DOM/hardcoded path
+- loadOCFilterScript(): XHR + eval with cache-bust timestamp
+- forceReinit(): XHR-based reload if $.fn.ocfilter undefined, then initModules()
+- Watchdog on [data-ocf='mobile'] click: checks panel opened in 1.5s, else reinit
+- Touch trigger: smarter detection of OCFilter area touches
+- tryInitSequence(): iOS delays [100,300,700,1200,2000,3000,5000,7000]ms
+
+### Test Results
+- HTTP 200: catalog page with iPhone Safari 17 UA - PASS
+- HTTP 200: catalog page with Yandex Browser iOS UA - PASS
+- HTTP 200: catalog page with iPhone Safari 15 UA - PASS
+- loadViaXHR present in HTML - PASS
+- XMLHttpRequest in HTML - PASS
+- Absolute URL construction in loadScript - PASS
+- _ocf_js_url_1 saved in HTML - PASS
+- _ocf_config_1 with textLoad/textSelect in HTML - PASS
+- ocfilter.js accessible via XHR (200, 95382 bytes, same-origin) - PASS
+- ocfilter-mobile-fix.js v6.0 serving correctly (11702 bytes) - PASS
+- All resources HTTP 200 - PASS
+
+### Modified Files
+- catalog/view/theme/default/template/extension/module/ocfilter48/module.twig (v6.0)
+- catalog/view/javascript/ocfilter-mobile-fix.js (v6.0)

@@ -1,265 +1,214 @@
 /**
- * OCFilter mobile fix v5.0
- * Fixes for: iOS Safari, iOS Yandex Browser, Opera iOS, Android all browsers
+ * OCFilter mobile fix v6.0
+ * Fixes for: iOS Safari 15+, iOS Yandex Browser, Opera iOS, Android
  *
- * ROOT CAUSE ANALYSIS (v5.0):
- * - iOS Safari: dynamic script injection with s.async=true causes race condition
- *   (script may execute before jQuery bundle finishes)
- * - iOS Yandex Browser: $.ajax dataType:'script' uses aggressive caching,
- *   sometimes serving stale/broken cached version
- * - iOS WebKit: visibilitychange + back/forward cache (bfcache) - filter not reinit
- * - iOS Safari 15+: Intelligent Tracking Prevention blocks some XHR patterns
- *
- * FIXES APPLIED:
- * 1. module.twig: s.async=false (prevents race condition)
- * 2. module.twig: waitExec limit 100→400 (20s timeout instead of 5s)
- * 3. This file: iOS-specific reinit with proper jQuery wait
- * 4. This file: visibilitychange handler (tab switching on iPhone)
- * 5. This file: Touch-triggered lazy reinit for iOS
- * 6. This file: Cache-busting for ocfilter.js on iOS retry
+ * v6.0 Changes vs v5.0:
+ * - Uses XHR+eval reinit (same as module.twig v6.0 loadScript)
+ * - Reads _ocf_js_url_N to get the correct ocfilter.js URL
+ * - textLoad/textSelect now included in _ocf_config (fixed in module.twig)
+ * - Improved iOS detection (includes iPad with pointer)
+ * - Smarter reinit: checks if #ocf-module-N exists before trying
+ * - Watchdog on [data-ocf="mobile"] click: if filter panel doesn't open in 3s -> reinit
  */
 (function() {
   'use strict';
 
   // =============================================
-  // iOS detection
+  // Device detection
   // =============================================
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  var ua = navigator.userAgent;
+  var isIOS = /iPad|iPhone|iPod/.test(ua) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  var isYandexBrowser = /YaBrowser/.test(navigator.userAgent);
-  var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  var isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
+  var isYandexBrowser = /YaBrowser/.test(ua);
+  var isMobile = window.innerWidth <= 1024 || /Mobi|Android|iPhone|iPad|iPod/.test(ua);
 
   var DELAYS = isIOS
-    ? [50, 200, 500, 1000, 1500, 2000, 3000, 4000, 5000, 7000]
-    : [0, 100, 300, 500, 800, 1200, 2000, 3000, 5000];
+    ? [100, 300, 700, 1200, 2000, 3000, 5000, 7000]
+    : [200, 500, 1200, 2500, 5000];
 
   // =============================================
-  // Core: check if OCFilter needs init
+  // Check if any OCFilter module needs init
   // =============================================
   function needsInit() {
     if (typeof jQuery === 'undefined') return false;
-    var $ = jQuery;
-    var modules = $('[id^="ocf-module-"]');
+    var modules = document.querySelectorAll('[id^="ocf-module-"]');
     if (!modules.length) return false;
-    var needs = false;
-    modules.each(function() {
-      if (!$(this).data('ocfilter')) needs = true;
-    });
-    return needs;
-  }
-
-  // =============================================
-  // Core: force OCFilter reload and re-init
-  // iOS-specific: cache bust + synchronous injection
-  // =============================================
-  function forceReloadAndInit() {
-    if (typeof jQuery === 'undefined') return false;
-    var $ = jQuery;
-
-    var modules = $('[id^="ocf-module-"]');
-    if (!modules.length) return false;
-
-    var anyUninitialized = false;
-    modules.each(function() {
-      if (!$(this).data('ocfilter')) anyUninitialized = true;
-    });
-    if (!anyUninitialized) return false;
-
-    // Find the ocfilter.js script URL from existing script tags
-    var ocfScriptEl = document.querySelector('script[src*="ocfilter"][src*=".js"]');
-    if (!ocfScriptEl) return false;
-
-    var scriptUrl = ocfScriptEl.src;
-
-    // iOS cache bust: add timestamp to force fresh load
-    if (isIOS) {
-      // Remove old script tag to force reload
-      var oldTag = document.querySelector('script[src*="ocfilter48/ocfilter.js"]');
-      if (oldTag && typeof $.fn.ocfilter === 'undefined') {
-        // Script loaded but plugin not defined - remove and retry
-        oldTag.parentNode.removeChild(oldTag);
-
-        // Add cache-bust param
-        var cbUrl = scriptUrl.split('?')[0] + '?_ios_cb=' + Date.now();
-        var newTag = document.createElement('script');
-        newTag.type = 'text/javascript';
-        newTag.src = cbUrl;
-        newTag.async = false; // IMPORTANT: no async on iOS
-        newTag.onload = function() {
-          setTimeout(function() {
-            if (typeof $.fn.ocfilter !== 'undefined') {
-              triggerOCFilterInit();
-            }
-          }, 100);
-        };
-        document.head.appendChild(newTag);
-        return true;
-      }
+    for (var i = 0; i < modules.length; i++) {
+      var data = jQuery(modules[i]).data('ocfilter');
+      if (!data) return true;
     }
-
-    // Non-iOS or plugin already loaded: just trigger init
-    if (typeof $.fn.ocfilter !== 'undefined') {
-      triggerOCFilterInit();
-      return true;
-    }
-
     return false;
   }
 
   // =============================================
-  // Trigger OCFilter init on all uninitialized modules
-  // Re-runs the inline script logic from module.twig
+  // Get ocfilter.js absolute URL from page
   // =============================================
-  function triggerOCFilterInit() {
-    if (typeof jQuery === 'undefined') return;
+  function getOCFilterScriptUrl(idx) {
+    idx = idx || '1';
+    // First try: saved URL by module.twig v6.0
+    var savedUrl = window['_ocf_js_url_' + idx];
+    if (savedUrl) {
+      // Make absolute
+      if (savedUrl.indexOf('http') !== 0 && savedUrl.indexOf('//') !== 0) {
+        savedUrl = window.location.protocol + '//' + window.location.host + '/' +
+          savedUrl.replace(/^\/+/, '');
+      }
+      return savedUrl;
+    }
+    // Second try: find in DOM
+    var scripts = document.querySelectorAll('script[src]');
+    for (var i = 0; i < scripts.length; i++) {
+      if (scripts[i].src && scripts[i].src.indexOf('ocfilter48/ocfilter') !== -1) {
+        return scripts[i].src;
+      }
+    }
+    // Fallback: construct from known path
+    return window.location.protocol + '//' + window.location.host +
+      '/catalog/view/javascript/ocfilter48/ocfilter.js?v=4.8.2';
+  }
+
+  // =============================================
+  // Load ocfilter.js via XHR + eval (iOS-safe)
+  // =============================================
+  function loadOCFilterScript(scriptUrl, onLoaded) {
+    if (typeof $.fn.ocfilter !== 'undefined') {
+      onLoaded();
+      return;
+    }
+    // Cache-bust
+    var cbUrl = scriptUrl.split('?')[0] + '?v=4.8.2&_fix=' + Date.now();
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', cbUrl, true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status === 200) {
+          try {
+            (new Function(xhr.responseText)).call(window);
+          } catch(e1) {
+            try { (0, eval)(xhr.responseText); } catch(e2) {}
+          }
+          setTimeout(function() {
+            onLoaded();
+          }, 50);
+        }
+      };
+      xhr.onerror = function() { onLoaded(); };
+      xhr.send();
+    } catch(e) {
+      onLoaded();
+    }
+  }
+
+  // =============================================
+  // Initialize OCFilter on all uninitialized modules
+  // =============================================
+  function initModules() {
+    if (typeof jQuery === 'undefined') return false;
     var $ = jQuery;
+    var modules = $('[id^="ocf-module-"]');
+    if (!modules.length) return false;
 
-    $('[id^="ocf-module-"]').each(function() {
+    var anyInited = false;
+    modules.each(function() {
       var $el = $(this);
-      if ($el.data('ocfilter')) return; // already initialized
-
+      if ($el.data('ocfilter')) return; // already OK
       if (typeof $.fn.ocfilter === 'undefined') return;
 
+      var idx = ($el.attr('id') || '').replace('ocf-module-', '') || '1';
+      var cfg = window['_ocf_config_' + idx];
+
       try {
-        // Extract init params from data attributes on the element
-        // These are set by the inline script in module.twig
-        var idx = $el.attr('id') ? $el.attr('id').replace('ocf-module-', '') : '0';
-
-        // Try to get the stored init config from window (set by module.twig)
-        var config = window['_ocf_config_' + idx];
-        if (config) {
-          $el.ocfilter(config);
-          return;
+        if (cfg && cfg.index) {
+          $el.ocfilter(cfg);
+          anyInited = true;
+        } else {
+          // Minimal fallback config
+          $el.ocfilter({ index: idx });
+          anyInited = true;
         }
-
-        // Fallback: minimal init config
-        $el.ocfilter({ index: idx });
       } catch(e) {
         console.warn('OCFilter reinit error:', e);
       }
     });
+    return anyInited;
   }
 
   // =============================================
-  // Wait for jQuery + OCFilter, then try init
+  // Full reinit: reload script if needed, then init
   // =============================================
-  function tryInit(delayIndex) {
-    delayIndex = delayIndex || 0;
-    if (delayIndex >= DELAYS.length) return;
+  function forceReinit(onDone) {
+    if (typeof jQuery === 'undefined') return;
+    if (!needsInit()) { if (onDone) onDone(false); return; }
 
-    var delay = DELAYS[delayIndex];
+    var scriptUrl = getOCFilterScriptUrl('1');
+
+    if (typeof jQuery.fn.ocfilter === 'undefined') {
+      // Need to load/reload the script
+      loadOCFilterScript(scriptUrl, function() {
+        var ok = initModules();
+        if (onDone) onDone(ok);
+      });
+    } else {
+      // Script loaded, just init
+      var ok = initModules();
+      if (onDone) onDone(ok);
+    }
+  }
+
+  // =============================================
+  // Retry sequence with delays
+  // =============================================
+  function tryInitSequence(delayIdx) {
+    delayIdx = delayIdx || 0;
+    if (delayIdx >= DELAYS.length) return;
 
     setTimeout(function() {
-      if (!needsInit()) return; // already initialized or no modules
-
-      var initiated = forceReloadAndInit();
-      if (!initiated && delayIndex < DELAYS.length - 1) {
-        tryInit(delayIndex + 1);
-      }
-    }, delay);
+      if (!needsInit()) return; // already OK
+      forceReinit(function(ok) {
+        if (!ok && delayIdx < DELAYS.length - 1) {
+          tryInitSequence(delayIdx + 1);
+        }
+      });
+    }, DELAYS[delayIdx]);
   }
 
   // =============================================
-  // iOS-specific: intercept first touch to trigger init
-  // On iOS Safari, touch events can wake up lazy-initialized components
-  // =============================================
-  function installIOSTouchTrigger() {
-    if (!isIOS && !isMobile) return;
-
-    var triggered = false;
-    var touchHandler = function(e) {
-      if (triggered) return;
-
-      // Check if touching OCFilter area
-      var target = e.target;
-      var inOCFilter = false;
-      while (target && target !== document) {
-        if (target.id && target.id.indexOf('ocf-module-') === 0) {
-          inOCFilter = true;
-          break;
-        }
-        if (target.classList && (
-          target.classList.contains('ocf-container') ||
-          target.classList.contains('ocf-btn-mobile-fixed')
-        )) {
-          inOCFilter = true;
-          break;
-        }
-        target = target.parentNode;
-      }
-
-      if (inOCFilter && needsInit()) {
-        triggered = true;
-        document.removeEventListener('touchstart', touchHandler);
-
-        // iOS: delay slightly to let touch event processing complete
-        setTimeout(function() {
-          forceReloadAndInit();
-          // Retry sequence if still not initialized
-          setTimeout(function() {
-            if (needsInit()) tryInit(0);
-          }, 500);
-        }, 50);
-      }
-    };
-
-    document.addEventListener('touchstart', touchHandler, { passive: true });
-  }
-
-  // =============================================
-  // visibilitychange handler (iOS tab switching)
-  // When user switches back to tab on iPhone, filter may be dead
-  // =============================================
-  document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible') {
-      setTimeout(function() {
-        if (needsInit()) {
-          tryInit(0);
-        }
-      }, 300);
-    }
-  });
-
-  // =============================================
-  // pageshow: handle bfcache (back button)
-  // =============================================
-  window.addEventListener('pageshow', function(e) {
-    var fromCache = e.persisted;
-    var navEntry = (performance && performance.getEntriesByType) ?
-      performance.getEntriesByType('navigation')[0] : null;
-    var isBackForward = navEntry && navEntry.type === 'back_forward';
-
-    if (fromCache || isBackForward) {
-      // Restored from bfcache - full reinit sequence
-      tryInit(0);
-      setTimeout(installWatchdog, 500);
-    } else {
-      // Normal page load
-      setTimeout(function() {
-        if (needsInit()) tryInit(0);
-      }, isIOS ? 1000 : 2000);
-    }
-  });
-
-  // =============================================
-  // WATCHDOG: Reset stuck "loading" state
+  // Watchdog: detect stuck "loading" button state
   // =============================================
   function installWatchdog() {
     if (typeof jQuery === 'undefined') return;
     var $ = jQuery;
 
-    $(document).off('click.ocf_watchdog touchend.ocf_watchdog').on(
-      'click.ocf_watchdog touchend.ocf_watchdog',
-      '[data-filter-key], [data-ocf="button"], [data-ocf-discard], [data-ocf="mobile"], .ocf-btn-mobile-fixed',
-      function() {
+    $(document).off('click.ocfw touchend.ocfw').on(
+      'click.ocfw touchend.ocfw',
+      '[data-ocf="button"], [data-ocf-discard], [data-filter-key], .ocf-btn-mobile-fixed, [data-ocf="mobile"]',
+      function(e) {
+        var $btn = $(e.currentTarget);
+
+        // Special handling for mobile open button
+        if ($btn.attr('data-ocf') === 'mobile' || $btn.closest('.ocf-btn-mobile-fixed').length) {
+          // Check if filter panel is visible after 1.5s
+          setTimeout(function() {
+            var $container = $('[id^="ocf-module-"]').first();
+            var isVisible = $container.hasClass('ocf-open') || 
+              $container.find('.ocf-content').is(':visible') ||
+              $('[id^="ocf-module-"]').data('ocfilter') !== undefined;
+            
+            if (!isVisible || needsInit()) {
+              // Filter didn't open - try reinit
+              forceReinit(null);
+            }
+          }, 1500);
+        }
+
+        // Watchdog for stuck spinner
         setTimeout(function() {
-          var $btn = $('[data-ocf="button"]');
-          $btn.each(function() {
+          $('[data-ocf="button"]').each(function() {
             var $b = $(this);
             if ($b.hasClass('ocf-disabled') && ($b.html() || '').indexOf('fa-spin') !== -1) {
               $b.removeClass('ocf-disabled').removeAttr('disabled');
-              var resetText = $b.data('resetText') || $b.data('selectText');
+              var resetText = $b.data('resetText') || $b.data('selectText') || $b.data('textSelect');
               if (resetText) $b.html(resetText);
             }
           });
@@ -269,22 +218,85 @@
   }
 
   // =============================================
-  // Main init sequence
+  // iOS touch trigger: reinit on first filter touch
+  // =============================================
+  function installTouchTrigger() {
+    if (!isMobile) return;
+
+    var triggered = false;
+    function touchHandler(e) {
+      if (triggered || !needsInit()) return;
+
+      var t = e.target;
+      var inOCF = false;
+      while (t && t !== document.body) {
+        if ((t.id && t.id.indexOf('ocf-module-') === 0) ||
+            (t.className && (
+              t.className.indexOf('ocf-container') !== -1 ||
+              t.className.indexOf('ocf-btn-mobile') !== -1
+            ))) {
+          inOCF = true;
+          break;
+        }
+        t = t.parentNode;
+      }
+
+      if (inOCF) {
+        triggered = true;
+        document.removeEventListener('touchstart', touchHandler, true);
+        setTimeout(function() {
+          forceReinit(function(ok) {
+            if (!ok) setTimeout(function() { tryInitSequence(0); }, 500);
+          });
+        }, 50);
+      }
+    }
+    document.addEventListener('touchstart', touchHandler, { passive: true, capture: true });
+  }
+
+  // =============================================
+  // visibilitychange: reinit when tab becomes visible
+  // =============================================
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible' && needsInit()) {
+      setTimeout(function() { tryInitSequence(0); }, 300);
+    }
+  });
+
+  // =============================================
+  // pageshow: bfcache (back button) handling
+  // =============================================
+  window.addEventListener('pageshow', function(e) {
+    var fromCache = e.persisted;
+    var navEntry = (performance && performance.getEntriesByType) ?
+      performance.getEntriesByType('navigation')[0] : null;
+    var isBackForward = navEntry && navEntry.type === 'back_forward';
+
+    if (fromCache || isBackForward) {
+      tryInitSequence(0);
+      setTimeout(installWatchdog, 500);
+    } else {
+      setTimeout(function() {
+        if (needsInit()) tryInitSequence(0);
+      }, isIOS ? 500 : 1000);
+    }
+  });
+
+  // =============================================
+  // Main start
   // =============================================
   function start() {
-    // Start delayed init sequence
-    tryInit(0);
+    tryInitSequence(0);
 
-    // Install watchdog after jQuery loads
     var wdTries = 0;
-    var wdInterval = setInterval(function() {
+    var wdInt = setInterval(function() {
       wdTries++;
       if (typeof jQuery !== 'undefined') {
-        clearInterval(wdInterval);
+        clearInterval(wdInt);
         installWatchdog();
-        installIOSTouchTrigger();
+        installTouchTrigger();
       } else if (wdTries > 200) {
-        clearInterval(wdInterval);
+        clearInterval(wdInt);
       }
     }, 100);
   }
@@ -295,18 +307,17 @@
     start();
   }
 
-  // Also on window load (last resort)
   window.addEventListener('load', function() {
     setTimeout(function() {
       if (typeof jQuery !== 'undefined') {
         installWatchdog();
-        if (needsInit()) tryInit(0);
+        if (needsInit()) tryInitSequence(0);
       }
     }, isIOS ? 800 : 500);
   });
 
   // =============================================
-  // Task 15: Catalog button direct link (desktop)
+  // Task 15: Catalog button - direct link on desktop
   // =============================================
   function initCatalogButton() {
     var btn = document.querySelector('.ds-header-catalog-button');

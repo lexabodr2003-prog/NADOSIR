@@ -69,65 +69,122 @@
 +(function(global) {
 
 var startOCFilter = function() {
+  // ============================================================
+  // loadScript v6.0 - iOS Safari / Yandex Browser fix
+  // Primary: XHR + eval (bypasses iOS script tag async issues)
+  // Fallback: native <script> tag injection
+  // ============================================================
   var loadScript = function(url, callback) {
-    // iOS Yandex Browser fix: $.ajax dataType:'script' unreliable (cache issue)
-    // Use native <script> tag injection for reliable loading
-    var existing = document.querySelector('script[src="' + url + '"]');
-    if (existing) {
-      // Script tag already in DOM
-      if (typeof $.fn.ocfilter !== 'undefined') {
-        // Plugin already loaded - call init directly
-        setTimeout(callback, 0);
-        return;
+    // Make URL absolute (iOS Safari may ignore <base href> for dynamic script.src)
+    var absUrl = url;
+    if (url.indexOf('http') !== 0 && url.indexOf('//') !== 0) {
+      absUrl = window.location.protocol + '//' + window.location.host + '/' +
+        url.replace(/^\/+/, '');
+    }
+
+    // Already loaded?
+    if (typeof $.fn.ocfilter !== 'undefined') {
+      setTimeout(callback, 0);
+      return;
+    }
+
+    // Check if script tag already in DOM
+    var existing = null;
+    try {
+      var allScripts = document.querySelectorAll('script[src]');
+      for (var si = 0; si < allScripts.length; si++) {
+        if (allScripts[si].src && allScripts[si].src.indexOf('ocfilter48/ocfilter') !== -1) {
+          existing = allScripts[si];
+          break;
+        }
       }
-      // Wait for plugin to finish executing
+    } catch(e) {}
+
+    if (existing) {
+      // Tag in DOM - wait for plugin to be defined
       var waitExec = 0;
       var checkLoaded = setInterval(function() {
         waitExec++;
         if (typeof $.fn.ocfilter !== 'undefined') {
           clearInterval(checkLoaded);
           callback();
-        } else if (waitExec > 400) { // iOS fix: 20s timeout
+        } else if (waitExec > 400) { // 20s timeout
           clearInterval(checkLoaded);
+          loadViaXHR(absUrl, callback); // last resort
         }
       }, 50);
       return;
     }
+
+    // Primary method: XHR + eval (reliable on iOS Safari)
+    loadViaXHR(absUrl, callback);
+  };
+
+  function loadViaXHR(absUrl, callback) {
+    // Cache-bust: refresh every 5 minutes
+    var cbUrl = absUrl.split('?')[0] + '?v=4.8.2&_t=' + Math.floor(Date.now() / 300000);
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', cbUrl, true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status === 200) {
+          try {
+            // Execute in global scope
+            (new Function(xhr.responseText)).call(window);
+          } catch(e1) {
+            try { (0, eval)(xhr.responseText); } catch(e2) {}
+          }
+          setTimeout(function() {
+            if (typeof $.fn.ocfilter !== 'undefined') {
+              callback();
+            } else {
+              loadViaTag(absUrl, callback);
+            }
+          }, 50);
+        } else {
+          loadViaTag(absUrl, callback);
+        }
+      };
+      xhr.onerror = function() { loadViaTag(absUrl, callback); };
+      xhr.send();
+    } catch(e) {
+      loadViaTag(absUrl, callback);
+    }
+  }
+
+  function loadViaTag(absUrl, callback) {
     var s = document.createElement('script');
     s.type = 'text/javascript';
-    s.src = url;
-    s.async = false; // iOS Safari fix: do NOT use async on dynamically created script tags
+    s.src = absUrl;
     s.onload = s.onreadystatechange = function() {
       if (!s.readyState || s.readyState === 'loaded' || s.readyState === 'complete') {
         s.onload = s.onreadystatechange = null;
-        callback();
+        setTimeout(function() {
+          if (typeof $.fn.ocfilter !== 'undefined') callback();
+        }, 50);
       }
     };
     s.onerror = function() {
-      console.warn('OCFilter: script load error, trying fallback');
-      $.getScript(url).done(callback);
+      console.warn('OCFilter: all load methods failed');
     };
     (document.head || document.body).appendChild(s);
-  };
+  }
   
   var init = function() {
-    $('#ocf-module-{{ index }}').ocfilter({
+    // Store config BEFORE calling ocfilter() - used by ocfilter-mobile-fix.js
+    var cfg = {
       index: '{{ index }}',
-      
       paramsIndex: '{{ url_index }}',
-      
       urlHost: '{{ url_host }}',
       urlParams: '{{ url_params }}',
-      
       params: '{{ filter_params }}',
-      
       sepFilt: '{{ sep_filt }}',
       sepFsrc: '{{ sep_fsrc }}',
       sepVals: '{{ sep_vals }}',
       sepSdot: '{{ sep_sdot }}',
       sepSneg: '{{ sep_sneg }}',
       sepSran: '{{ sep_sran }}',
-
       position: '{{ position }}',
       layout: '{{ layout }}',
       numeralLocale: '{{ numeral_locale }}',
@@ -138,39 +195,19 @@ var startOCFilter = function() {
       priceLogarithmic: {{ price_logarithmic + 0 }},
       lazyLoadFilters: {{ hidden_filters_lazy_load + 0 }},
       lazyLoadValues: {{ hidden_values_lazy_load + 0 }},
-      
       mobileMaxWidth: {{ mobile_max_width + 0 }},
       mobileRememberState: {{ mobile_remember_state + 0 }},
-      
       textLoad: '{{ text_loading_ocf|e('js') }}',
       textSelect: '{{ button_select|e('js') }}'
-    });
-    // iOS fix v5.0: save config for external reinit by ocfilter-mobile-fix.js
-    window["_ocf_config_{{ index }}"] = {
-      index: "{{ index }}",
-      paramsIndex: "{{ url_index }}",
-      urlHost: "{{ url_host }}",
-      urlParams: "{{ url_params }}",
-      params: "{{ filter_params }}",
-      sepFilt: "{{ sep_filt }}",
-      sepFsrc: "{{ sep_fsrc }}",
-      sepVals: "{{ sep_vals }}",
-      sepSdot: "{{ sep_sdot }}",
-      sepSneg: "{{ sep_sneg }}",
-      sepSran: "{{ sep_sran }}",
-      position: "{{ position }}",
-      layout: "{{ layout }}",
-      numeralLocale: "{{ numeral_locale }}",
-      searchButton: {{ search_button + 0 }},
-      showCounter: {{ show_counter + 0 }},
-      sliderInput: {{ slider_input + 0 }},
-      sliderPips: {{ slider_pips + 0 }},
-      priceLogarithmic: {{ price_logarithmic + 0 }},
-      lazyLoadFilters: {{ hidden_filters_lazy_load + 0 }},
-      lazyLoadValues: {{ hidden_values_lazy_load + 0 }},
-      mobileMaxWidth: {{ mobile_max_width + 0 }},
-      mobileRememberState: {{ mobile_remember_state + 0 }}
     };
+
+    // Save config and JS URL for external reinit (ocfilter-mobile-fix.js)
+    window['_ocf_config_{{ index }}'] = cfg;
+    window['_ocf_js_url_{{ index }}'] = '{{ javascript }}';
+
+    if (typeof $.fn.ocfilter !== 'undefined') {
+      $('#ocf-module-{{ index }}').ocfilter(cfg);
+    }
   };
   
   {% if index < 2 %}
@@ -189,13 +226,12 @@ var ready = function(fn) {
 };
 
 ready(function() { // DOM loaded
-  // iOS Yandex Browser fix: jQuery may not be loaded at DOMContentLoaded time
-  // (e.g. when jQuery loads asynchronously or from cache with delay)
+  // Wait for jQuery (handles async/cached bundle loading)
   var jqWaitTries = 0;
   var waitForJQ = function() {
     jqWaitTries++;
-    if (jqWaitTries > 120) {
-      console.error('OCFilter: jQuery not available after 6s');
+    if (jqWaitTries > 300) { // 15s timeout
+      console.error('OCFilter: jQuery not available');
       return;
     }
     if (typeof jQuery !== 'undefined') {
