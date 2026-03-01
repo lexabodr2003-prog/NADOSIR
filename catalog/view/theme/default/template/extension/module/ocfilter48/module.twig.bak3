@@ -1,0 +1,212 @@
+<div class="ocf-container {{ ocf_class }} ocf-theme-{{ theme }} ocf-mobile-{{ index }} ocf-mobile-{{ mobile_placement }} ocf-{{ layout }} ocf-{{ position }}" id="ocf-module-{{ index }}">
+{% if index < 2 %}
+<link rel="stylesheet" href="{{ stylesheet }}" />
+{% endif %}
+
+  <div class="ocf-content">
+    <div class="ocf-header">
+      <i class="ocf-icon ocf-icon-16 ocf-brand ocf-sliders"></i>      
+      
+      {{ heading_title }}
+      
+      {% if layout == 'horizontal' and (search_button or selecteds) %}
+      <div class="ocf-header-btn ocf-desktop">
+        {% if selecteds %}
+        <button type="button" onclick="location = '{{ link }}';" class="ocf-btn ocf-btn-link">{{ button_cancel_all }}</button>
+        {% else %}
+        <button type="button" data-ocf-discard="*" class="ocf-btn ocf-btn-link ocf-disabled" disabled="disabled">{{ button_cancel_all }}</button>
+        {% endif %}         
+        {% if search_button %}
+        <button type="button" class="ocf-btn ocf-btn-link ocf-disabled" data-ocf="button" data-loading-text="{{ text_loading_ocf }}" disabled="disabled">{{ button_select }}</button>
+        {% endif %}        
+      </div>   
+      {% endif %}  
+      
+      <button type="button" data-ocf="mobile" class="ocf-btn ocf-btn-link ocf-mobile ocf-close-mobile" aria-label="Close filter"><i class="ocf-icon ocf-icon-16 ocf-times"></i></button>
+    </div>
+          
+    <div class="ocf-body">     
+      {% include('default/template/extension/module/ocfilter48/filter_list.twig') %}
+    </div>      
+       
+    {% if search_button or selecteds %}
+    {% if layout == 'vertical' %}
+    {% set class = 'ocf-footer' %}
+    {% else %}
+    {% set class = 'ocf-footer ocf-mobile' %}
+    {% endif %}
+    <div class="{{ class }}">
+      <div class="ocf-between">
+        {% if selecteds %}
+        <button type="button" onclick="location = '{{ link }}';" class="ocf-btn ocf-btn-link">{{ button_cancel_all }}</button>
+        {% else %}
+        <button type="button" data-ocf-discard="*" class="ocf-btn ocf-btn-link ocf-disabled" disabled="disabled">{{ button_cancel_all }}</button>
+        {% endif %}        
+        {% if search_button %}
+        <button type="button" class="ocf-btn ocf-disabled ocf-btn-block ocf-search-btn-static" data-ocf="button" data-loading-text="{{ text_loading_ocf }}" disabled="disabled">{{ button_select }}</button>
+        {% endif %}        
+      </div>
+    </div>            
+    {% endif %}
+  </div><!-- /.ocf-content -->
+  
+  <div class="ocf-is-mobile"></div>
+  
+  {% if (mobile_button_position == 'fixed' or mobile_button_position == 'both') and index < 2 %}
+  <div class="ocf-btn-mobile-fixed ocf-mobile">
+    <button type="button" class="ocf-btn ocf-btn-default" data-ocf="mobile" aria-label="{{ button_ocfilter_mobile }}">
+      <span class="ocf-btn-name">{{ button_ocfilter_mobile }}</span>
+      <i class="ocf-icon ocf-icon-16 ocf-brand ocf-sliders"></i>
+    </button>
+  </div>  
+  {% endif %} 
+  
+  <div class="ocf-hidden">
+    <button class="ocf-btn ocf-search-btn-popover" data-ocf="button" data-loading-text="{{ text_loading_ocf }}">{{ button_select }}</button>
+  </div>
+  
+<script>
++(function(global) {
+
+var startOCFilter = function() {
+  var loadScript = function(url, callback) {
+    // iOS Yandex Browser fix: $.ajax dataType:'script' unreliable (cache issue)
+    // Use native <script> tag injection for reliable loading
+    var existing = document.querySelector('script[src="' + url + '"]');
+    if (existing) {
+      // Script tag already in DOM
+      if (typeof $.fn.ocfilter !== 'undefined') {
+        // Plugin already loaded - call init directly
+        setTimeout(callback, 0);
+        return;
+      }
+      // Wait for plugin to finish executing
+      var waitExec = 0;
+      var checkLoaded = setInterval(function() {
+        waitExec++;
+        if (typeof $.fn.ocfilter !== 'undefined') {
+          clearInterval(checkLoaded);
+          callback();
+        } else if (waitExec > 400) { // iOS fix: 20s timeout
+          clearInterval(checkLoaded);
+        }
+      }, 50);
+      return;
+    }
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.src = url;
+    s.async = false; // iOS Safari fix: do NOT use async on dynamically created script tags
+    s.onload = s.onreadystatechange = function() {
+      if (!s.readyState || s.readyState === 'loaded' || s.readyState === 'complete') {
+        s.onload = s.onreadystatechange = null;
+        callback();
+      }
+    };
+    s.onerror = function() {
+      console.warn('OCFilter: script load error, trying fallback');
+      $.getScript(url).done(callback);
+    };
+    (document.head || document.body).appendChild(s);
+  };
+  
+  var init = function() {
+    $('#ocf-module-{{ index }}').ocfilter({
+      index: '{{ index }}',
+      
+      paramsIndex: '{{ url_index }}',
+      
+      urlHost: '{{ url_host }}',
+      urlParams: '{{ url_params }}',
+      
+      params: '{{ filter_params }}',
+      
+      sepFilt: '{{ sep_filt }}',
+      sepFsrc: '{{ sep_fsrc }}',
+      sepVals: '{{ sep_vals }}',
+      sepSdot: '{{ sep_sdot }}',
+      sepSneg: '{{ sep_sneg }}',
+      sepSran: '{{ sep_sran }}',
+
+      position: '{{ position }}',
+      layout: '{{ layout }}',
+      numeralLocale: '{{ numeral_locale }}',
+      searchButton: {{ search_button + 0 }},
+      showCounter: {{ show_counter + 0 }},
+      sliderInput: {{ slider_input + 0 }},
+      sliderPips: {{ slider_pips + 0 }},
+      priceLogarithmic: {{ price_logarithmic + 0 }},
+      lazyLoadFilters: {{ hidden_filters_lazy_load + 0 }},
+      lazyLoadValues: {{ hidden_values_lazy_load + 0 }},
+      
+      mobileMaxWidth: {{ mobile_max_width + 0 }},
+      mobileRememberState: {{ mobile_remember_state + 0 }},
+      
+      textLoad: '{{ text_loading_ocf|e('js') }}',
+      textSelect: '{{ button_select|e('js') }}'
+    });
+    // iOS fix v5.0: save config for external reinit by ocfilter-mobile-fix.js
+    window["_ocf_config_{{ index }}"] = {
+      index: "{{ index }}",
+      paramsIndex: "{{ url_index }}",
+      urlHost: "{{ url_host }}",
+      urlParams: "{{ url_params }}",
+      params: "{{ filter_params }}",
+      sepFilt: "{{ sep_filt }}",
+      sepFsrc: "{{ sep_fsrc }}",
+      sepVals: "{{ sep_vals }}",
+      sepSdot: "{{ sep_sdot }}",
+      sepSneg: "{{ sep_sneg }}",
+      sepSran: "{{ sep_sran }}",
+      position: "{{ position }}",
+      layout: "{{ layout }}",
+      numeralLocale: "{{ numeral_locale }}",
+      searchButton: {{ search_button + 0 }},
+      showCounter: {{ show_counter + 0 }},
+      sliderInput: {{ slider_input + 0 }},
+      sliderPips: {{ slider_pips + 0 }},
+      priceLogarithmic: {{ price_logarithmic + 0 }},
+      lazyLoadFilters: {{ hidden_filters_lazy_load + 0 }},
+      lazyLoadValues: {{ hidden_values_lazy_load + 0 }},
+      mobileMaxWidth: {{ mobile_max_width + 0 }},
+      mobileRememberState: {{ mobile_remember_state + 0 }}
+    };
+  };
+  
+  {% if index < 2 %}
+  loadScript('{{ javascript }}', init);
+  {% else %}
+  init();
+  {% endif %}
+};
+
+var ready = function(fn) {
+  if (global.readyState != 'loading') {
+    fn();
+  } else {
+    global.addEventListener('DOMContentLoaded', fn);
+  }
+};
+
+ready(function() { // DOM loaded
+  // iOS Yandex Browser fix: jQuery may not be loaded at DOMContentLoaded time
+  // (e.g. when jQuery loads asynchronously or from cache with delay)
+  var jqWaitTries = 0;
+  var waitForJQ = function() {
+    jqWaitTries++;
+    if (jqWaitTries > 120) {
+      console.error('OCFilter: jQuery not available after 6s');
+      return;
+    }
+    if (typeof jQuery !== 'undefined') {
+      jQuery(startOCFilter); // jQuery ready
+    } else {
+      setTimeout(waitForJQ, 50);
+    }
+  };
+  waitForJQ();
+});
+
+})(document);
+</script>
+</div><!-- /.ocf-container -->
