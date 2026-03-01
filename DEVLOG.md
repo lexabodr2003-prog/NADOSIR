@@ -199,3 +199,28 @@ git push origin main
 - [ ] Email order notifications
 - [ ] Payment flow testing
 - [ ] Final iOS/Yandex Browser testing
+
+---
+
+## Email Notifications Fix
+
+### Problem
+config_mail_alert was: a:1:{i:0;s:6:review;}
+Only review alerts were enabled, no order notifications!
+
+### Fix Applied
+Updated config_mail_alert to include both order AND review:
+a:2:{i:0;s:5:order;i:1;s:6:review;}
+
+Method: PHP script via web (serialize(array(order,review)))
+
+### Email settings after fix
+- config_mail_engine: mail (PHP mail)
+- config_email: info@kamtek.pro
+- config_mail_alert_email: info@kamtek.pro
+- config_mail_alert: order + review
+
+### Note
+SMTP is not configured (config_mail_smtp_hostname is empty).
+PHP mail() function is used. If emails are not arriving,
+configure SMTP in admin: System > Settings > Server > Mail.
