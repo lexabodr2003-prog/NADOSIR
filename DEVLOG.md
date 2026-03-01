@@ -444,3 +444,23 @@ Thorough investigation of rendered HTML revealed:
 
 ### Тесты
 3/3 раунда: HTTP 200, mobile-fix v7.1, isLoading fix=2, AJAX 200
+
+
+## Session 8 - OCFilter v8.0: Remove XHR+eval, simplify mobile fix (2026-03-01)
+
+### Problem
+- Video: filter counter updates correctly but result page is empty after clicking Show button
+- Android also broken after v7.0 changes
+
+### Root Cause
+- XHR+eval was unreliable on iOS Safari (CSP/scope issues)
+- isLoading race condition (setState setTimeout vs AJAX callback)
+- Server side confirmed working: filtered page has correct params and 24 products
+
+### Changes v8.0
+- mobile-fix.js: removed XHR+eval, removed loadOCFilterScript
+- mobile-fix.js: simplified - just waits for fn.ocfilter, then calls initModules
+- mobile-fix.js: added detailed console.log diagnostics (iOS/Android/UA)
+- mobile-fix.js: added jQuery ajaxError logger for mobile debugging
+- mobile-fix.js: kept watchdog 8s reset, kept AJAX timeout=15s
+- ocfilter.js: kept isLoading=false patches and _ocf_resp flag
