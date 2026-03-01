@@ -371,3 +371,46 @@ Thorough investigation of rendered HTML revealed:
 ### Modified Files
 - catalog/view/theme/default/template/extension/module/ocfilter48/module.twig (v6.0)
 - catalog/view/javascript/ocfilter-mobile-fix.js (v6.0)
+
+## Session 6 – iOS Filter Stuck Loading Fix (2026-03-01)
+
+### Проблема
+Клиент сообщил: при выборе значения фильтра (напор 55) кнопка уходит в бесконечную загрузку.
+Появляется надпись «Загрузка» + крутящийся эмодзи, затем «Выберите фильтры» — результаты не
+применяются.
+
+### Root-cause анализ
+1. **КРИТИЧЕСКАЯ ОШИБКА в ocfilter.js search()**: функция 
+   переводит кнопку в disabled состояние ( +  attr). После успешного
+   получения AJAX ответа код обновляет  кнопки, но **никогда не вызывает **.
+   Это означает что  остаётся, кнопка показывает текст но остаётся заблокированной.
+   На десктопе это незаметно (кнопка визуально работает через onclick), но на iOS — проявляется.
+
+2. **iOS ITP (Intelligent Tracking Prevention)**: первый AJAX запрос без куки занимает ~4s
+   (создание новой сессии). jQuery $.get без timeout может зависать. Добавлен timeout + cache-buster.
+
+3. **Отсутствие watchdog для «Загрузка» текста**: старый watchdog проверял только класс ,
+   но реальный loadingText — это «Загрузка...» без иконки в HTML кнопки.
+
+### Исправления
+
+#### ocfilter.js (v7.0 patch)
+Добавлен вызов  ПЕРЕД обновлением UI в $.get callback:
+
+Теперь ,  атрибут снят ДО того как html обновляется.
+
+#### ocfilter-mobile-fix.js (v7.0)
+-  — глобальный таймаут для всех AJAX
+-  — добавляет cache-buster  и timeout для OCFilter запросов
+- Улучшенный watchdog: проверяет наличие текста «загрузка»/«loading»/«fa-spin» в кнопке
+- После 8 секунд ожидания — принудительный сброс через DOM и ocfButton plugin
+
+### Результаты тестов
+- HTTP 200 для страницы (3/3)
+- AJAX запрос фильтра: 0.02-0.04s (с куки), href: YES (3/3)
+- ocfilter-mobile-fix.js v7.0: HTTP 200, 13968 bytes
+- ocfilter.js патч: button reset called present ✅
+
+### Изменённые файлы
+-  (patch: добавлен button('reset') в search callback)
+-  (v7.0: AJAX timeout, улучшенный watchdog)

@@ -1,14 +1,14 @@
 /**
- * OCFilter mobile fix v6.0
+ * OCFilter mobile fix v7.0
  * Fixes for: iOS Safari 15+, iOS Yandex Browser, Opera iOS, Android
  *
- * v6.0 Changes vs v5.0:
- * - Uses XHR+eval reinit (same as module.twig v6.0 loadScript)
- * - Reads _ocf_js_url_N to get the correct ocfilter.js URL
- * - textLoad/textSelect now included in _ocf_config (fixed in module.twig)
- * - Improved iOS detection (includes iPad with pointer)
- * - Smarter reinit: checks if #ocf-module-N exists before trying
- * - Watchdog on [data-ocf="mobile"] click: if filter panel doesn't open in 3s -> reinit
+ * v7.0 Changes vs v6.0:
+ * - CRITICAL FIX: jQuery $.ajax timeout override to prevent stuck loading state
+ * - CRITICAL FIX: Watchdog now detects loadingText ("Загрузка...") in button HTML
+ * - CRITICAL FIX: Forces button('reset') if loading stuck > 8s
+ * - Added global $.ajaxSetup with timeout:15000 for all OCFilter AJAX requests
+ * - Improved stuck detection: checks both ocf-disabled class AND loadingText content
+ * - Added direct AJAX interceptor via $.ajaxPrefilter to ensure timeout
  */
 (function() {
   'use strict';
@@ -25,6 +25,37 @@
   var DELAYS = isIOS
     ? [100, 300, 700, 1200, 2000, 3000, 5000, 7000]
     : [200, 500, 1200, 2500, 5000];
+
+  console.log('[OCFilter v7.0] iOS='+isIOS+' Yandex='+isYandexBrowser+' Mobile='+isMobile);
+
+  // =============================================
+  // CRITICAL: Set jQuery AJAX timeout (run early, retry until jQuery loads)
+  // =============================================
+  function installAjaxTimeout() {
+    if (typeof jQuery === 'undefined') {
+      setTimeout(installAjaxTimeout, 100);
+      return;
+    }
+    // Set global timeout for ALL ajax requests - prevents stuck loading on iOS
+    jQuery.ajaxSetup({ timeout: 15000 });
+
+    // Extra: intercept OCFilter AJAX calls and add cache-busting + timeout
+    jQuery.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+      if (options.url && options.url.indexOf('ocfilter') !== -1) {
+        if (!options.timeout || options.timeout < 10000) {
+          options.timeout = 15000;
+        }
+        // Add cache buster for iOS Safari ITP
+        var sep = options.url.indexOf('?') !== -1 ? '&' : '?';
+        if (options.url.indexOf('_ios_t=') === -1) {
+          options.url += sep + '_ios_t=' + Math.floor(Date.now() / 30000);
+        }
+        console.log('[OCFilter v7.0] AJAX intercepted:', options.url.slice(0, 100));
+      }
+    });
+
+    console.log('[OCFilter v7.0] jQuery AJAX timeout=15s installed');
+  }
 
   // =============================================
   // Check if any OCFilter module needs init
@@ -45,24 +76,20 @@
   // =============================================
   function getOCFilterScriptUrl(idx) {
     idx = idx || '1';
-    // First try: saved URL by module.twig v6.0
     var savedUrl = window['_ocf_js_url_' + idx];
     if (savedUrl) {
-      // Make absolute
       if (savedUrl.indexOf('http') !== 0 && savedUrl.indexOf('//') !== 0) {
         savedUrl = window.location.protocol + '//' + window.location.host + '/' +
           savedUrl.replace(/^\/+/, '');
       }
       return savedUrl;
     }
-    // Second try: find in DOM
     var scripts = document.querySelectorAll('script[src]');
     for (var i = 0; i < scripts.length; i++) {
       if (scripts[i].src && scripts[i].src.indexOf('ocfilter48/ocfilter') !== -1) {
         return scripts[i].src;
       }
     }
-    // Fallback: construct from known path
     return window.location.protocol + '//' + window.location.host +
       '/catalog/view/javascript/ocfilter48/ocfilter.js?v=4.8.2';
   }
@@ -75,7 +102,6 @@
       onLoaded();
       return;
     }
-    // Cache-bust
     var cbUrl = scriptUrl.split('?')[0] + '?v=4.8.2&_fix=' + Date.now();
     try {
       var xhr = new XMLHttpRequest();
@@ -88,9 +114,7 @@
           } catch(e1) {
             try { (0, eval)(xhr.responseText); } catch(e2) {}
           }
-          setTimeout(function() {
-            onLoaded();
-          }, 50);
+          setTimeout(function() { onLoaded(); }, 50);
         }
       };
       xhr.onerror = function() { onLoaded(); };
@@ -112,7 +136,7 @@
     var anyInited = false;
     modules.each(function() {
       var $el = $(this);
-      if ($el.data('ocfilter')) return; // already OK
+      if ($el.data('ocfilter')) return;
       if (typeof $.fn.ocfilter === 'undefined') return;
 
       var idx = ($el.attr('id') || '').replace('ocf-module-', '') || '1';
@@ -123,12 +147,11 @@
           $el.ocfilter(cfg);
           anyInited = true;
         } else {
-          // Minimal fallback config
           $el.ocfilter({ index: idx });
           anyInited = true;
         }
       } catch(e) {
-        console.warn('OCFilter reinit error:', e);
+        console.warn('[OCFilter v7.0] reinit error:', e);
       }
     });
     return anyInited;
@@ -144,13 +167,11 @@
     var scriptUrl = getOCFilterScriptUrl('1');
 
     if (typeof jQuery.fn.ocfilter === 'undefined') {
-      // Need to load/reload the script
       loadOCFilterScript(scriptUrl, function() {
         var ok = initModules();
         if (onDone) onDone(ok);
       });
     } else {
-      // Script loaded, just init
       var ok = initModules();
       if (onDone) onDone(ok);
     }
@@ -164,7 +185,7 @@
     if (delayIdx >= DELAYS.length) return;
 
     setTimeout(function() {
-      if (!needsInit()) return; // already OK
+      if (!needsInit()) return;
       forceReinit(function(ok) {
         if (!ok && delayIdx < DELAYS.length - 1) {
           tryInitSequence(delayIdx + 1);
@@ -174,11 +195,60 @@
   }
 
   // =============================================
-  // Watchdog: detect stuck "loading" button state
+  // CRITICAL: Watchdog - detect and fix stuck loading button
   // =============================================
   function installWatchdog() {
     if (typeof jQuery === 'undefined') return;
     var $ = jQuery;
+
+    // Monitor for stuck loading state every 2 seconds
+    var stuckWatchInterval = setInterval(function() {
+      $('[data-ocf="button"]').each(function() {
+        var $b = $(this);
+        var html = ($b.html() || '').toLowerCase();
+        var isDisabled = $b.hasClass('ocf-disabled') || $b.attr('disabled');
+        var isLoading = html.indexOf('fa-spin') !== -1 ||
+                        html.indexOf('загрузка') !== -1 ||
+                        html.indexOf('loading') !== -1;
+
+        if (isDisabled && isLoading) {
+          // Check how long it's been stuck
+          var stuckSince = $b.data('stuck-since');
+          if (!stuckSince) {
+            $b.data('stuck-since', Date.now());
+            console.log('[OCFilter v7.0] Watchdog: detected stuck loading button');
+          } else if (Date.now() - stuckSince > 8000) {
+            // Stuck for > 8 seconds - force reset
+            console.warn('[OCFilter v7.0] Watchdog: forcing button reset after 8s stuck');
+            $b.removeData('stuck-since');
+
+            // Use ocfButton plugin reset if available
+            var pluginKey = 'ocf.button';
+            var pluginData = $b.data(pluginKey);
+            if (pluginData && typeof pluginData.setState === 'function') {
+              pluginData.isLoading = false;
+              pluginData.isLoading = false;
+            }
+
+            // Force DOM reset
+            $b.removeClass('ocf-disabled').removeAttr('disabled').prop('disabled', false);
+            var resetText = $b.data('resetText');
+            if (resetText) {
+              $b.html(resetText);
+            } else {
+              // Try to get textSelect from config
+              var cfg = window['_ocf_config_1'];
+              if (cfg && cfg.textSelect) {
+                $b.html(cfg.textSelect);
+              }
+            }
+          }
+        } else {
+          // Not stuck - clear timer
+          $b.removeData('stuck-since');
+        }
+      });
+    }, 2000);
 
     $(document).off('click.ocfw touchend.ocfw').on(
       'click.ocfw touchend.ocfw',
@@ -188,31 +258,17 @@
 
         // Special handling for mobile open button
         if ($btn.attr('data-ocf') === 'mobile' || $btn.closest('.ocf-btn-mobile-fixed').length) {
-          // Check if filter panel is visible after 1.5s
           setTimeout(function() {
             var $container = $('[id^="ocf-module-"]').first();
-            var isVisible = $container.hasClass('ocf-open') || 
+            var isVisible = $container.hasClass('ocf-open') ||
               $container.find('.ocf-content').is(':visible') ||
               $('[id^="ocf-module-"]').data('ocfilter') !== undefined;
-            
+
             if (!isVisible || needsInit()) {
-              // Filter didn't open - try reinit
               forceReinit(null);
             }
           }, 1500);
         }
-
-        // Watchdog for stuck spinner
-        setTimeout(function() {
-          $('[data-ocf="button"]').each(function() {
-            var $b = $(this);
-            if ($b.hasClass('ocf-disabled') && ($b.html() || '').indexOf('fa-spin') !== -1) {
-              $b.removeClass('ocf-disabled').removeAttr('disabled');
-              var resetText = $b.data('resetText') || $b.data('selectText') || $b.data('textSelect');
-              if (resetText) $b.html(resetText);
-            }
-          });
-        }, 12000);
       }
     );
   }
@@ -255,7 +311,7 @@
   }
 
   // =============================================
-  // visibilitychange: reinit when tab becomes visible
+  // visibilitychange / bfcache
   // =============================================
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible' && needsInit()) {
@@ -263,9 +319,6 @@
     }
   });
 
-  // =============================================
-  // pageshow: bfcache (back button) handling
-  // =============================================
   window.addEventListener('pageshow', function(e) {
     var fromCache = e.persisted;
     var navEntry = (performance && performance.getEntriesByType) ?
@@ -286,6 +339,8 @@
   // Main start
   // =============================================
   function start() {
+    installAjaxTimeout(); // CRITICAL: must be first
+
     tryInitSequence(0);
 
     var wdTries = 0;
@@ -310,6 +365,7 @@
   window.addEventListener('load', function() {
     setTimeout(function() {
       if (typeof jQuery !== 'undefined') {
+        installAjaxTimeout();
         installWatchdog();
         if (needsInit()) tryInitSequence(0);
       }
@@ -317,7 +373,7 @@
   });
 
   // =============================================
-  // Task 15: Catalog button - direct link on desktop
+  // Catalog button - direct link on desktop
   // =============================================
   function initCatalogButton() {
     var btn = document.querySelector('.ds-header-catalog-button');
