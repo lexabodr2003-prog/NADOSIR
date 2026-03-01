@@ -87,7 +87,7 @@ var startOCFilter = function() {
         if (typeof $.fn.ocfilter !== 'undefined') {
           clearInterval(checkLoaded);
           callback();
-        } else if (waitExec > 100) {
+        } else if (waitExec > 400) { // iOS fix: 20s timeout
           clearInterval(checkLoaded);
         }
       }, 50);
@@ -96,7 +96,7 @@ var startOCFilter = function() {
     var s = document.createElement('script');
     s.type = 'text/javascript';
     s.src = url;
-    s.async = true;
+    s.async = false; // iOS Safari fix: do NOT use async on dynamically created script tags
     s.onload = s.onreadystatechange = function() {
       if (!s.readyState || s.readyState === 'loaded' || s.readyState === 'complete') {
         s.onload = s.onreadystatechange = null;
@@ -145,6 +145,32 @@ var startOCFilter = function() {
       textLoad: '{{ text_loading_ocf|e('js') }}',
       textSelect: '{{ button_select|e('js') }}'
     });
+    // iOS fix v5.0: save config for external reinit by ocfilter-mobile-fix.js
+    window["_ocf_config_{{ index }}"] = {
+      index: "{{ index }}",
+      paramsIndex: "{{ url_index }}",
+      urlHost: "{{ url_host }}",
+      urlParams: "{{ url_params }}",
+      params: "{{ filter_params }}",
+      sepFilt: "{{ sep_filt }}",
+      sepFsrc: "{{ sep_fsrc }}",
+      sepVals: "{{ sep_vals }}",
+      sepSdot: "{{ sep_sdot }}",
+      sepSneg: "{{ sep_sneg }}",
+      sepSran: "{{ sep_sran }}",
+      position: "{{ position }}",
+      layout: "{{ layout }}",
+      numeralLocale: "{{ numeral_locale }}",
+      searchButton: {{ search_button + 0 }},
+      showCounter: {{ show_counter + 0 }},
+      sliderInput: {{ slider_input + 0 }},
+      sliderPips: {{ slider_pips + 0 }},
+      priceLogarithmic: {{ price_logarithmic + 0 }},
+      lazyLoadFilters: {{ hidden_filters_lazy_load + 0 }},
+      lazyLoadValues: {{ hidden_values_lazy_load + 0 }},
+      mobileMaxWidth: {{ mobile_max_width + 0 }},
+      mobileRememberState: {{ mobile_remember_state + 0 }}
+    };
   };
   
   {% if index < 2 %}

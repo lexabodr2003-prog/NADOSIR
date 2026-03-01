@@ -224,3 +224,85 @@ Method: PHP script via web (serialize(array(order,review)))
 SMTP is not configured (config_mail_smtp_hostname is empty).
 PHP mail() function is used. If emails are not arriving,
 configure SMTP in admin: System > Settings > Server > Mail.
+
+
+---
+
+## Session 4 - iOS Safari Fix (OCFilter v5.0)
+Date: 2026-03-01
+Problem: OCFilter worked on Android tablet but NOT on two iPhones (confirmed by client)
+
+### Root Cause Analysis
+1. Race condition: s.async=true on dynamic script injection in module.twig
+   iOS Safari can execute dynamically added async script before jQuery bundle finishes
+2. waitExec timeout too short: 100x50ms=5s - not enough for slow iOS connections
+3. No iOS-specific handlers: bfcache, visibilitychange, touch-triggered init
+4. No config storage: external fix script had no access to OCFilter init params
+
+### Fixes Applied
+
+[module.twig]
+- s.async = true -> s.async = false (race condition fix)
+- waitExec limit 100->400 (5s->20s timeout)
+- Added window["_ocf_config_N"]={...} config save block
+
+[ocfilter-mobile-fix.js v5.0 - full rewrite]
+- iOS/Safari/YandexBrowser detection
+- iOS delays: 50/200/500/1000/1500/2000/3000/4000/5000/7000ms
+- Cache-busting: remove+re-add script tag with ?_ios_cb=timestamp
+- Touch trigger: on first tap of OCFilter area - force reinit
+- visibilitychange: on tab switch back on iPhone - retry init
+- Watchdog: touchend added alongside click events
+
+### Test Results
+- HTTP 200: home/catalog/product - PASS
+- s.async=false in HTML output - PASS
+- window["_ocf_config_1"] with real params in HTML - PASS
+- ocfilter-mobile-fix.js v5.0 serving correctly - PASS
+- Android tablet: WORKS (client confirmed)
+- iPhone: awaiting client confirmation
+
+### Modified Files
+- catalog/view/theme/default/template/extension/module/ocfilter48/module.twig
+- catalog/view/javascript/ocfilter-mobile-fix.js (upgraded to v5.0)
+
+
+---
+
+## Session 4 - iOS Safari Fix (OCFilter v5.0)
+Date: 16:11
+Problem: OCFilter worked on Android tablet but NOT on two iPhones (confirmed by client)
+
+### Root Cause Analysis
+1. Race condition: s.async=true on dynamic script injection in module.twig
+   iOS Safari can execute dynamically added async script before jQuery bundle finishes
+2. waitExec timeout too short: 100x50ms=5s - not enough for slow iOS connections
+3. No iOS-specific handlers: bfcache, visibilitychange, touch-triggered init
+4. No config storage: external fix script had no access to OCFilter init params
+
+### Fixes Applied
+
+[module.twig]
+- s.async = true -> s.async = false (race condition fix)
+- waitExec limit 100->400 (5s->20s timeout)
+- Added window["_ocf_config_N"]={...} config save block
+
+[ocfilter-mobile-fix.js v5.0 - full rewrite]
+- iOS/Safari/YandexBrowser detection
+- iOS delays: 50/200/500/1000/1500/2000/3000/4000/5000/7000ms
+- Cache-busting: remove+re-add script tag with ?_ios_cb=timestamp
+- Touch trigger: on first tap of OCFilter area - force reinit
+- visibilitychange: on tab switch back on iPhone - retry init
+- Watchdog: touchend added alongside click events
+
+### Test Results
+- HTTP 200: home/catalog/product - PASS
+- s.async=false in HTML output - PASS
+- window["_ocf_config_1"] with real params in HTML - PASS
+- ocfilter-mobile-fix.js v5.0 serving correctly - PASS
+- Android tablet: WORKS (client confirmed)
+- iPhone: awaiting client confirmation
+
+### Modified Files
+- catalog/view/theme/default/template/extension/module/ocfilter48/module.twig
+- catalog/view/javascript/ocfilter-mobile-fix.js (upgraded to v5.0)

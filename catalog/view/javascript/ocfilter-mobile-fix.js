@@ -1,115 +1,246 @@
 /**
- * OCFilter mobile fix v4.0
- * Fixes for: iOS Yandex Browser, Opera iOS, Android all browsers
+ * OCFilter mobile fix v5.0
+ * Fixes for: iOS Safari, iOS Yandex Browser, Opera iOS, Android all browsers
  *
- * Key fixes:
- * 1. Multiple initialization attempts with increasing delays
- * 2. pageshow/bfcache handling for back button
- * 3. Watchdog for stuck loading state
- * 4. Direct OCFilter instance check and re-init
+ * ROOT CAUSE ANALYSIS (v5.0):
+ * - iOS Safari: dynamic script injection with s.async=true causes race condition
+ *   (script may execute before jQuery bundle finishes)
+ * - iOS Yandex Browser: $.ajax dataType:'script' uses aggressive caching,
+ *   sometimes serving stale/broken cached version
+ * - iOS WebKit: visibilitychange + back/forward cache (bfcache) - filter not reinit
+ * - iOS Safari 15+: Intelligent Tracking Prevention blocks some XHR patterns
+ *
+ * FIXES APPLIED:
+ * 1. module.twig: s.async=false (prevents race condition)
+ * 2. module.twig: waitExec limit 100→400 (20s timeout instead of 5s)
+ * 3. This file: iOS-specific reinit with proper jQuery wait
+ * 4. This file: visibilitychange handler (tab switching on iPhone)
+ * 5. This file: Touch-triggered lazy reinit for iOS
+ * 6. This file: Cache-busting for ocfilter.js on iOS retry
  */
 (function() {
   'use strict';
 
-  var MAX_TRIES = 40;
-  var DELAYS = [0, 100, 300, 500, 800, 1200, 2000, 3000, 5000];
+  // =============================================
+  // iOS detection
+  // =============================================
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isYandexBrowser = /YaBrowser/.test(navigator.userAgent);
+  var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  var isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
+
+  var DELAYS = isIOS
+    ? [50, 200, 500, 1000, 1500, 2000, 3000, 4000, 5000, 7000]
+    : [0, 100, 300, 500, 800, 1200, 2000, 3000, 5000];
 
   // =============================================
-  // Core: force OCFilter init on element
+  // Core: check if OCFilter needs init
   // =============================================
-  function forceInitOCFilter() {
+  function needsInit() {
+    if (typeof jQuery === 'undefined') return false;
+    var $ = jQuery;
+    var modules = $('[id^="ocf-module-"]');
+    if (!modules.length) return false;
+    var needs = false;
+    modules.each(function() {
+      if (!$(this).data('ocfilter')) needs = true;
+    });
+    return needs;
+  }
+
+  // =============================================
+  // Core: force OCFilter reload and re-init
+  // iOS-specific: cache bust + synchronous injection
+  // =============================================
+  function forceReloadAndInit() {
     if (typeof jQuery === 'undefined') return false;
     var $ = jQuery;
 
     var modules = $('[id^="ocf-module-"]');
     if (!modules.length) return false;
 
-    var initiated = 0;
+    var anyUninitialized = false;
     modules.each(function() {
-      var $el = $(this);
-      var pluginData = $el.data('ocfilter');
+      if (!$(this).data('ocfilter')) anyUninitialized = true;
+    });
+    if (!anyUninitialized) return false;
 
-      if (!pluginData) {
-        if (typeof $.fn.ocfilter !== 'undefined') {
-          try {
-            var opts = $el.data() || {};
-            // Reconstruct key options from data attributes
-            var idx = $el.attr('id') ? $el.attr('id').replace('ocf-module-', '') : '0';
-            $el.ocfilter({ index: idx });
-            initiated++;
-          } catch(e) {
-            // ignore
-          }
+    // Find the ocfilter.js script URL from existing script tags
+    var ocfScriptEl = document.querySelector('script[src*="ocfilter"][src*=".js"]');
+    if (!ocfScriptEl) return false;
+
+    var scriptUrl = ocfScriptEl.src;
+
+    // iOS cache bust: add timestamp to force fresh load
+    if (isIOS) {
+      // Remove old script tag to force reload
+      var oldTag = document.querySelector('script[src*="ocfilter48/ocfilter.js"]');
+      if (oldTag && typeof $.fn.ocfilter === 'undefined') {
+        // Script loaded but plugin not defined - remove and retry
+        oldTag.parentNode.removeChild(oldTag);
+
+        // Add cache-bust param
+        var cbUrl = scriptUrl.split('?')[0] + '?_ios_cb=' + Date.now();
+        var newTag = document.createElement('script');
+        newTag.type = 'text/javascript';
+        newTag.src = cbUrl;
+        newTag.async = false; // IMPORTANT: no async on iOS
+        newTag.onload = function() {
+          setTimeout(function() {
+            if (typeof $.fn.ocfilter !== 'undefined') {
+              triggerOCFilterInit();
+            }
+          }, 100);
+        };
+        document.head.appendChild(newTag);
+        return true;
+      }
+    }
+
+    // Non-iOS or plugin already loaded: just trigger init
+    if (typeof $.fn.ocfilter !== 'undefined') {
+      triggerOCFilterInit();
+      return true;
+    }
+
+    return false;
+  }
+
+  // =============================================
+  // Trigger OCFilter init on all uninitialized modules
+  // Re-runs the inline script logic from module.twig
+  // =============================================
+  function triggerOCFilterInit() {
+    if (typeof jQuery === 'undefined') return;
+    var $ = jQuery;
+
+    $('[id^="ocf-module-"]').each(function() {
+      var $el = $(this);
+      if ($el.data('ocfilter')) return; // already initialized
+
+      if (typeof $.fn.ocfilter === 'undefined') return;
+
+      try {
+        // Extract init params from data attributes on the element
+        // These are set by the inline script in module.twig
+        var idx = $el.attr('id') ? $el.attr('id').replace('ocf-module-', '') : '0';
+
+        // Try to get the stored init config from window (set by module.twig)
+        var config = window['_ocf_config_' + idx];
+        if (config) {
+          $el.ocfilter(config);
+          return;
         }
+
+        // Fallback: minimal init config
+        $el.ocfilter({ index: idx });
+      } catch(e) {
+        console.warn('OCFilter reinit error:', e);
       }
     });
-
-    return initiated > 0;
   }
 
   // =============================================
-  // Wait for jQuery + OCFilter plugin, then init
+  // Wait for jQuery + OCFilter, then try init
   // =============================================
-  function waitAndInit(tryIndex) {
-    tryIndex = tryIndex || 0;
-    if (tryIndex >= DELAYS.length) return;
+  function tryInit(delayIndex) {
+    delayIndex = delayIndex || 0;
+    if (delayIndex >= DELAYS.length) return;
 
-    var delay = DELAYS[tryIndex] || 1000;
+    var delay = DELAYS[delayIndex];
 
     setTimeout(function() {
-      if (typeof jQuery === 'undefined') {
-        waitAndInit(tryIndex + 1);
-        return;
+      if (!needsInit()) return; // already initialized or no modules
+
+      var initiated = forceReloadAndInit();
+      if (!initiated && delayIndex < DELAYS.length - 1) {
+        tryInit(delayIndex + 1);
       }
-
-      var $ = jQuery;
-
-      if (typeof $.fn.ocfilter === 'undefined') {
-        waitAndInit(tryIndex + 1);
-        return;
-      }
-
-      // OCFilter plugin available - check if modules need init
-      var modules = $('[id^="ocf-module-"]');
-      if (!modules.length) return;
-
-      var needsInit = false;
-      modules.each(function() {
-        if (!$(this).data('ocfilter')) needsInit = true;
-      });
-
-      if (needsInit) {
-        // Re-trigger the inline scripts in module.twig
-        // by dispatching a custom event
-        try {
-          var evt = new Event('ocfilter:reinit', { bubbles: true });
-          document.dispatchEvent(evt);
-        } catch(e) {}
-
-        // Also try direct init after short delay
-        setTimeout(function() {
-          modules.each(function() {
-            if (!$(this).data('ocfilter')) {
-              try {
-                // Try to extract init params from the script in the module
-                var scripts = $(this).find('script');
-                if (scripts.length) {
-                  // Module has inline script - it should self-init
-                  // Just trigger it differently
-                }
-              } catch(e) {}
-            }
-          });
-        }, 200);
-      }
-
-      // Continue trying in case first attempt didn't work
-      if (tryIndex < DELAYS.length - 1) {
-        waitAndInit(tryIndex + 1);
-      }
-
     }, delay);
   }
+
+  // =============================================
+  // iOS-specific: intercept first touch to trigger init
+  // On iOS Safari, touch events can wake up lazy-initialized components
+  // =============================================
+  function installIOSTouchTrigger() {
+    if (!isIOS && !isMobile) return;
+
+    var triggered = false;
+    var touchHandler = function(e) {
+      if (triggered) return;
+
+      // Check if touching OCFilter area
+      var target = e.target;
+      var inOCFilter = false;
+      while (target && target !== document) {
+        if (target.id && target.id.indexOf('ocf-module-') === 0) {
+          inOCFilter = true;
+          break;
+        }
+        if (target.classList && (
+          target.classList.contains('ocf-container') ||
+          target.classList.contains('ocf-btn-mobile-fixed')
+        )) {
+          inOCFilter = true;
+          break;
+        }
+        target = target.parentNode;
+      }
+
+      if (inOCFilter && needsInit()) {
+        triggered = true;
+        document.removeEventListener('touchstart', touchHandler);
+
+        // iOS: delay slightly to let touch event processing complete
+        setTimeout(function() {
+          forceReloadAndInit();
+          // Retry sequence if still not initialized
+          setTimeout(function() {
+            if (needsInit()) tryInit(0);
+          }, 500);
+        }, 50);
+      }
+    };
+
+    document.addEventListener('touchstart', touchHandler, { passive: true });
+  }
+
+  // =============================================
+  // visibilitychange handler (iOS tab switching)
+  // When user switches back to tab on iPhone, filter may be dead
+  // =============================================
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      setTimeout(function() {
+        if (needsInit()) {
+          tryInit(0);
+        }
+      }, 300);
+    }
+  });
+
+  // =============================================
+  // pageshow: handle bfcache (back button)
+  // =============================================
+  window.addEventListener('pageshow', function(e) {
+    var fromCache = e.persisted;
+    var navEntry = (performance && performance.getEntriesByType) ?
+      performance.getEntriesByType('navigation')[0] : null;
+    var isBackForward = navEntry && navEntry.type === 'back_forward';
+
+    if (fromCache || isBackForward) {
+      // Restored from bfcache - full reinit sequence
+      tryInit(0);
+      setTimeout(installWatchdog, 500);
+    } else {
+      // Normal page load
+      setTimeout(function() {
+        if (needsInit()) tryInit(0);
+      }, isIOS ? 1000 : 2000);
+    }
+  });
 
   // =============================================
   // WATCHDOG: Reset stuck "loading" state
@@ -118,7 +249,8 @@
     if (typeof jQuery === 'undefined') return;
     var $ = jQuery;
 
-    $(document).off('click.ocf_watchdog').on('click.ocf_watchdog',
+    $(document).off('click.ocf_watchdog touchend.ocf_watchdog').on(
+      'click.ocf_watchdog touchend.ocf_watchdog',
       '[data-filter-key], [data-ocf="button"], [data-ocf-discard], [data-ocf="mobile"], .ocf-btn-mobile-fixed',
       function() {
         setTimeout(function() {
@@ -137,42 +269,11 @@
   }
 
   // =============================================
-  // pageshow: handle bfcache (back button)
-  // =============================================
-  window.addEventListener('pageshow', function(e) {
-    var fromCache = e.persisted;
-
-    // Some Android browsers don't set persisted correctly
-    // Also handle performance navigation type
-    var navEntry = (performance && performance.getEntriesByType) ?
-      performance.getEntriesByType('navigation')[0] : null;
-    var isBackForward = navEntry && navEntry.type === 'back_forward';
-
-    if (fromCache || isBackForward) {
-      // Restored from cache - full reinit sequence
-      waitAndInit(0);
-      setTimeout(installWatchdog, 500);
-    } else {
-      // Normal page load - still try delayed init for slow browsers
-      setTimeout(function() {
-        if (typeof jQuery !== 'undefined') {
-          var $ = jQuery;
-          var modules = $('[id^="ocf-module-"]');
-          modules.each(function() {
-            if (!$(this).data('ocfilter') && typeof $.fn.ocfilter !== 'undefined') {
-              installWatchdog();
-            }
-          });
-        }
-      }, 2000);
-    }
-  });
-
-  // =============================================
   // Main init sequence
   // =============================================
   function start() {
-    waitAndInit(0);
+    // Start delayed init sequence
+    tryInit(0);
 
     // Install watchdog after jQuery loads
     var wdTries = 0;
@@ -181,7 +282,8 @@
       if (typeof jQuery !== 'undefined') {
         clearInterval(wdInterval);
         installWatchdog();
-      } else if (wdTries > 100) {
+        installIOSTouchTrigger();
+      } else if (wdTries > 200) {
         clearInterval(wdInterval);
       }
     }, 100);
@@ -198,8 +300,9 @@
     setTimeout(function() {
       if (typeof jQuery !== 'undefined') {
         installWatchdog();
+        if (needsInit()) tryInit(0);
       }
-    }, 500);
+    }, isIOS ? 800 : 500);
   });
 
   // =============================================
