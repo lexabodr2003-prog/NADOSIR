@@ -1,0 +1,336 @@
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header p-0 pb-4">
+				<h5 class="modal-title fsz-20 fw-700 d-flex align-items-center justify-content-between" id="loginModalLabel">{{ heading_title }}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+					<svg xmlns="http://www.w3.org/2000/svg" width="12" height="13" viewbox="0 0 12 13" fill="none">
+						<path d="M11.8029 11.5725C12.0633 11.8329 12.0633 12.2551 11.8029 12.5155C11.6731 12.6453 11.5025 12.7111 11.3319 12.7111C11.1612 12.7111 10.9906 12.6462 10.8608 12.5155L5.99911 7.65384L1.13743 12.5155C1.00766 12.6453 0.837017 12.7111 0.666369 12.7111C0.495722 12.7111 0.325075 12.6462 0.195312 12.5155C-0.0651039 12.2551 -0.0651039 11.8329 0.195312 11.5725L5.057 6.71085L0.195312 1.8492C-0.0651039 1.58878 -0.0651039 1.16657 0.195312 0.906158C0.455727 0.645742 0.877907 0.645742 1.13832 0.906158L6.00001 5.76787L10.8617 0.906158C11.1221 0.645742 11.5443 0.645742 11.8047 0.906158C12.0651 1.16657 12.0651 1.58878 11.8047 1.8492L6.943 6.71085L11.8029 11.5725Z" fill="#00A8E8"/>
+					</svg>
+				</button>
+			</div>
+			<div class="modal-body p-0 pt-4">
+        <div class="dark-text fsz-14 pb-2 fw-500{% if not otp_module_status %} d-none{% endif %}">{{ text_choose_login }}</div>
+				<ul class="nav nav-tabs{% if not otp_module_status %} d-none{% endif %}" id="loginTabs" role="tablist">
+					{% if otp_module_status %}
+						<li class="nav-item" role="presentation">
+							<button class="nav-link active " id="otp-login-tab" data-bs-toggle="tab" data-bs-target="#otp-login" type="button" role="tab"  aria-selected="true">{{ text_otp_tab }}</button>
+						</li>
+					{% endif %}
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="email-login-tab" data-bs-toggle="tab" data-bs-target="#email-login" type="button" role="tab" aria-selected="{% if otp_module_status %}false{% else %}true{% endif %}">{{ text_email_tab }}</button>
+					</li>
+				</ul>
+				<!-- Tabs content -->
+				<div class="tab-content{% if otp_module_status %} tab-content-otp{% endif %}" id="loginTabsContent">
+					{% if otp_module_status %}
+						<div class="tab-pane fade show active" id="otp-login" role="tabpanel" aria-labelledby="otp-login-tab">
+						  <div class="light-text fsz-14 py-4">{{ text_entry_telephone }}</div>
+							<div id="otp-alert" style="display: none;" class="fsz-14 alert" role="alert"></div>
+							<form id="otp-form-telephone">
+								<div class="input-group mb-3">
+                  <span class="input-group-text" id="phoneCallbackIcon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" fill="none">
+                      <path d="M11.3368 15.1627C11.0004 15.1627 10.6618 15.1174 10.3276 15.0262C5.80904 13.7918 2.23157 10.2329 0.990706 5.73786C0.708526 4.71571 0.863136 3.65051 1.4275 2.73998C1.99406 1.82508 2.92566 1.17939 3.98329 0.969273C4.68691 0.829192 5.38246 1.14146 5.7394 1.74045L6.88497 3.66655C7.44127 4.60188 7.16486 5.80643 6.25529 6.40907L5.42644 6.95773C6.20115 8.54094 7.5042 9.84179 9.08808 10.6122L9.64673 9.78268C10.2558 8.87872 11.4658 8.60806 12.4047 9.16473L14.3419 10.3146C14.9415 10.6706 15.2514 11.3673 15.1151 12.0473C14.904 13.1001 14.2554 14.0274 13.337 14.5914C12.7199 14.9693 12.0331 15.1627 11.3368 15.1627ZM4.3197 2.02863C4.28378 2.02863 4.24716 2.03229 4.21198 2.03959C3.43946 2.19353 2.77029 2.6568 2.36425 3.31416C1.96186 3.96349 1.85117 4.72154 2.052 5.44748C3.19025 9.57184 6.47306 12.8382 10.6185 13.9705C11.3486 14.1697 12.1078 14.0588 12.7594 13.659C13.419 13.2541 13.8853 12.5872 14.037 11.8314C14.0824 11.6045 13.9791 11.3717 13.7783 11.2528L11.8418 10.103C11.4057 9.84469 10.8428 9.97092 10.5599 10.3904L9.74264 11.6052C9.59605 11.8226 9.31324 11.9058 9.0743 11.8051C6.90261 10.9011 5.13549 9.13846 4.22665 6.96867C4.1255 6.72644 4.21042 6.44774 4.42957 6.30256L5.64707 5.49635C6.06924 5.21692 6.19747 4.65733 5.93874 4.22323L4.79317 2.29784C4.69276 2.12858 4.51099 2.02863 4.3197 2.02863Z" fill="#00171F"/>
+                    </svg>
+                  </span>
+                  <input type="tel" name="telephone" value="{{ telephone }}" class="form-control" id="oct-input-telephone" placeholder="{{ entry_telephone }}" inputmode="tel" aria-label="telephone" aria-describedby="phoneCallbackIcon">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                </div>
+								<button type="button" id="button-send-otp" class="button button-primary br-7 w-100">{{ button_send_otp }}</button>
+							</form>
+
+							<form id="otp-form-code" style="display: none;">
+								<div class="mb-3">
+									<label for="input-otp" class="form-label">{{ entry_otp }}</label>
+									<input type="text" name="otp_code" placeholder="{{ entry_otp }}" id="input-otp" class="form-control"/>
+								</div>
+								<button type="button" id="button-verify-otp" class="button button-primary br-7 w-100">{{ button_verify_otp }}</button>
+								<button type="button" id="button-resend-otp" class="button button-outline button-outline-primary mt-3 br-7 w-100">{{ button_resend_otp }}</button>
+                <div class="pt-3 border-0">
+                  <div class="ds-cart-column-item-title d-flex align-items-center secondary-text">
+                      {{ text_otp_not_received }}
+                      <svg class="mx-2" xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                          <path d="M5.24831 5.67345C5.05631 5.67345 4.86428 5.60048 4.71829 5.45348L0.718285 1.45348C0.425285 1.16048 0.425285 0.685449 0.718285 0.392449C1.01129 0.099449 1.48632 0.099449 1.77932 0.392449L5.24929 3.86242L8.71926 0.392449C9.01226 0.099449 9.4873 0.099449 9.7803 0.392449C10.0733 0.685449 10.0733 1.16048 9.7803 1.45348L5.7803 5.45348C5.6323 5.60048 5.44031 5.67345 5.24831 5.67345Z" fill="#003459"></path>
+                      </svg>
+                  </div>
+                  <div class="form-group ds-cart-column-item-block-group dark-text fsz-14">
+                      <p class="py-3">{{ text_otp_not_sent }}</p>
+                      <div class="p-3 br-8 otp-code-block">{{ text_otp_not_sent_list }}</div>
+                  </div>
+              </div>
+							</form>
+							<input type="hidden" id="saved-telephone" value=""/>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+						</div>
+            <script>
+              stickyColumn();
+            </script>
+					{% endif %}
+					<div class="tab-pane fade{% if not otp_module_status %} show active{% endif %}" id="email-login" role="tabpanel" aria-labelledby="email-login-tab">
+						<div class="light-text fsz-14 pt-4">{{ oct_text_popup_login }}</div>
+						<form method="post" enctype="multipart/form-data" id="popupLoginForm">
+							<div class="input-group mt-4">
+								<span class="input-group-text" id="emailPopupLoginIcon">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewbox="0 0 16 15" fill="none">
+										<path d="M12.9231 14.4517H3.07692C1.09292 14.4517 0 13.3588 0 11.3748V3.99019C0 2.00619 1.09292 0.913269 3.07692 0.913269H12.9231C14.9071 0.913269 16 2.00619 16 3.99019V11.3748C16 13.3588 14.9071 14.4517 12.9231 14.4517ZM3.07692 2.14404C1.78297 2.14404 1.23077 2.69624 1.23077 3.99019V11.3748C1.23077 12.6688 1.78297 13.221 3.07692 13.221H12.9231C14.217 13.221 14.7692 12.6688 14.7692 11.3748V3.99019C14.7692 2.69624 14.217 2.14404 12.9231 2.14404H3.07692ZM8.84435 8.23963L12.8746 5.30875C13.1495 5.10937 13.2102 4.72374 13.01 4.44886C12.8106 4.17481 12.4268 4.11245 12.1502 4.31347L8.11979 7.24435C8.04759 7.29686 7.95161 7.29686 7.87941 7.24435L3.84896 4.31347C3.57162 4.11245 3.18857 4.17563 2.98918 4.44886C2.78898 4.72374 2.84973 5.10855 3.1246 5.30875L7.15485 8.24044C7.40757 8.42424 7.70381 8.51532 7.9992 8.51532C8.29458 8.51532 8.59245 8.42342 8.84435 8.23963Z" fill="#00171F"></path>
+									</svg>
+								</span>
+								<input type="email" class="form-control" id="inputEmailLogin" placeholder="{{ entry_email }}" name="email" inputmode="text" aria-label="email" aria-describedby="emailPopupLoginIcon" autocomplete="username">
+							</div>
+							<div class="input-group mt-4">
+								<span class="input-group-text" id="passwordPopupLoginIcon">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="20" viewbox="0 0 16 20" fill="none">
+										<path d="M12.75 6.41724V5.11328C12.75 2.49428 10.619 0.363281 8 0.363281C5.381 0.363281 3.25 2.49428 3.25 5.11328V6.41724C1.312 6.67424 0.25 7.95928 0.25 10.1133V16.1133C0.25 18.5313 1.582 19.8633 4 19.8633H12C14.418 19.8633 15.75 18.5313 15.75 16.1133V10.1133C15.75 7.96028 14.688 6.67524 12.75 6.41724ZM8 1.86328C9.792 1.86328 11.25 3.32128 11.25 5.11328V6.36328H4.75V5.11328C4.75 3.32128 6.208 1.86328 8 1.86328ZM14.25 16.1133C14.25 17.6903 13.577 18.3633 12 18.3633H4C2.423 18.3633 1.75 17.6903 1.75 16.1133V10.1133C1.75 8.53628 2.423 7.86328 4 7.86328H12C13.577 7.86328 14.25 8.53628 14.25 10.1133V16.1133ZM9.27002 12.1133C9.27002 12.5253 9.058 12.8733 8.75 13.1003V15.1133C8.75 15.5273 8.414 15.8633 8 15.8633C7.586 15.8633 7.25 15.5273 7.25 15.1133V13.0752C6.962 12.8462 6.76489 12.5083 6.76489 12.1133C6.76489 11.4233 7.32001 10.8633 8.01001 10.8633H8.02002C8.71002 10.8633 9.27002 11.4233 9.27002 12.1133Z" fill="#003459"/>
+									</svg>
+								</span>
+								<input type="password" class="form-control" id="inputPasswordLogin" placeholder="{{ entry_password }}" name="password" aria-label="password" aria-describedby="passwordPopupLoginIcon" autocomplete="current-password">
+								{% if redirect %}
+									<input type="hidden" name="redirect" value="{{ redirect }}"/>
+								{% endif %}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+							</div>
+							<div class="d-flex justify-content-between my-4 fsz-14">
+								<a class="blue-link" href="{{ forgotten_url }}">{{ button_forgotten }}</a>
+								<a class="blue-link" href="{{ register_url }}">{{ button_register }}</a>
+							</div>
+							<button id="popup-login-button" type="button" class="button button-primary br-7 w-100">{{ button_login }}</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Email Modal Script -->
+<script>
+$('#popup-login-button').on('click', function() {
+    $.ajax({
+		type: 'post',
+		url:  'index.php?route=octemplates/module/oct_popup_login/login',
+		dataType: 'json',
+		cache: false,
+		data: $('#popupLoginForm').serialize(),
+		beforeSend: function() {
+			masked('body', true);
+
+			$('#popup-login-button').data('original-content', $('#popup-login-button').html());
+			$('#popup-login-button').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>').prop('disabled', true);
+		},
+		complete: function() {
+			masked('body', false);
+
+			setTimeout(function () {
+				$('#popup-login-button').html($('#popup-login-button').data('original-content')).prop('disabled', false);
+			}, 600);
+		},
+		success: function(json) {
+	        if (json['warning']) {
+				scNotify('danger', json['warning']);
+	        } else {
+
+				if (json['redirect']) {
+					location = json['redirect'];
+				} else {
+					location = '{{ account_url }}';
+				}
+	        }
+	    }
+    });
+});
+</script>
+{% if otp_module_status %}
+  <!-- OTP Modal Scripts -->
+  <script>
+  $(document).ready(function() {
+    var otpModal = $('#otpModal');
+    var otpAlert = $('#otp-alert');
+    var otpFormTelephone = $('#otp-form-telephone');
+    var otpFormCode = $('#otp-form-code');
+    var buttonSendOtp = $('#button-send-otp');
+    var buttonVerifyOtp = $('#button-verify-otp');
+    var buttonResendOtp = $('#button-resend-otp');
+
+    otpFormCode.on('submit', function(e) {
+      e.preventDefault();
+      buttonVerifyOtp.trigger('click');
+    });
+    
+    var currentUrl = window.location.href;
+
+    $('#oct-input-telephone').on('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        buttonSendOtp.trigger('click');
+      }
+    });
+
+    function showAlert(type, message) {
+      otpAlert.removeClass('alert-success alert-danger').addClass(type);
+      otpAlert.html(message);
+      otpAlert.show();
+    }
+
+    buttonSendOtp.on('click', function() {
+      var telephone = $('#oct-input-telephone').val();
+      var csrfToken = $('input[name="csrf_token"]').val();
+
+      $.ajax({
+        url: '{{ action_send_otp }}',
+        type: 'post',
+        data: {
+          telephone: telephone,
+          csrf_token: csrfToken,
+          redirect: currentUrl
+        },
+        dataType: 'json',
+        headers: { 'Cache-Control': 'no-cache' },
+        beforeSend: function() {
+          buttonSendOtp.prop('disabled', true);
+          masked('body', true);
+
+          $('#button-send-otp').data('original-content', $('#button-send-otp').html());
+          $('#button-send-otp').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>').prop('disabled', true);
+        },
+        complete: function() {
+          buttonSendOtp.prop('disabled', false);
+          masked('body', false);
+
+          setTimeout(function () {
+            $('#button-send-otp').html($('#button-send-otp').data('original-content')).prop('disabled', false);
+          }, 600);
+        },
+        success: function(json) {
+          if (json['success']) {
+            showAlert('alert-success', json['message']);
+            $('#saved-telephone').val(telephone);
+            otpFormTelephone.hide();
+            otpFormCode.show();
+          } else if (json['error']) {
+            showAlert('alert-danger', json['error']);
+            if (json['otp_throttle']) {
+              $('#saved-telephone').val(telephone);
+              otpFormTelephone.hide();
+              otpFormCode.show();
+            }
+          } 
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+          console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+      });
+    });
+
+    buttonVerifyOtp.on('click', function() {
+      var otpCode = $('#input-otp').val();
+      var csrfToken = $('input[name="csrf_token"]').val();
+
+      $.ajax({
+        url: '{{ action_verify_otp }}',
+        type: 'post',
+        data: { otp_code: otpCode, csrf_token: csrfToken },
+        dataType: 'json',
+        cache: false,
+        headers: { 'Cache-Control': 'no-cache' },
+        beforeSend: function() {
+          buttonVerifyOtp.prop('disabled', true);
+          masked('body', true);
+
+          $('#button-verify-otp').data('original-content', $('#button-verify-otp').html());
+          $('#button-verify-otp').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>').prop('disabled', true);
+        },
+        complete: function() {
+          buttonVerifyOtp.prop('disabled', false);
+          masked('body', false);
+
+          setTimeout(function () {
+            $('#button-verify-otp').html($('#button-verify-otp').data('original-content')).prop('disabled', false);
+          }, 600);
+        },
+        success: function(json) {
+          if (json['success']) {
+            showAlert('alert-success', json['message']);
+            setTimeout(function() { 
+              otpModal.modal('hide'); 
+              if (json['redirect']) {
+                window.location.href = json['redirect'];
+              } else {
+                location.reload();
+              }
+            }, 1200); 
+          } else if (json['error']) {
+            showAlert('alert-danger', json['error']);
+            if (json['max_attempts_exceeded']) {
+              otpFormCode.hide();
+              otpFormTelephone.show();
+            } else {
+              otpFormTelephone.hide();
+              otpFormCode.show();
+            }
+          }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+          console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+      });
+    });
+
+    buttonResendOtp.on('click', function() {
+      var telephone = $('#saved-telephone').val();
+      var csrfToken = $('input[name="csrf_token"]').val();
+
+      if (!telephone) {
+        showAlert('alert-danger', '{{ error_telephone }}');
+        otpFormTelephone.show();
+        otpFormCode.hide();
+        return;
+      }
+
+      $.ajax({
+        url: '{{ action_send_otp }}',
+        type: 'post',
+        data: {
+          telephone: telephone,
+          csrf_token: csrfToken,
+          redirect: currentUrl
+        },
+        dataType: 'json',
+        headers: { 'Cache-Control': 'no-cache' },
+        beforeSend: function() {
+          buttonResendOtp.prop('disabled', true);
+          masked('body', true);
+
+          $('#button-resend-otp').data('original-content', $('#button-resend-otp').html());
+          $('#button-resend-otp').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>').prop('disabled', true);
+        },
+        complete: function() {
+          buttonResendOtp.prop('disabled', false);
+          masked('body', false);
+
+          setTimeout(function () {
+            $('#button-resend-otp').html($('#button-resend-otp').data('original-content')).prop('disabled', false);
+          }, 600);
+        },
+        success: function(json) {
+          if (json['success']) {
+            showAlert('alert-success', json['message']);
+          } else if (json['error']) {
+            showAlert('alert-danger', json['error']);
+          }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+          console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+      });
+    });
+  });
+  </script>
+  {% if mask is defined and mask is not empty %}
+    <script>
+    $('#loginModal #oct-input-telephone').inputmask({
+      mask: '{{ mask }}',
+      clearMaskOnLostFocus: false
+    });
+    </script>
+  {% endif %}
+{% endif %}

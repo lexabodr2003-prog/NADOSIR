@@ -1,0 +1,58 @@
+<div class="sub-link-item panel panel-default" id="sub-link-{{ sub_link_id }}">
+  <div class="panel-heading">
+    <span><i class="fa fa-link" aria-hidden="true"></i> {{ text_sub_link }}</span>
+    <a href="javascript:;" class="btn btn-danger btn-sm pull-right" onclick="removeSubLink({{ sub_link_id }});">
+      <i class="fa fa-trash-o" aria-hidden="true"></i>
+    </a>
+  </div>
+  <div class="panel-body">
+    <ul class="nav nav-tabs sub-link-tabs">
+      {% for language in languages %}
+        <li{% if loop.first %} class="active"{% endif %}>
+          <a href="#sub-link-{{ sub_link_id }}-lang-{{ language.language_id }}" data-toggle="tab">
+            <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="tab-content">
+      {% for language in languages %}
+        <div class="tab-pane{% if loop.first %} active{% endif %}" id="sub-link-{{ sub_link_id }}-lang-{{ language.language_id }}">
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_sub_link_title }}</label>
+            <div class="col-sm-10">
+              <input type="text" 
+                     name="oct_megamenu[{{ menu_id }}][sub_links][{{ sub_link_id }}][description][{{ language.language_id }}][title]" 
+                     value="" 
+                     placeholder="{{ entry_sub_link_title }}" 
+                     class="form-control sub-link-title" 
+                     data-sub-link-id="{{ sub_link_id }}"
+                     data-language-id="{{ language.language_id }}"
+                     {% if language.language_id == config_language_id %}onkeyup="updateSubLinkTitle({{ sub_link_id }}, this.value)"{% endif %} />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_sub_link_href }}</label>
+            <div class="col-sm-10">
+              <input type="text" 
+                     name="oct_megamenu[{{ menu_id }}][sub_links][{{ sub_link_id }}][description][{{ language.language_id }}][href]" 
+                     value="" 
+                     placeholder="{{ entry_sub_link_href }}" 
+                     class="form-control" />
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">{{ entry_sub_link_sort }}</label>
+      <div class="col-sm-10">
+        <input type="text" 
+               name="oct_megamenu[{{ menu_id }}][sub_links][{{ sub_link_id }}][sort_order]" 
+               value="0" 
+               placeholder="{{ entry_sub_link_sort }}" 
+               class="form-control" />
+      </div>
+    </div>
+  </div>
+</div>

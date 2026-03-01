@@ -1,0 +1,13 @@
+{% if free_shipping_from_text is not empty %}
+    <div class="oct-bottom-free-shipping-from dark-text text-center text-md-end fsz-12 fw-400 mb-3 pb-3{% if total_percentage >= 100 %} green-text fsz-16 fw-500{% endif %}">
+        {{ free_shipping_from_text }}
+        {% if total_percentage < 100 %}
+            <div class="progress mt-1">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                     aria-valuenow="{{ total_value }}" aria-valuemin="0" 
+                     aria-valuemax="{{ free_shipping_from }}" 
+                     style="width: {{ total_percentage }}%"></div>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

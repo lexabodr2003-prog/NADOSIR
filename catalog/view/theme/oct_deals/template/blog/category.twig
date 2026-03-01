@@ -1,0 +1,118 @@
+{{ header }}
+<div class="container-fluid container-lg flex-grow-1 mobile-no-gutters">
+	<nav aria-label="breadcrumb">
+		<ul class="breadcrumb ds-breadcrumb fsz-12">
+			{% for breadcrumb in breadcrumbs %}
+				{% if loop.last %}
+					<li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+				{% else %}
+					<li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+	</nav>
+	<main>
+		<div class="row">
+			<div class="col-12 ds-page-title pb-3">
+				<h1>{{ heading_title }}</h1>
+			</div>
+		</div>
+		<div class="content-top-box">{{ content_top }}</div>
+		<div class="row">
+			{{ column_left }}
+		    {% if column_left and column_right %}
+                {% set class = 'col-xl-6 is-cols' %}
+            {% elseif column_left or column_right %}
+                {% set class = 'col-xl-9' %}
+            {% else %}
+                {% set class = 'col-xl-12 no-col' %}
+            {% endif %}
+		    <div id="content" class="{{ class }} ds-category">
+				{% if thumb or description %}
+					<div class="row ds-category-description-row mb-2">
+						<div class="col-12">
+							<div class="ds-category-description content-block content-block-text">
+								<div class="d-flex flex-column flex-md-row">
+									{% if thumb %}
+										<div class="ds-category-description-img">
+											<img src="{{ thumb }}" alt="{{ heading_title }}" title="{{ heading_title }}" />
+										</div>
+									{% endif %}
+									{% if description %}
+										<div class="ds-category-description-text pt-3 pt-md-0 ps-md-3">{{ description }}</div>
+									{% endif %}
+								</div>
+							</div>
+						</div>
+					</div>
+				{% endif %}
+				{% if articles %}
+					<div class="row ds-category-sort-row pb-sm-2">
+						<div class="col-12">
+							<div class="ds-category-sort d-flex justify-content-between content-block">
+								<div class="ds-category-sort-limit d-flex align-items-center">
+									<select id="input-sort" class="ds-category-sort-select form-select fsz-10 br-7 light-text fw-500 me-2" onchange="location = this.value;" aria-label="Sort select">
+										{% for sorts in sorts %}
+											{% if sorts.value == '%s-%s'|format(sort, order) %}
+												<option value="{{ sorts.href }}" selected="selected">{{ sorts.text }}</option>
+											{% else %}
+												<option value="{{ sorts.href }}">{{ sorts.text }}</option>
+											{% endif %}
+										{% endfor %}
+									</select>
+									<select id="input-limit" class="ds-category-limit-select form-select fsz-10 br-7 light-text fw-500" onchange="location = this.value;" aria-label="Limit select">
+										{% for limits in limits %}
+											{% if limits.value == limit %}
+												<option value="{{ limits.href }}" selected="selected">{{ limits.text }}</option>
+											{% else %}
+												<option value="{{ limits.href }}">{{ limits.text }}</option>
+											{% endif %}
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">  
+				        {% for article in articles %} 
+				        <div class="product-layout ds-module-col product-grid col-sm-6 col-md-4 col-lg-3">
+						    <div class="content-block h-100 d-flex flex-column">
+							    <div class="ds-module-img">
+									<a href="{{ article.href }}">
+										<img src="{{ article.thumb }}" alt="{{ article.name }}" title="{{ article.name }}" class="img-fluid" />
+									</a>
+								</div>
+								<a href="{{ article.href }}" class="ds-module-title dark-text fw-700">{{ article.name }}</a>
+								{% if article.rating %}
+								<div class="ds-module-rating d-flex align-items-center mt-2 mb-1 br-4">
+									<div class="ds-module-rating-stars d-flex align-items-center">
+										{% for i in 1..5 %}
+											{% if product.rating < i %}
+												<span class="ds-module-rating-star"></span>
+											{% else %}
+												<span class="ds-module-rating-star ds-module-rating-star-is"></span>
+											{% endif %}
+										{% endfor %}
+									</div>
+								</div>
+						        {% endif %}
+						        <div class="ds-product-description my-4 fsz-14">{{ article.description }}</div>
+								<button class="button button-primary br-7 mt-auto" type="button" onclick="location.href = ('{{ article.href }}');"><i class="fas fa-share"></i> <span class="hidden-xs hidden-sm hidden-md">{{ button_more }}</span></button>
+							</div>
+						</div>
+						{% endfor %}
+					</div>
+					<div class="row">
+						<div class="col-sm-6 text-left">{{ pagination }}</div>
+					</div>
+				{% else %}
+					<p class="fw-500 dark-text">{{ text_empty }}</p>
+						<a href="{{ continue }}" class="button button-primary br-7">{{ button_continue }}</a>
+				{% endif %}
+			</div>
+			{{ column_right }}
+		</div>
+		{{ content_bottom }}
+	</main>
+</div>
+{{ footer }}

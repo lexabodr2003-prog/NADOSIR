@@ -1,0 +1,138 @@
+{% if reviews %}
+	{% if position == 'column_left' or position == 'column_right' %}
+		<div  class="content-block overflow-hidden position-relative">
+			<div class="ds-column-title pb-3 mb-3 fw-500 dark-text">{{ heading_title }}</div>
+			<div id="ds-column-last-reviews-{{ module }}" class="ds-column-last-reviews swiper">
+				<div class="swiper-wrapper">
+					{% for review in reviews %}
+						<div class="ds-last-reviews-item swiper-slide">
+							<div class="h-100">
+								<div class="ds-last-reviews-item-top d-flex pb-3 mb-3">
+									<div class="ds-last-reviews-item-img position-relative">
+										<a href="{{ review.href }}">
+											<img src="{{ review.thumb }}" alt="{{ review.name }}" width="{{ review.width }}" height="{{ review.height }}" loading="lazy"/>
+										</a>
+										<div class="ds-last-reviews-item-img-label position-absolute green-bg text-white fsz-14 d-flex align-items-center justify-content-center br-4 text-nowrap">
+											<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+												<path
+													d="M6.64059 0.886303L7.9353 3.42086C8.03264 3.61175 8.22065 3.74376 8.43865 3.77418L11.4273 4.19344C11.9753 4.27045 12.1941 4.9227 11.7974 5.29671L9.63668 7.33175C9.47868 7.48057 9.40663 7.69475 9.44397 7.90504L9.93796 10.69C10.038 11.2549 9.42663 11.6859 8.90261 11.4199L6.31059 10.1032C6.11592 10.0042 5.88389 10.0042 5.68989 10.1032L3.09982 11.4186C2.57514 11.6852 1.96177 11.2536 2.06244 10.6874L2.55651 7.90504C2.59385 7.69475 2.5218 7.48057 2.3638 7.33175L0.203102 5.29671C-0.194241 4.9227 0.0243855 4.27045 0.573065 4.19344L3.56183 3.77418C3.77916 3.74376 3.96717 3.61175 4.06517 3.42086L5.35988 0.886303C5.62056 0.371883 6.37792 0.371883 6.64059 0.886303Z"
+													fill="#F8FBFD" />
+											</svg>
+											{{ review.rating }} {{ text_rating_from }}
+										</div>
+									</div>
+									<div class="ds-last-reviews-item-info ms-3">
+										<div class="ds-last-reviews-item-author fsz-14 fw-500 dark-text mb-2">{{ review.author }}</div>
+										<div class="ds-last-reviews-item-date d-flex align-items-center light-text fsz-10 mb-2">
+											<svg class="me-1" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+												<path
+													d="M9.69231 0.923565H8.92308V0.462027C8.92308 0.207258 8.71631 0.000488281 8.46154 0.000488281C8.20677 0.000488281 8 0.207258 8 0.462027V0.923565H4V0.462027C4 0.207258 3.79323 0.000488281 3.53846 0.000488281C3.28369 0.000488281 3.07692 0.207258 3.07692 0.462027V0.923565H2.30769C0.819692 0.923565 0 1.74326 0 3.23126V9.6928C0 11.1808 0.819692 12.0005 2.30769 12.0005H9.69231C11.1803 12.0005 12 11.1808 12 9.6928V3.23126C12 1.74326 11.1803 0.923565 9.69231 0.923565ZM2.30769 1.84664H3.07692V2.30818C3.07692 2.56295 3.28369 2.76972 3.53846 2.76972C3.79323 2.76972 4 2.56295 4 2.30818V1.84664H8V2.30818C8 2.56295 8.20677 2.76972 8.46154 2.76972C8.71631 2.76972 8.92308 2.56295 8.92308 2.30818V1.84664H9.69231C10.6628 1.84664 11.0769 2.2608 11.0769 3.23126V3.6928H0.923077V3.23126C0.923077 2.2608 1.33723 1.84664 2.30769 1.84664ZM9.69231 11.0774H2.30769C1.33723 11.0774 0.923077 10.6633 0.923077 9.6928V4.61587H11.0769V9.6928C11.0769 10.6633 10.6628 11.0774 9.69231 11.0774ZM4.16617 6.61587C4.16617 6.95557 3.89109 7.23126 3.55078 7.23126C3.21109 7.23126 2.93224 6.95557 2.93224 6.61587C2.93224 6.27618 3.20493 6.00049 3.54462 6.00049H3.55078C3.89047 6.00049 4.16617 6.27618 4.16617 6.61587ZM6.6277 6.61587C6.6277 6.95557 6.35263 7.23126 6.01232 7.23126C5.67263 7.23126 5.39378 6.95557 5.39378 6.61587C5.39378 6.27618 5.66647 6.00049 6.00616 6.00049H6.01232C6.35201 6.00049 6.6277 6.27618 6.6277 6.61587ZM9.08924 6.61587C9.08924 6.95557 8.81417 7.23126 8.47386 7.23126C8.13417 7.23126 7.85532 6.95557 7.85532 6.61587C7.85532 6.27618 8.12801 6.00049 8.4677 6.00049H8.47386C8.81355 6.00049 9.08924 6.27618 9.08924 6.61587ZM4.16617 9.07741C4.16617 9.4171 3.89109 9.6928 3.55078 9.6928C3.21109 9.6928 2.93224 9.4171 2.93224 9.07741C2.93224 8.73772 3.20493 8.46203 3.54462 8.46203H3.55078C3.89047 8.46203 4.16617 8.73772 4.16617 9.07741ZM6.6277 9.07741C6.6277 9.4171 6.35263 9.6928 6.01232 9.6928C5.67263 9.6928 5.39378 9.4171 5.39378 9.07741C5.39378 8.73772 5.66647 8.46203 6.00616 8.46203H6.01232C6.35201 8.46203 6.6277 8.73772 6.6277 9.07741ZM9.08924 9.07741C9.08924 9.4171 8.81417 9.6928 8.47386 9.6928C8.13417 9.6928 7.85532 9.4171 7.85532 9.07741C7.85532 8.73772 8.12801 8.46203 8.4677 8.46203H8.47386C8.81355 8.46203 9.08924 8.73772 9.08924 9.07741Z"
+													fill="#9CA3AF" />
+											</svg>
+											{{ review.date }}
+										</div>
+										<a href="{{ review.href }}" class="fsz-12 fw-500 text-decoration-underline dark-text">{{ review.name }}</a>
+										<div class="ds-module-rating d-flex align-items-center mt-3">
+											<div class="ds-module-rating-stars d-flex align-items-center">
+												{% if review.rating %}
+												{% for i in 1..5 %}
+												{% if review.rating < i %}
+												<span class="ds-module-rating-star"></span>
+												{% else %}
+												<span class="ds-module-rating-star ds-module-rating-star-is"></span>
+												{% endif %}
+												{% endfor %}
+												{% endif %}
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="ds-last-reviews-item-text fsz-14 fw-300 secondary-text">
+									{{ review.text }}
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+				<div class="swiper-button-prev swiper-button-prev-{{ module }} button button-secondary button-with-icon br-4 overflow-hidden d-flex align-items-center justify-content-center py-3 px-1">
+					<svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="4" height="6" viewBox="0 0 4 6" fill="none">
+						<path d="M0.263207 2.99938C0.263207 2.87814 0.309287 2.75688 0.402114 2.66468L2.92803 0.138767C3.11305 -0.0462558 3.41303 -0.0462558 3.59805 0.138767C3.78307 0.323791 3.78307 0.623765 3.59805 0.808788L1.40684 3L3.59805 5.19121C3.78307 5.37624 3.78307 5.67621 3.59805 5.86123C3.41303 6.04626 3.11305 6.04626 2.92803 5.86123L0.402114 3.33532C0.309287 3.24186 0.263207 3.12063 0.263207 2.99938Z" fill="#003459"/>
+					</svg>
+				</div>
+				<div class="swiper-button-next swiper-button-next-{{ module }} button button-secondary button-with-icon br-4 overflow-hidden d-flex align-items-center justify-content-center py-3 px-1">
+					<svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="4" height="6" viewBox="0 0 4 6" fill="none">
+						<path d="M3.73679 3.00062C3.73679 3.12186 3.69071 3.24312 3.59789 3.33532L1.07197 5.86123C0.886949 6.04626 0.586974 6.04626 0.401951 5.86123C0.216928 5.67621 0.216928 5.37623 0.401951 5.19121L2.59316 3L0.401951 0.808788C0.216928 0.623765 0.216928 0.32379 0.401951 0.138767C0.586974 -0.0462565 0.886949 -0.0462565 1.07197 0.138767L3.59789 2.66468C3.69071 2.75814 3.73679 2.87937 3.73679 3.00062Z" fill="#003459"/>
+					</svg>
+				</div>
+			</div>
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+					var columnReviewsSwiper = new Swiper('#ds-column-last-reviews-{{ module }}', {
+						slidesPerView: 1,
+						spaceBetween: 0,
+						loop: true,
+						navigation: {
+							nextEl: '.swiper-button-next-{{ module }}',
+							prevEl: '.swiper-button-prev-{{ module }}',
+						},
+					});
+				});
+			</script>
+		</div>
+	{% else %}
+		<div class="py-3 fw-500 dark-text fsz-20">
+			{{ heading_title }}
+		</div>
+		<div id="rm-product-reviews_{{ module }}" class="row g-2 g-md-3 ds-last-reviews">
+			{% for review in reviews %}
+				<div class="ds-last-reviews-item">
+					<div class="content-block h-100">
+						<div class="ds-last-reviews-item-top d-flex pb-3 mb-3">
+							<div class="ds-last-reviews-item-img position-relative">
+								<a href="{{ review.href }}">
+									<img src="{{ review.thumb }}" alt="{{ review.name }}" width="{{ review.width }}" height="{{ review.height }}" loading="lazy"/>
+								</a>
+								<div class="ds-last-reviews-item-img-label position-absolute green-bg text-white fsz-14 d-flex align-items-center justify-content-center br-4 text-nowrap">
+									<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path
+											d="M6.64059 0.886303L7.9353 3.42086C8.03264 3.61175 8.22065 3.74376 8.43865 3.77418L11.4273 4.19344C11.9753 4.27045 12.1941 4.9227 11.7974 5.29671L9.63668 7.33175C9.47868 7.48057 9.40663 7.69475 9.44397 7.90504L9.93796 10.69C10.038 11.2549 9.42663 11.6859 8.90261 11.4199L6.31059 10.1032C6.11592 10.0042 5.88389 10.0042 5.68989 10.1032L3.09982 11.4186C2.57514 11.6852 1.96177 11.2536 2.06244 10.6874L2.55651 7.90504C2.59385 7.69475 2.5218 7.48057 2.3638 7.33175L0.203102 5.29671C-0.194241 4.9227 0.0243855 4.27045 0.573065 4.19344L3.56183 3.77418C3.77916 3.74376 3.96717 3.61175 4.06517 3.42086L5.35988 0.886303C5.62056 0.371883 6.37792 0.371883 6.64059 0.886303Z"
+											fill="#F8FBFD" />
+									</svg>
+									{{ review.rating }} {{ text_rating_from }}
+								</div>
+							</div>
+							<div class="ds-last-reviews-item-info ms-3">
+								<div class="ds-last-reviews-item-author fsz-14 fw-500 dark-text mb-2">{{ review.author }}</div>
+								<div class="ds-last-reviews-item-date d-flex align-items-center light-text fsz-10 mb-2">
+									<svg class="me-1" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path
+											d="M9.69231 0.923565H8.92308V0.462027C8.92308 0.207258 8.71631 0.000488281 8.46154 0.000488281C8.20677 0.000488281 8 0.207258 8 0.462027V0.923565H4V0.462027C4 0.207258 3.79323 0.000488281 3.53846 0.000488281C3.28369 0.000488281 3.07692 0.207258 3.07692 0.462027V0.923565H2.30769C0.819692 0.923565 0 1.74326 0 3.23126V9.6928C0 11.1808 0.819692 12.0005 2.30769 12.0005H9.69231C11.1803 12.0005 12 11.1808 12 9.6928V3.23126C12 1.74326 11.1803 0.923565 9.69231 0.923565ZM2.30769 1.84664H3.07692V2.30818C3.07692 2.56295 3.28369 2.76972 3.53846 2.76972C3.79323 2.76972 4 2.56295 4 2.30818V1.84664H8V2.30818C8 2.56295 8.20677 2.76972 8.46154 2.76972C8.71631 2.76972 8.92308 2.56295 8.92308 2.30818V1.84664H9.69231C10.6628 1.84664 11.0769 2.2608 11.0769 3.23126V3.6928H0.923077V3.23126C0.923077 2.2608 1.33723 1.84664 2.30769 1.84664ZM9.69231 11.0774H2.30769C1.33723 11.0774 0.923077 10.6633 0.923077 9.6928V4.61587H11.0769V9.6928C11.0769 10.6633 10.6628 11.0774 9.69231 11.0774ZM4.16617 6.61587C4.16617 6.95557 3.89109 7.23126 3.55078 7.23126C3.21109 7.23126 2.93224 6.95557 2.93224 6.61587C2.93224 6.27618 3.20493 6.00049 3.54462 6.00049H3.55078C3.89047 6.00049 4.16617 6.27618 4.16617 6.61587ZM6.6277 6.61587C6.6277 6.95557 6.35263 7.23126 6.01232 7.23126C5.67263 7.23126 5.39378 6.95557 5.39378 6.61587C5.39378 6.27618 5.66647 6.00049 6.00616 6.00049H6.01232C6.35201 6.00049 6.6277 6.27618 6.6277 6.61587ZM9.08924 6.61587C9.08924 6.95557 8.81417 7.23126 8.47386 7.23126C8.13417 7.23126 7.85532 6.95557 7.85532 6.61587C7.85532 6.27618 8.12801 6.00049 8.4677 6.00049H8.47386C8.81355 6.00049 9.08924 6.27618 9.08924 6.61587ZM4.16617 9.07741C4.16617 9.4171 3.89109 9.6928 3.55078 9.6928C3.21109 9.6928 2.93224 9.4171 2.93224 9.07741C2.93224 8.73772 3.20493 8.46203 3.54462 8.46203H3.55078C3.89047 8.46203 4.16617 8.73772 4.16617 9.07741ZM6.6277 9.07741C6.6277 9.4171 6.35263 9.6928 6.01232 9.6928C5.67263 9.6928 5.39378 9.4171 5.39378 9.07741C5.39378 8.73772 5.66647 8.46203 6.00616 8.46203H6.01232C6.35201 8.46203 6.6277 8.73772 6.6277 9.07741ZM9.08924 9.07741C9.08924 9.4171 8.81417 9.6928 8.47386 9.6928C8.13417 9.6928 7.85532 9.4171 7.85532 9.07741C7.85532 8.73772 8.12801 8.46203 8.4677 8.46203H8.47386C8.81355 8.46203 9.08924 8.73772 9.08924 9.07741Z"
+											fill="#9CA3AF" />
+									</svg>
+									{{ review.date }}
+								</div>
+								<a href="{{ review.href }}" class="fsz-12 fw-500 text-decoration-underline dark-text">{{ review.name }}</a>
+								<div class="ds-module-rating d-flex align-items-center mt-3">
+									<div class="ds-module-rating-stars d-flex align-items-center">
+										{% if review.rating %}
+										{% for i in 1..5 %}
+										{% if review.rating < i %}
+										<span class="ds-module-rating-star"></span>
+										{% else %}
+										<span class="ds-module-rating-star ds-module-rating-star-is"></span>
+										{% endif %}
+										{% endfor %}
+										{% endif %}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="ds-last-reviews-item-text fsz-14 fw-300 secondary-text">
+							{{ review.text }}
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	{% endif %}
+{% endif %}

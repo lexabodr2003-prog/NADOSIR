@@ -1,0 +1,31 @@
+<div class="tbank-info" style="padding: 10px 0 14px; color: #555; font-size: 14px;">
+    <p style="margin-bottom: 0;">После оформления заказа менеджер свяжется с вами и пришлёт ссылку на оплату картой или через СБП.</p>
+</div>
+<div class="buttons">
+  <div class="pull-right">
+    <input type="button" value="Оформить заказ" id="button-confirm" data-loading-text="Загрузка..." class="btn btn-primary" />
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('#button-confirm').on('click', function() {
+    $.ajax({
+        url: 'index.php?route=extension/payment/tbank/confirm',
+        type: 'post',
+        dataType: 'json',
+        beforeSend: function() {
+            $('#button-confirm').prop('disabled', true).val('Загрузка...');
+        },
+        complete: function() {
+            $('#button-confirm').prop('disabled', false).val('Оформить заказ');
+        },
+        success: function(json) {
+            if (json['redirect']) {
+                location = json['redirect'];
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+//--></script>

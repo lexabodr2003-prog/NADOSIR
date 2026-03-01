@@ -1,0 +1,8 @@
+<footer id="footer">{{ text_footer }}<br/>{{ text_version }}</footer></div>
+
+			{% if longlife %}
+		<script type="text/javascript">
+			window.setInterval(function(){ $.get('{{ longlife }}')}, 60000);
+		</script>
+			{% endif %}
+			</body></html>

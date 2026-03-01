@@ -1,0 +1,8 @@
+<div class="buttons">
+    <input type="button" value="{{ button_confirm }}" id="button-confirm" class="button button-primary br-7" />
+</div>
+<script type="text/javascript"><!--
+  $('#button-confirm').bind('click', function() {
+    location.href = "{{ redirect }}";
+  });
+//--></script>

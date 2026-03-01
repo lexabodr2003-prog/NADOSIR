@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }}</title>
+<style type="text/css">
+  body { margin: 0; padding: 0; }
+  table { border-collapse: collapse; border-spacing: 0; }
+  td { padding: 0; }
+  img { border: 0; display: block; max-width: 100%; }
+  a { text-decoration: none; }
+  .container { 
+    font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; 
+    line-height: 1.6; 
+    color: #333; 
+    max-width: 680px; 
+    margin: 20px auto; 
+    padding: 30px; 
+    background-color: #ffffff; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
+  }
+  h2 { color: #000000; margin-top: 0; font-weight: 600; }
+  h3 { color: #000000; margin-top: 25px; margin-bottom: 10px; font-weight: 500; }
+  p { margin: 0 0 15px 0; }
+  ul { padding-left: 20px; margin: 0 0 15px 0; }
+  li { margin-bottom: 8px; }
+  strong { font-weight: 600; }
+  .button {
+    display: inline-block; 
+    background-color: #2563eb; 
+    color: #ffffff !important; 
+    text-decoration: none; 
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    font-weight: 500; 
+    text-align: center; 
+    margin: 15px 0;
+  }
+  .product-table th {
+    background-color: #000000; 
+    padding: 12px; 
+    text-align: left; 
+    color: #FFFFFF; 
+    font-weight: 600; 
+    font-size: 13px;
+  }
+  .product-table td {
+    padding: 12px; 
+    border-bottom: 1px solid #e5e7eb; 
+    vertical-align: middle;
+    font-size: 14px;
+  }
+  .product-table img {
+    max-width: 60px; 
+    max-height: 60px; 
+    border-radius: 4px;
+  }
+  .product-table .options {
+    font-size: 12px; 
+    color: #6b7280; 
+    margin-top: 4px;
+  }
+  .totals-table {
+    width: 100%; 
+    max-width: 300px; 
+    margin-left: auto; 
+    border-collapse: collapse; 
+    font-size: 14px;
+  }
+  .totals-table td {
+    padding: 6px 12px; 
+    text-align: right;
+  }
+  .totals-table .total-row td {
+    font-weight: bold; 
+    font-size: 16px; 
+    color: #1e3a8a; 
+    border-top: 1px solid #e5e7eb; 
+    padding-top: 10px;
+  }
+  .footer {
+    margin-top: 30px; 
+    padding-top: 20px; 
+    border-top: 1px solid #e5e7eb; 
+    font-size: 13px; 
+    color: #6b7280; 
+    line-height: 1.5;
+  }
+  .footer img {
+    max-height: 50px;
+  }
+  .footer strong {
+    font-size: 14px;
+    color: #333;
+  }
+  .footer a {
+    color: #2563eb;
+  }
+  .info-block {
+    background-color: #f0f9ff; 
+    border-left: 4px solid #3b82f6; 
+    padding: 15px; 
+    margin: 20px 0; 
+    border-radius: 0 8px 8px 0;
+  }
+  .comment-block {
+     background-color: #fefce8; 
+     border-left: 4px solid #eab308;
+     padding: 15px;
+     margin: 20px 0;
+     border-radius: 0 8px 8px 0;
+     font-style: italic;
+     color: #713f12;
+  }
+
+  @media screen and (max-width: 600px) {
+    .container { width: 100% !important; max-width: 100% !important; padding: 15px !important; border-radius: 0 !important; box-shadow: none !important; }
+    .product-table th, .product-table td { font-size: 13px !important; padding: 8px !important; }
+    .product-table img { max-width: 40px !important; max-height: 40px !important; }
+    .totals-table { max-width: 100% !important; }
+    h2 { font-size: 20px !important; }
+    h3 { font-size: 16px !important; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div style="text-align: center; margin-bottom: 25px;">
+    <a href="{{ store_url }}" title="{{ store_name }}">
+      <img src="{{ logo }}" alt="{{ store_name }}" style="max-width: 200px; height: auto; margin: 0 auto;">
+    </a>
+  </div>
+
+  <h2>{{ text_greeting }}</h2>
+  
+  <p></p>
+
+  <div class="info-block">
+    <p><strong>{{ text_order_id }}</strong> №{{ order_id }}<br>
+       <strong>{{ text_date_added }}</strong> {{ date_added }}<br>
+       <strong>{{ text_payment_method }}</strong> {{ payment_method }}<br>
+       {% if shipping_method %}<strong>{{ text_shipping_method }}</strong> {{ shipping_method }}<br>{% endif %}
+       <strong>{{ text_email }}</strong> {{ email }}<br>
+       <strong>{{ text_telephone }}</strong> {{ telephone }}</p>
+  </div>
+  
+  {% if customer_id %}
+  <p>{{ text_link }}</p>
+  <p><a href="{{ link }}" style="color: #2563eb;">{{ link }}</a></p>
+  {% endif %}
+
+  {% if comment %}
+  <div class="comment-block">
+    <strong>{{ text_instruction }}:</strong><br>
+    {{ comment }}
+  </div>
+  {% endif %}
+
+  {% if module_account_payment_address_view %}
+  <h3>{{ text_payment_address }}:</h3>
+  <p>{{ payment_address }}</p>
+  {% endif %}  
+
+  {% if shipping_address %}
+  <h3>{{ text_shipping_address }}:</h3>
+  <p>{{ shipping_address }}</p>
+  {% endif %}
+  
+  {% if products or vouchers %}
+  <table class="product-table" style="width: 100%;">
+    <thead style="background-color:rgb(16, 20, 32); color: #ffffff;">
+      <tr>
+        <th style="width: 60px;"></th>
+        <th>{{ text_product }}</th>
+        <th>{{ text_model }}</th>
+        <th style="text-align: center;">{{ text_quantity }}</th>
+        <th style="text-align: right;">{{ text_price }}</th>
+        <th style="text-align: right;">{{ text_total }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products %}
+      <tr>
+        <td>
+          {% if product.image %}
+          <a href="{{ product.href }}" target="_blank">
+            <img src="{{ product.image }}" alt="{{ product.name }}">
+          </a>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{{ product.href }}" target="_blank" style="color: #2563eb; font-weight: 500;">{{ product.name }}</a>
+          {% if product.option|length > 0 %}
+          <div class="options">
+            {% for option in product.option %}
+            - {{ option.name }}: {{ option.value }}<br>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </td>
+        <td>{{ product.model }}</td>
+        <td style="text-align: center;">{{ product.quantity }}</td>
+        <td style="text-align: right;white-space: nowrap;">{{ product.price }}</td>
+        <td style="text-align: right;white-space: nowrap;">{{ product.total }}</td>
+      </tr>
+      {% endfor %}
+      {% for voucher in vouchers %}
+      <tr>
+        <td></td>
+        <td>{{ voucher.description }}</td>
+        <td></td>
+        <td style="text-align: center;">1</td>
+        <td style="text-align: right;">{{ voucher.amount }}</td>
+        <td style="text-align: right;white-space: nowrap;">{{ voucher.amount }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="totals-table">
+    <tbody>
+      {% for total in totals %}
+      <tr {% if total.code == 'total' %}class="total-row"{% endif %}>
+        <td><strong>{{ total.title }}:</strong></td>
+        <td style="white-space: nowrap;">{{ total.text }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% if download %}
+    <p style="margin-top: 20px;">{{ text_download }}</p>
+    <p style="margin-top: 0px; margin-bottom: 20px;"><a href="{{ download }}">{{ download }}</a></p>
+  {% endif %}
+
+  <p style="margin-top: 20px; margin-bottom: 20px; text-align: center;">{{ text_footer }}</p>
+	<div style="color: #757575; font-size: 12px; text-align: center; margin: 30px 0 0;">
+		{% if oct_deals_contact_address %}
+		{{ oct_deals_contact_address }}
+		{% endif %}
+		<div style="padding: 15px 0;">
+		{% if oct_deals_contact_telephone %}
+			{% for phone in oct_deals_contact_telephone %}
+				<a style="font-size: 18px; line-height: 32px; font-weight: bold; color: #000000; text-decoration: underline;" href="tel:{{ phone }}">{{ phone }}</a><br />
+			{% endfor %}
+		{% endif %}
+		</div>
+		{% if oct_deals_contact_open %}
+			{% for contact_open in oct_deals_contact_open %}
+				{{ contact_open }}
+			{% endfor %}
+		{% endif %}
+		<div style="padding: 15px 0;">
+		{% if oct_deals_socials %}
+			{% for social in oct_deals_socials %}
+				<a style="font-size: 18px; line-height: 32px; font-weight: bold; color: #000000; text-decoration: underline;" href="{{ social.link }}">{{ social.title }}</a><br />
+			{% endfor %}
+		{% endif %}
+		</div>
+	</div>
+</div>
+</body>
+</html>

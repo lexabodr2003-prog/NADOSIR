@@ -1,0 +1,22 @@
+{% if  error_system_test %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i>
+        {{ error_text_system_test }}
+        <button type="button" class="close" data-dismiss="alert">×</button>
+    </div>
+{% endif %}
+<!-- @formatter:off -->
+<style>.csvpricepro-form-wrapper .form-group + .form-group {border-top: 1px solid transparent !important}input[type="text"].input-sm, select.input-sm, .input-group-sm > select.form-control, .input-group-sm > select.input-group-addon, .input-group-sm > .input-group-btn > select.btn {height:28px !important}.csvprice_pro_container .panel-default{border-top:1px solid #e8e8e8}.csvprice_pro_container #table-custom-fields .csvpricepro_tbody-form td{padding-top:8px}.csvprice_pro_container #table-custom-fields>tbody+tbody{border-top:1px solid #ddd}.csvprice_pro_container #table-custom-fields thead>tr>th{border-bottom:1px solid #ddd}p.csvpricepro-main_menu{margin-bottom:3px}.csvpricepro-main_menu a{margin-bottom:6px;font-size:13px;text-shadow:1px 1px 2px rgba(0,0,0,0.3);padding:6px 10px}.csvpricepro_tbody-form tr,.csvpricepro_tbody-form tr td{border:none!important;background-color:transparent!important}.csvpricepro-field_set tr:first-child td{border-top:0}.csvprice_pro_container .form-group{padding-top:6px;padding-bottom:6px;margin-bottom:0}.csvprice_pro_container .form-group-sm .control-label{font-size:12px}.csvprice_pro_container .csvpricepro-field_set tr:last-child{border-bottom:1px solid #ddd}.csvprice_pro_container .csvpricepro-field_set td{padding:4px;margin:0}.csvprice_pro_container .table-macros-field #tbody_data td,.csvprice_pro_container .table-macros-field #tbody_foot td{padding:4px 8px}.csvprice_pro_container .table-macros-field #tbody_form{border-top:1px solid #ddd}.csvprice_pro_container .csvpricepro-field_set label,.csvprice_pro_container .csvpricepro-field_set span,.csvprice_pro_container .form-control-static{font-size:12px}.csvprice_pro_container .csvpricepro-field_set label{padding-top:5px;cursor:pointer;line-height:13px}.csvprice_pro_container .csvpricepro-field_set label input[type="checkbox"]{margin-right:6px}.csvprice_pro_container label{font-weight:normal}.csvpricepro_label_checkbox{cursor:pointer}.csvpricepro_label_checkbox>input{margin-right:4px}.csvprice_pro_container .f-icon-helper{cursor:pointer;text-decoration:none}.csvprice_pro_container label.control-label span:after{font-family:FontAwesome;color:#1e91cf;content:"\f059";margin-left:4px}.csvprice_pro-exclude-item{margin-bottom:6px;margin-right:6px}.f-tooltip{max-width:600px;position: absolute;-moz-box-shadow:0 0 4px #ccc;-webkit-box-shadow:0 0 4px #ccc;box-shadow:0 0 4px #ccc;background:#fff3cd;border:1px solid #ffeeba;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;padding:0;display:none;z-index:9999}.f-tooltip p{color:#000;font-size:12px;margin:0;padding:0}.f-tooltip .close{padding-right: 6px;font-weight:700;font-size:18px;cursor:pointer;opacity:.2}.f-tooltip .close:before{content:'\00D7'}.f-help-block{max-width:500px;position:absolute;z-index:3000!important;display:none}.f-help-block .close{position:absolute;right:5px;top:1px;cursor:pointer;opacity:.4}.f-help-block .c_top,.f-help-block .c_btm{background-image:none}.f-help-content{min-height:1em;padding:20px}.f-help-content p+p{padding-top:10px}.f-help-content p{font-size:12px;color:#666}.f-help-block .close:hover{opacity:.8}p.help-block{color:#737373}.info-banner a{font-size:15px;line-height:26px;color:#31708f}.info-banner a:hover{text-decoration:underline;color: #14628c;}.info-banner{box-shadow: 0 .5rem 1.5rem rgba(22,28,45,.1)!important;background-color:#d9edf7;border-color: #bce8f1;}.csvprice_pro_container .btn{outline:0px solid transparent!important}.box-caption {padding: 10px;margin-bottom: 17px;border: 1px solid transparent;border-radius: 3px;}.csvprice_pro_container th{font-weight:600!important}</style>
+<!-- @formatter:on -->
+{% if demo_message %}
+    <div class="well info-banner bg-info">{{ demo_message }}</div>
+{% endif %}
+<h4>{{ csvprice_pro_title }}</h4>
+<p class="csvpricepro-main_menu">
+    {% for menu_item in top_menu %}
+        {% if menu_item.active == 1 %}
+            <a href="{{ menu_item.url }}" class="btn btn-info active">{{ menu_item.text }}</a>
+        {% else %}
+            <a href="{{ menu_item.url }}" class="btn btn-info">{{ menu_item.text }}</a>
+        {% endif %}
+    {% endfor %}
+</p>

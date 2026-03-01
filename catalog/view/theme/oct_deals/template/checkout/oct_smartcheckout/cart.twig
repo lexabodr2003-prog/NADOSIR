@@ -1,0 +1,169 @@
+<div>
+	{% if weight %}<div class="mb-3 fsz-16">{{ text_order_weight }}: {{ weight}}</div>{% endif %}
+	{% if attention %}
+	<div class="alert alert-info d-flex align-items-start fsz-14"><i class="fa fa-info-circle me-2"></i> {{ attention }}
+		<button type="button" class="close ds-btn ds-btn-transparent no-btn ms-auto" data-bs-dismiss="alert">&times;</button>
+	</div>
+	{% endif %}
+	{% if error_warning %}
+	<script>
+		scNotify('danger', '{{ error_warning }}');
+	</script>
+	<div class="alert alert-danger d-flex align-items-center fsz-14"><i class="fa fa-exclamation-circle me-2"></i> {{ error_warning }}
+		<button type="button" class="close ds-btn ds-btn-transparent no-btn ms-auto red fsz-16" data-bs-dismiss="alert">&times;</button>
+	</div>
+	<script type="text/javascript">
+		$(function () {
+			$('#button-go').attr('disabled', 'disabled');
+			$('#button-go').addClass('disabled');
+		});
+	</script>
+	{% else %}
+	<script type="text/javascript">
+		$(function () {
+			$('#button-go').removeAttr('disabled');
+			$('#button-go').removeClass('disabled');
+			$('.oct-checkout .alert-danger').addClass('d-none');
+		});
+	</script>
+	{% endif %}
+
+	{% set productKey = 0 %}
+	{% for product in products %}
+		{% set productKey = productKey + 1 %}
+		<div class="ds-cart-item oct-checkout-block oct-checkout-cart">
+			<div class="ds-cart-item-info d-flex mb-3 position-relative">
+				{% if product.thumb %}
+					<div class="ds-cart-item-img me-3">
+						<a href="{{ product.href }}">
+							<img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" width="48" height="48"/>
+						</a>
+					</div>
+				{% endif %}
+				<div class="ds-cart-item-desc">
+					<div class="ds-cart-item-title fw-300 fsz-16">
+						<a href="{{ product.href }}" class="dark-text d-block mb-2">{{ product.name }}</a>
+						{% if not product.stock %}
+							<span class="required">***</span>
+						{% endif %}
+					</div>
+                    <div class="ds-cart-item-option fsz-12">{{ column_model }}: {{ product.model }}</div>
+					{% if product.option %}
+						<div class="ds-cart-item-options">
+							{% for option in product['option'] %}
+								<div class="ds-cart-item-option fsz-12">
+									{{ option.name }}:
+									<span class="light-text">{{ option.value }}</span>
+								</div>
+							{% endfor %}
+						</div>
+					{% endif %}
+					{% if product.reward %}
+						<small>{{ product.reward }}</small>
+					{% endif %}
+					{% if product.recurring %}
+						<br/>
+						<small>{{ text_recurring_item }}{{ product.recurring }}</small>
+					{% endif %}
+				</div>
+				<button class="no-btn position-absolute" aria-label="Delete" onclick="update(this, 'remove');">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+						viewBox="0 0 14 14" fill="none">
+						<path
+							d="M13.7783 12.2207C14.0713 12.5137 14.0713 12.9888 13.7783 13.2818C13.6323 13.4278 13.4403 13.5017 13.2483 13.5017C13.0563 13.5017 12.8643 13.4288 12.7183 13.2818L7.24828 7.81173L1.77828 13.2818C1.63228 13.4278 1.44028 13.5017 1.24828 13.5017C1.05628 13.5017 0.864285 13.4288 0.718285 13.2818C0.425285 12.9888 0.425285 12.5137 0.718285 12.2207L6.18829 6.75076L0.718285 1.28079C0.425285 0.987785 0.425285 0.51275 0.718285 0.21975C1.01129 -0.07325 1.48629 -0.07325 1.77929 0.21975L7.24929 5.68978L12.7193 0.21975C13.0123 -0.07325 13.4873 -0.07325 13.7803 0.21975C14.0733 0.51275 14.0733 0.987785 13.7803 1.28079L8.31028 6.75076L13.7783 12.2207Z"
+							fill="#D84040" />
+					</svg>
+				</button>
+			</div>
+			<div class="ds-cart-item-actions d-flex align-items-center justify-content-between">
+				<div class="ds-cart-item-buttons d-flex">
+					<div class="ds-module-quantity d-flex align-items-center justify-content-center br-8 me-2">
+						<input name="product_id_q" value="{{ product.product_id }}" style="display: none;" type="hidden"/>
+						<input name="product_minimum_{{ product.product_id }}" value="{{ product.minimum }}" style="display: none;" type="hidden"/>
+						<input name="product_id" value="{{ product.key }}" style="display: none;" type="hidden"/>
+						<button type="button" aria-label="Minus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="update_manual('#quantity-{{ product.quantity }}-{{ productKey }}', '{{ product.key }}', 'minus');">
+							<svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+								xmlns="http://www.w3.org/2000/svg">
+								<g>
+									<path
+										d="M3.33333 7.5L12.6667 7.5C12.9427 7.5 13.1667 7.724 13.1667 8C13.1667 8.276 12.9427 8.5 12.6667 8.5L3.33333 8.5C3.05733 8.5 2.83333 8.276 2.83333 8C2.83333 7.724 3.05733 7.5 3.33333 7.5Z"
+										fill="#25314C"></path>
+								</g>
+							</svg>
+						</button>
+						<input id="quantity-{{ product.quantity }}-{{ productKey }}" type="text" name="quantity" value="{{ product.quantity }}" class="form-control" onchange="update_manual(this, '{{ product.key }}');" aria-label="Quantity" inputmode="numeric">
+						<button type="button" aria-label="Plus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="update_manual('#quantity-{{ product.quantity }}-{{ productKey }}', '{{ product.key }}', 'plus');">
+							<svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+								xmlns="http://www.w3.org/2000/svg">
+								<g>
+									<path
+										d="M2.83341 8.00009C2.83341 7.72409 3.05741 7.50009 3.33341 7.50009L7.50008 7.50009L7.50008 3.33342C7.50008 3.05742 7.72408 2.83342 8.00008 2.83342C8.27608 2.83342 8.50008 3.05742 8.50008 3.33342L8.50008 7.50009L12.6667 7.50008C12.9427 7.50008 13.1667 7.72408 13.1667 8.00008C13.1667 8.27608 12.9427 8.50008 12.6667 8.50008L8.50008 8.50009L8.50008 12.6668C8.50008 12.9428 8.27608 13.1668 8.00008 13.1668C7.72408 13.1668 7.50008 12.9428 7.50008 12.6668L7.50008 8.50009L3.33342 8.50009C3.05742 8.50009 2.83342 8.27609 2.83341 8.00009Z"
+										fill="#25314C"></path>
+								</g>
+							</svg>
+						</button>
+					</div>
+				</div>
+				{% if product.total and product.price %}
+					<div class="ds-cart-item-price text-end">
+						<div class="ds-cart-item-price-total dark-text fw-500 fsz-16">
+							{{ column_total }} {{ product.total }}
+						</div>
+						<div class="ds-cart-item-price-one fsz-12">
+							{{ column_price }} {{ product.price }}
+						</div>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+	{% endfor %}
+</div>
+<div class="oct-bottom-total-cart d-none">
+	{% if free_shipping_from_text %}
+		<div class="oct-bottom-free-shipping-from dark-text text-start fsz-14 fw-500 pb-3{% if total_percentage >= 100 %} green-text fsz-14{% endif %}">
+		{{ free_shipping_from_text }}
+			{% if total_percentage < 100 %}
+				<div class="progress mt-1">
+					<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ total_value }}" aria-valuemin="0" aria-valuemax="{{ oct_smart_checkout_data.free_shipping_from }}" style="width: {{ total_percentage }}%"></div>
+				</div>
+			{% endif %}
+		</div>
+	{% endif %}
+	{% for total in totals %}
+		<div class="ds-cart-column-total-item mb-2 d-flex align-items-start justify-content-between lh-sm">
+			<span class="me-auto pe-3">{{ total.title }}</span> <span class="dark-text fw-600 fsz-22 ds-cart-column-total-item-text{% if total.code == 'oct_product_set' %} red-text{% endif %}">{{ total.text }}</span>
+		</div>
+	{% endfor %}
+	{% if weight %}
+		<div class="ds-cart-column-total-item d-flex align-items-center justify-content-between">
+			{{ text_weight }} <span class="dark-text fw-600">{{ weight }}</span>
+		</div>
+	{% endif %}
+</div>
+<script>
+	function updateTotal() {
+		let oldTotal = document.querySelector('.ds-cart-column-total'),
+			content = document.querySelector('.oct-bottom-total-cart');
+
+		oldTotal.innerHTML = content.innerHTML;
+	}
+
+	updateTotal();
+</script>
+
+{% for voucher in vouchers %}
+<div class="content-block p-2 p-md-3 mt-3">
+	<div class="d-flex align-items-center justify-content-between">
+		<input type="text" name="" value="1" size="1" disabled="disabled" hidden class="form-control" />
+		<div class="mr-auto d-flex align-items-center gap-2">
+			<p class="dark-text fw-300">{{ voucher.description }}</p>
+			<div class="oct-checkout-cart-total">{{ voucher.amount }}</div>
+		</div>
+		<button type="button" class="no-btn" onclick="voucher.remove('{{ voucher.key }}');formChangeData();return false;">
+			<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 14 14" fill="none">
+				<path d="M13.7783 12.2207C14.0713 12.5137 14.0713 12.9888 13.7783 13.2818C13.6323 13.4278 13.4403 13.5017 13.2483 13.5017C13.0563 13.5017 12.8643 13.4288 12.7183 13.2818L7.24828 7.81173L1.77828 13.2818C1.63228 13.4278 1.44028 13.5017 1.24828 13.5017C1.05628 13.5017 0.864285 13.4288 0.718285 13.2818C0.425285 12.9888 0.425285 12.5137 0.718285 12.2207L6.18829 6.75076L0.718285 1.28079C0.425285 0.987785 0.425285 0.51275 0.718285 0.21975C1.01129 -0.07325 1.48629 -0.07325 1.77929 0.21975L7.24929 5.68978L12.7193 0.21975C13.0123 -0.07325 13.4873 -0.07325 13.7803 0.21975C14.0733 0.51275 14.0733 0.987785 13.7803 1.28079L8.31028 6.75076L13.7783 12.2207Z" fill="#D84040"></path>
+			</svg>
+		</button>
+	</div>
+</div>
+{% endfor %}

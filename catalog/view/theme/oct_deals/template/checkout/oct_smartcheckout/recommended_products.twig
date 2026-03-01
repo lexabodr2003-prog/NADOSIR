@@ -1,0 +1,46 @@
+{% if recommended_poducts %}
+<div class="ds-cart-column-title dark-text fw-500 mb-2">{% if not title %}{{ text_recommended_products }}{% else %}{{ title }}{% endif %}</div>
+{% if description %}
+    <div class="ds-cart-column-description fw-300 fsz-14 light-text mb-3">{{ description }}</div>
+{% endif %}
+<div class="ds-cart-recommended-products d-flex gap-2 gap-md-3">
+    {% for product in recommended_poducts %}
+        <div class="ds-cart-recommended-products-item">
+            <div class="content-block h-100 d-flex gap-2 gap-md-3 p-2 p-md-3">
+                <div class="ds-cart-recommended-products-item-img ds-module-img">
+                    <a href="{{ product.href }}">
+                        <img class="d-block mx-auto" src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" width="{{ product.width }}" height="{{ product.height }}"/>
+                    </a>
+                </div>
+                <div class="ds-module-caption d-flex flex-column align-items-start h-100 pt-0 w-100">
+                    <a href="{{ product.href }}" class="ds-module-title dark-text lh-sm">{{ product.name }}</a>
+                    <div class="d-flex gap-3 justify-content-between align-items-end mt-auto w-100">
+                        <div class="ds-module-price mb-2">
+                        {% if product.special %}
+                            <div class="ds-price-old fsz-12 fw-300 light-text text-decoration-line-through mb-1">
+                                {{ product.price }}
+                            </div>
+                            <div class="ds-price-new fsz-20 fw-700 red-text">
+                                {{ product.special }}
+                            </div>
+                        {% else %}
+                            <div class="ds-price-new fsz-20 fw-700 dark-text">
+                                {{ product.price }}
+                            </div>
+                        {% endif %}
+                        </div>
+                        <button type="button" onclick="addToCartFromCheckout({{ product.product_id }});" aria-label="To cart" class="button button-outline button-outline-primary br-8 fsz-12 p-2">
+                            <svg class="me-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M13.3333 4.10256H11.4872V3.48718C11.4872 1.5639 9.92328 0 8 0C6.07672 0 4.51282 1.5639 4.51282 3.48718V4.10256H2.66666C1.64923 4.10256 0.820511 4.93046 0.820511 5.94872V12.9231C0.820511 14.9071 1.91343 16 3.89743 16H12.1026C14.0866 16 15.1795 14.9071 15.1795 12.9231V5.94872C15.1795 4.93046 14.3508 4.10256 13.3333 4.10256ZM5.74359 3.48718C5.74359 2.24246 6.75528 1.23077 8 1.23077C9.24472 1.23077 10.2564 2.24246 10.2564 3.48718V4.10256H5.74359V3.48718ZM13.9487 12.9231C13.9487 14.217 13.3965 14.7692 12.1026 14.7692H3.89743C2.60349 14.7692 2.05128 14.217 2.05128 12.9231V5.94872C2.05128 5.60903 2.32779 5.33333 2.66666 5.33333H4.51282V7.17949C4.51282 7.51918 4.78851 7.79487 5.1282 7.79487C5.4679 7.79487 5.74359 7.51918 5.74359 7.17949V5.33333H10.2564V7.17949C10.2564 7.51918 10.5321 7.79487 10.8718 7.79487C11.2115 7.79487 11.4872 7.51918 11.4872 7.17949V5.33333H13.3333C13.6722 5.33333 13.9487 5.60903 13.9487 5.94872V12.9231Z"
+                                    fill="#00A8E8" />
+                            </svg>
+                        </button>
+                        <input type="hidden" name="product_id" value="{{ product.product_id }}" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}

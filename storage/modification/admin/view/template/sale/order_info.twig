@@ -1,0 +1,2268 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right"><a href="{{ invoice }}" target="_blank" data-toggle="tooltip" title="{{ button_invoice_print }}" class="btn btn-info"><i class="fa fa-print"></i></a> <a href="{{ shipping }}" target="_blank" data-toggle="tooltip" title="{{ button_shipping_print }}" class="btn btn-info"><i class="fa fa-truck"></i></a> <a href="{{ edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-shopping-cart"></i> {{ text_order_detail }}</h3>
+          </div>
+          <table class="table">
+            <tbody>
+              <tr>
+                <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_store }}" class="btn btn-info btn-xs"><i class="fa fa-shopping-cart fa-fw"></i></button></td>
+                <td><a href="{{ store_url }}" target="_blank">{{ store_name }}</a></td>
+              </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_date_added }}" class="btn btn-info btn-xs"><i class="fa fa-calendar fa-fw"></i></button></td>
+                <td>{{ date_added }}</td>
+              </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_payment_method }}" class="btn btn-info btn-xs"><i class="fa fa-credit-card fa-fw"></i></button></td>
+                <td>{{ payment_method }}</td>
+              </tr>
+              {% if shipping_method %}
+                <tr>
+                  <td><button data-toggle="tooltip" title="{{ text_shipping_method }}" class="btn btn-info btn-xs"><i class="fa fa-truck fa-fw"></i></button></td>
+                  <td>{{ shipping_method }}</td>
+                </tr>
+              {% endif %}
+            
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-user"></i> {{ text_customer_detail }}</h3>
+          </div>
+          <table class="table">
+            <tr>
+              <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_customer }}" class="btn btn-info btn-xs"><i class="fa fa-user fa-fw"></i></button></td>
+              <td>{% if customer %} <a href="{{ customer }}" target="_blank">{{ firstname }} {{ lastname }}</a> {% else %}
+                  {{ firstname }} {{ lastname }}
+                {% endif %}</td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_customer_group }}" class="btn btn-info btn-xs"><i class="fa fa-group fa-fw"></i></button></td>
+              <td>{{ customer_group }}</td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_email }}" class="btn btn-info btn-xs"><i class="fa fa-envelope-o fa-fw"></i></button></td>
+              <td><a href="mailto:{{ email }}">{{ email }}</a></td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_telephone }}" class="btn btn-info btn-xs"><i class="fa fa-phone fa-fw"></i></button></td>
+              
+                <td>{{ telephone }}
+                <!-- OCT SMS Notify -->
+                {% if can_edit %}
+                    {% if not oct_sms_status %}
+                        <button type="button"
+                                class="btn btn-success btn-xs btn-alert-sms" 
+                                data-toggle="tooltip"
+                                title="{{ button_send_sms }}">
+                            <i class="fa fa-sms" aria-hidden="true"></i>
+                        </button>
+                    {% else %} 
+                        <button type="button"
+                                class="btn btn-success btn-xs btn-send-ttn"
+                                data-order-id="{{ order_id }}"
+                                data-shipping-ttn="{{ shipping_ttn_number }}"
+                                data-oct-token="{{ oct_sms_token }}"
+                                data-shipping-type="{{ shipping_type }}"
+                                data-shipping-tracking-url="{{ shipping_ttn_url }}"
+                                data-toggle="tooltip"
+                                title="{{ button_send_sms }}">
+                        <i class="fa fa-sms" aria-hidden="true"></i>
+                        </button>
+                    {% endif %} 
+                {% endif %}
+                <!-- OCT SMS Notify -->
+                </td>
+            
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-cog"></i> {{ text_option }}</h3>
+          </div>
+          <table class="table">
+            <tbody>
+              <tr>
+                <td>{{ text_invoice }}</td>
+                <td id="invoice" class="text-right">{{ invoice_no }}</td>
+                <td style="width: 1%;" class="text-center">{% if not invoice_no %}
+                    <button id="button-invoice" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_generate }}" class="btn btn-success btn-xs"><i class="fa fa-cog"></i></button>
+                  {% else %}
+                    <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-refresh"></i></button>
+                  {% endif %}</td>
+              </tr>
+              <tr>
+                <td>{{ text_reward }}</td>
+                <td class="text-right">{{ reward }}</td>
+                <td class="text-center">{% if customer and reward %}
+                    {% if not reward_total %}
+                      <button id="button-reward-add" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_reward_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                    {% else %}
+                      <button id="button-reward-remove" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>
+                    {% endif %}
+                  {% else %}
+                    <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                  {% endif %}</td>
+              </tr>
+              <tr>
+                <td>{{ text_affiliate }}
+                  {% if affiliate %}
+                    (<a href="{{ affiliate }}">{{ affiliate_firstname }} {{ affiliate_lastname }}</a>)
+                  {% endif %}</td>
+                <td class="text-right">{{ commission }}</td>
+                <td class="text-center">{% if affiliate %}
+                    {% if not commission_total %}
+                      <button id="button-commission-add" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                    {% else %}
+                      <button id="button-commission-remove" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>
+                    {% endif %}
+                  {% else %}
+                    <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>
+                  {% endif %}</td>
+              </tr>
+            
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-info-circle"></i> {{ text_order }}</h3>
+      </div>
+      <div class="panel-body">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <td style="width: 50%;" class="text-left">{{ text_payment_address }}</td>
+              {% if shipping_method %}
+                <td style="width: 50%;" class="text-left">{{ text_shipping_address }}</td>
+              {% endif %} </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left">{{ payment_address }}</td>
+              {% if shipping_method %}
+                <td class="text-left">{{ shipping_address }}</td>
+              {% endif %} </tr>
+          
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            </tbody>
+        </table>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <td class="text-left">{{ column_product }}</td>
+              <td class="text-left">{{ column_model }}</td>
+              <td class="text-right">{{ column_quantity }}</td>
+              <td class="text-right">{{ column_price }}</td>
+              <td class="text-right">{{ column_total }}</td>
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for product in products %}
+              <tr>
+                <td class="text-left"><a href="{{ product.href }}">{{ product.name }}</a> {% for option in product.option %}
+                    <br/>
+                    {% if option.type != 'file' %}
+                      &nbsp;
+                      <small> - {{ option.name }}: {{ option.value }}</small> {% else %}
+                      &nbsp;
+                      <small> - {{ option.name }}: <a href="{{ option.href }}">{{ option.value }}</a></small> {% endif %}
+                  {% endfor %}</td>
+                <td class="text-left">{{ product.model }}</td>
+                <td class="text-right">{{ product.quantity }}</td>
+                <td class="text-right">{{ product.price }}</td>
+                <td class="text-right">{{ product.total }}</td>
+              </tr>
+            {% endfor %}
+            {% for voucher in vouchers %}
+              <tr>
+                <td class="text-left"><a href="{{ voucher.href }}">{{ voucher.description }}</a></td>
+                <td class="text-left"></td>
+                <td class="text-right">1</td>
+                <td class="text-right">{{ voucher.amount }}</td>
+                <td class="text-right">{{ voucher.amount }}</td>
+              </tr>
+            {% endfor %}
+            {% for total in totals %}
+              <tr>
+                <td colspan="4" class="text-right">{{ total.title }}</td>
+                <td class="text-right">{{ total.text }}</td>
+              </tr>
+            {% endfor %}
+          
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            </tbody>
+
+        </table>
+        {% if comment %}
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <td>{{ text_comment }}</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ comment }}</td>
+              </tr>
+            
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            </tbody>
+          </table>
+        {% endif %} </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-comment-o"></i> {{ text_history }}</h3>
+      </div>
+      <div class="panel-body">
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#tab-history" data-toggle="tab">{{ tab_history }}</a></li>
+          <li><a href="#tab-additional" data-toggle="tab">{{ tab_additional }}</a></li>
+          {% for tab in tabs %}
+            <li><a href="#tab-{{ tab.code }}" data-toggle="tab">{{ tab.title }}</a></li>
+          {% endfor %}
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="tab-history">
+            <div id="history"></div>
+            <br/>
+            <fieldset>
+              <legend>{{ text_history_add }}</legend>
+              <form class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-order-status">{{ entry_order_status }}</label>
+                  <div class="col-sm-10">
+                    <select name="order_status_id" id="input-order-status" class="form-control">
+                      {% for order_statuses in order_statuses %}
+                        {% if order_statuses.order_status_id == order_status_id %}
+                          <option value="{{ order_statuses.order_status_id }}" selected="selected">{{ order_statuses.name }}</option>
+                        {% else %}
+                          <option value="{{ order_statuses.order_status_id }}">{{ order_statuses.name }}</option>
+                        {% endif %}
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-override"><span data-toggle="tooltip" title="{{ help_override }}">{{ entry_override }}</span></label>
+                  <div class="col-sm-10">
+                    <div class="checkbox">
+                      <input type="checkbox" name="override" value="1" id="input-override"/>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-notify">{{ entry_notify }}</label>
+                  <div class="col-sm-10">
+                    <div class="checkbox">
+                      <input type="checkbox" name="notify" value="1" id="input-notify"/>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-comment">{{ entry_comment }}</label>
+                  <div class="col-sm-10">
+                    <textarea name="comment" rows="8" id="input-comment" class="form-control"></textarea>
+                  </div>
+                </div>
+              </form>
+            </fieldset>
+            <div class="text-right">
+              <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i> {{ button_history_add }}</button>
+            </div>
+          </div>
+          <div class="tab-pane" id="tab-additional"> {% if account_custom_fields %}
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <td colspan="2">{{ text_account_custom_field }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    {% for custom_field in account_custom_fields %}
+                      <tr>
+                        <td>{{ custom_field.name }}</td>
+                        <td>{{ custom_field.value }}</td>
+                      </tr>
+                    {% endfor %}
+                  
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            </tbody>
+
+                </table>
+              </div>
+            {% endif %}
+            {% if payment_custom_fields %}
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <td colspan="2">{{ text_payment_custom_field }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    {% for custom_field in payment_custom_fields %}
+                      <tr>
+                        <td>{{ custom_field.name }}</td>
+                        <td>{{ custom_field.value }}</td>
+                      </tr>
+                    {% endfor %}
+                  
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            </tbody>
+
+                </table>
+              </div>
+            {% endif %}
+            {% if shipping_method and shipping_custom_fields %}
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <td colspan="2">{{ text_shipping_custom_field }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    {% for custom_field in shipping_custom_fields %}
+                      <tr>
+                        <td>{{ custom_field.name }}</td>
+                        <td>{{ custom_field.value }}</td>
+                      </tr>
+                    {% endfor %}
+                  
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            </tbody>
+
+                </table>
+              </div>
+            {% endif %}
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <td colspan="2">{{ text_browser }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{{ text_ip }}</td>
+                    <td>{{ ip }}</td>
+                  </tr>
+                  {% if forwarded_ip %}
+                    <tr>
+                      <td>{{ text_forwarded_ip }}</td>
+                      <td>{{ forwarded_ip }}</td>
+                    </tr>
+                  {% endif %}
+                  <tr>
+                    <td>{{ text_user_agent }}</td>
+                    <td>{{ user_agent }}</td>
+                  </tr>
+                  <tr>
+                    <td>{{ text_accept_language }}</td>
+                    <td>{{ accept_language }}</td>
+                  </tr>
+                
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            </tbody>
+
+              </table>
+            </div>
+          </div>
+          {% for tab in tabs %}
+            <div class="tab-pane" id="tab-{{ tab.code }}">{{ tab.content }}</div>
+          {% endfor %} </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+  $(document).delegate('#button-invoice', 'click', function() {
+	  $.ajax({
+		  url: 'index.php?route=sale/order/createinvoiceno&user_token={{ user_token }}&order_id={{ order_id }}',
+		  dataType: 'json',
+		  beforeSend: function() {
+			  $('#button-invoice').button('loading');
+		  },
+		  complete: function() {
+			  $('#button-invoice').button('reset');
+		  },
+		  success: function(json) {
+			  $('.alert-dismissible').remove();
+
+			  if (json['error']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			  }
+
+			  if (json['invoice_no']) {
+				  $('#invoice').html(json['invoice_no']);
+
+				  $('#button-invoice').replaceWith('<button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-cog"></i></button>');
+			  }
+		  },
+		  error: function(xhr, ajaxOptions, thrownError) {
+			  alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		  }
+	  });
+  });
+
+  $(document).delegate('#button-reward-add', 'click', function() {
+	  $.ajax({
+		  url: 'index.php?route=sale/order/addreward&user_token={{ user_token }}&order_id={{ order_id }}',
+		  type: 'post',
+		  dataType: 'json',
+		  beforeSend: function() {
+			  $('#button-reward-add').button('loading');
+		  },
+		  complete: function() {
+			  $('#button-reward-add').button('reset');
+		  },
+		  success: function(json) {
+			  $('.alert-dismissible').remove();
+
+			  if (json['error']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			  }
+
+			  if (json['success']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+				  $('#button-reward-add').replaceWith('<button id="button-reward-remove" data-toggle="tooltip" title="{{ button_reward_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>');
+			  }
+		  },
+		  error: function(xhr, ajaxOptions, thrownError) {
+			  alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		  }
+	  });
+  });
+
+  $(document).delegate('#button-reward-remove', 'click', function() {
+	  $.ajax({
+		  url: 'index.php?route=sale/order/removereward&user_token={{ user_token }}&order_id={{ order_id }}',
+		  type: 'post',
+		  dataType: 'json',
+		  beforeSend: function() {
+			  $('#button-reward-remove').button('loading');
+		  },
+		  complete: function() {
+			  $('#button-reward-remove').button('reset');
+		  },
+		  success: function(json) {
+			  $('.alert-dismissible').remove();
+
+			  if (json['error']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			  }
+
+			  if (json['success']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+				  $('#button-reward-remove').replaceWith('<button id="button-reward-add" data-toggle="tooltip" title="{{ button_reward_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>');
+			  }
+		  },
+		  error: function(xhr, ajaxOptions, thrownError) {
+			  alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		  }
+	  });
+  });
+
+  $(document).delegate('#button-commission-add', 'click', function() {
+	  $.ajax({
+		  url: 'index.php?route=sale/order/addcommission&user_token={{ user_token }}&order_id={{ order_id }}',
+		  type: 'post',
+		  dataType: 'json',
+		  beforeSend: function() {
+			  $('#button-commission-add').button('loading');
+		  },
+		  complete: function() {
+			  $('#button-commission-add').button('reset');
+		  },
+		  success: function(json) {
+			  $('.alert-dismissible').remove();
+
+			  if (json['error']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			  }
+
+			  if (json['success']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+				  $('#button-commission-add').replaceWith('<button id="button-commission-remove" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button>');
+			  }
+		  },
+		  error: function(xhr, ajaxOptions, thrownError) {
+			  alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		  }
+	  });
+  });
+
+  $(document).delegate('#button-commission-remove', 'click', function() {
+	  $.ajax({
+		  url: 'index.php?route=sale/order/removecommission&user_token={{ user_token }}&order_id={{ order_id }}',
+		  type: 'post',
+		  dataType: 'json',
+		  beforeSend: function() {
+			  $('#button-commission-remove').button('loading');
+		  },
+		  complete: function() {
+			  $('#button-commission-remove').button('reset');
+		  },
+		  success: function(json) {
+			  $('.alert-dismissible').remove();
+
+			  if (json['error']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			  }
+
+			  if (json['success']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+				  $('#button-commission-remove').replaceWith('<button id="button-commission-add" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button>');
+			  }
+		  },
+		  error: function(xhr, ajaxOptions, thrownError) {
+			  alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		  }
+	  });
+  });
+
+  var api_token = '';
+
+  $.ajax({
+	  url: '{{ catalog }}index.php?route=api/login',
+	  type: 'post',
+	  dataType: 'json',
+	  data: 'key={{ api_key }}',
+	  crossDomain: true,
+	  success: function(json) {
+		  $('.alert').remove();
+		  if (json['error']) {
+			  if (json['error']['key']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error']['key'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+			  }
+			  if (json['error']['ip']) {
+				  $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error']['ip'] + ' <button type="button" id="button-ip-add" data-loading-text="{{ text_loading }}" class="btn btn-danger btn-xs pull-right"><i class="fa fa-plus"></i>{{ button_ip_add }}</button></div>');
+			  }
+		  }
+		  if (json['token']) {
+			  api_token = json['token'];
+		  }
+	  },
+	  error: function(xhr, ajaxOptions, thrownError) {
+		  alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+	  }
+  });
+
+  $('#history').delegate('.pagination a', 'click', function(e) {
+	  e.preventDefault();
+
+	  $('#history').load(this.href);
+  });
+
+  $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+
+  $('#button-history').on('click', function() {
+	  $.ajax({
+		  url: '{{ catalog }}index.php?route=api/order/history&api_token={{ api_token }}&store_id={{ store_id }}&order_id={{ order_id }}',
+		  type: 'post',
+		  dataType: 'json',
+		  data: 'order_status_id=' + encodeURIComponent($('select[name=\'order_status_id\']').val()) + '&notify=' + ($('input[name=\'notify\']').prop('checked') ? 1 : 0) + '&override=' + ($('input[name=\'override\']').prop('checked') ? 1 : 0) + '&append=' + ($('input[name=\'append\']').prop('checked') ? 1 : 0) + '&comment=' + encodeURIComponent($('textarea[name=\'comment\']').val()),
+		  beforeSend: function() {
+			  $('#button-history').button('loading');
+		  },
+		  complete: function() {
+			  $('#button-history').button('reset');
+		  },
+		  success: function(json) {
+			  $('.alert-dismissible').remove();
+
+			  if (json['error']) {
+				  $('#history').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+			  }
+
+			  if (json['success']) {
+				  $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+
+				  $('#history').before('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+				  $('textarea[name=\'comment\']').val('');
+			  }
+		  },
+		  error: function(xhr, ajaxOptions, thrownError) {
+			  alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		  }
+	  });
+  });
+  //--></script>
+</div>
+{{ footer }} 

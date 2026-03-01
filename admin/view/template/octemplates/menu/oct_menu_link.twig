@@ -1,0 +1,131 @@
+<div class="form-group">
+    <label class="col-sm-2 control-label" for="megamenu-{{ menu_id }}-status">{{ entry_status }}</label>
+    <div class="col-sm-10">
+        <div class="toggle-group">
+            <input type="checkbox" name="oct_megamenu[{{ menu_id }}][status]" {% if oct_menu.status is defined and oct_menu.status %}checked="checked"{% endif %} id="megamenu-{{ menu_id }}-status" tabindex="1">
+            <label for="megamenu-{{ menu_id }}-status"></label>
+            <div class="onoffswitch pull-left" aria-hidden="true">
+                <div class="onoffswitch-label">
+                    <div class="onoffswitch-inner"></div>
+                    <div class="onoffswitch-switch"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+	<label class="col-sm-2 control-label">{{ entry_menu_image }}</label>
+	<div class="col-sm-10">
+        <a href="" id="thumb-menuimage{{ menu_id }}" data-toggle="image" class="img-thumbnail">
+            <img src="{{ thumb }}" style="min-width:50px;min-height:50px;" alt="" title="" data-placeholder="{{ placeholder }}" />
+        </a>
+		<input type="hidden" name="oct_megamenu[{{ menu_id }}][settings][image]" value="{{ oct_menu.settings.image }}" id="input-menuimage{{ menu_id }}" />
+	</div>
+</div>
+<div class="form-group">
+    <div class="col-sm-6">
+        <label class="col-sm-4 control-label" for="target{{ menu_id }}">{{ entry_menu_target }}</label>
+        <div class="col-sm-8">
+            <div class="toggle-group">
+                <input type="checkbox" name="oct_megamenu[{{ menu_id }}][settings][target]" {% if oct_menu.settings.target %}checked="checked"{% endif %} id="target{{ menu_id }}" tabindex="1">
+                <label for="target{{ menu_id }}"></label>
+                <div class="onoffswitch pull-left" aria-hidden="true">
+                    <div class="onoffswitch-label">
+                        <div class="onoffswitch-inner"></div>
+                        <div class="onoffswitch-switch"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <label class="col-sm-4 control-label" for="megamenu-{{ menu_id }}-sort_order">{{ entry_menu_sort }}</label>
+        <div class="col-sm-8">
+            <input type="text" name="oct_megamenu[{{ menu_id }}][sort_order]" value="{{ oct_menu.sort_order is defined ? oct_menu.sort_order : '' }}" placeholder="{{ entry_menu_sort }}" id="megamenu-{{ menu_id }}-sort_order" class="form-control" />
+        </div>
+    </div>
+</div>
+
+{% if oct_menu.type == 'link' %}
+<hr />
+
+<div class="form-group">
+  <label class="col-sm-2 control-label">{{ entry_sub_links }}</label>
+  <div class="col-sm-10">
+    <button type="button" class="btn btn-success" onclick="addSubLink({{ menu_id }});">
+      <i class="fa fa-plus" aria-hidden="true"></i> {{ button_add_sub_link }}
+    </button>
+  </div>
+</div>
+<div id="sub-links-container-{{ menu_id }}">
+  {% if oct_menu.sub_links is defined %}
+    {% for sub_link_id, sub_link in oct_menu.sub_links %}
+      <div class="sub-link-item panel panel-default" id="sub-link-{{ sub_link_id }}">
+        <div class="panel-heading">
+          <span>
+            <i class="fa fa-link" aria-hidden="true"></i> 
+            {% if sub_link.description[config_language_id] is defined and sub_link.description[config_language_id].title %}
+              {{ sub_link.description[config_language_id].title }}
+            {% else %}
+              {{ text_sub_link }}
+            {% endif %}
+          </span>
+          <a href="javascript:;" class="btn btn-danger btn-sm pull-right" onclick="removeSubLink({{ sub_link_id }});">
+            <i class="fa fa-trash-o" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="panel-body">
+          <ul class="nav nav-tabs sub-link-tabs">
+            {% for language in languages %}
+              <li{% if loop.first %} class="active"{% endif %}>
+                <a href="#sub-link-{{ sub_link_id }}-lang-{{ language.language_id }}" data-toggle="tab">
+                  <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+          <div class="tab-content">
+            {% for language in languages %}
+              <div class="tab-pane{% if loop.first %} active{% endif %}" id="sub-link-{{ sub_link_id }}-lang-{{ language.language_id }}">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_sub_link_title }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" 
+                           name="oct_megamenu[{{ menu_id }}][sub_links][{{ sub_link_id }}][description][{{ language.language_id }}][title]" 
+                           value="{{ sub_link.description[language.language_id].title is defined ? sub_link.description[language.language_id].title : '' }}" 
+                           placeholder="{{ entry_sub_link_title }}" 
+                           class="form-control sub-link-title" 
+                           data-sub-link-id="{{ sub_link_id }}"
+                           data-language-id="{{ language.language_id }}"
+                           {% if language.language_id == config_language_id %}onkeyup="updateSubLinkTitle({{ sub_link_id }}, this.value)"{% endif %} />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">{{ entry_sub_link_href }}</label>
+                  <div class="col-sm-10">
+                    <input type="text" 
+                           name="oct_megamenu[{{ menu_id }}][sub_links][{{ sub_link_id }}][description][{{ language.language_id }}][href]" 
+                           value="{{ sub_link.description[language.language_id].href is defined ? sub_link.description[language.language_id].href : '' }}" 
+                           placeholder="{{ entry_sub_link_href }}" 
+                           class="form-control" />
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_sub_link_sort }}</label>
+            <div class="col-sm-10">
+              <input type="text" 
+                     name="oct_megamenu[{{ menu_id }}][sub_links][{{ sub_link_id }}][sort_order]" 
+                     value="{{ sub_link.sort_order is defined ? sub_link.sort_order : '0' }}" 
+                     placeholder="{{ entry_sub_link_sort }}" 
+                     class="form-control" />
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endif %}

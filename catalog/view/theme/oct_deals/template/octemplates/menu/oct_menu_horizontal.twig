@@ -1,0 +1,466 @@
+{% if oct_menu %}
+    <ul class="ds-menu-maincategories d-flex flex-column flex-xl-row">
+        {% for oct_category in oct_menu %}
+            <li class="ds-menu-maincategories-item d-flex align-items-center py-2 px-3 px-xl-2">
+                {% if oct_category.oct_image %}
+                    <span class="d-inline-flex align-items-center">
+                        <img class="ds-menu-catalog-item-img" src="{{ oct_category.oct_image }}" alt="{{ oct_category.name }}" width="20" height="20" decoding="async">
+                        {% if oct_category.href %}
+                            <a href="{{ oct_category.href }}" {{ oct_category.target }} class="ds-menu-maincategories-item-title fsz-14 dark-text fw-500 ms-2">{{ oct_category.name }}</a>
+                        {% else %}
+                            <span class="ds-menu-maincategories-item-title fsz-14 dark-text fw-500 ms-2">{{ oct_category.name }}</span>
+                        {% endif %}
+                    </span>
+                {% else %}
+                    {% if oct_category.href %}
+                        <a href="{{ oct_category.href }}" {{ oct_category.target }} class="ds-menu-maincategories-item-title fsz-14 dark-text fw-500">{{ oct_category.name }}</a>
+                    {% else %}
+                        <span class="ds-menu-maincategories-item-title fsz-14 dark-text fw-500 ms-2">{{ oct_category.name }}</span>
+                    {% endif %}
+                {% endif %}
+                {% if oct_category.children or oct_category.oct_pages or oct_category.sub_links %}
+                    <span class="menu-chevron-icon"></span>
+                {% endif %}
+                {% if (oct_category.children or oct_category.oct_pages) and oct_category.type == 'standard' %}
+                    <div class="ds-menu-catalog{% if oct_category.view == '2' %} ds-menu-catalog-wide{% endif %}">
+                        {% if oct_category.view == '1' %}
+                            <div class="ds-menu-catalog-inner">
+                                <ul class="ds-menu-catalog-items">
+                                    {% for child in oct_category.children %}
+                                        <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                            <a href="{{ child.href }}">{{ child.name }}</a>
+                                            {% if child.children or child.oct_pages %}
+                                                <span class="menu-chevron-icon"></span>
+                                                <div class="ds-menu-catalog">
+                                                    <div class="ds-menu-catalog-inner">
+                                                        <ul class="ds-menu-catalog-items">
+                                                            {% for ch in child.children %}
+                                                                <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                                                    <a href="{{ ch.href }}">{{ ch.name }}</a>
+                                                                    {% if ch.children or ch.oct_pages %}
+                                                                        <span class="menu-chevron-icon"></span>
+                                                                        <div class="ds-menu-catalog">
+                                                                            <div class="ds-menu-catalog-inner">
+                                                                                <ul class="ds-menu-catalog-items">
+                                                                                    {% for child in ch.children %}
+                                                                                        <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                                                                            <a href="{{ child.href }}">
+                                                                                                {{ child.name }}
+                                                                                            </a>
+                                                                                        </li>
+                                                                                    {% endfor %}
+                                                                                    {% if ch.oct_pages %}
+                                                                                        <li class="ds-menu-list-landings">
+                                                                                            <ul>
+                                                                                                {% for oct_page in ch.oct_pages %}
+                                                                                                    {% if oct_page.page_links is not empty %}
+                                                                                                    <li class="d-flex flex-column ">
+                                                                                                        <span class="ds-megamenu-children-title fw-700 mb-2">{{ oct_page.page_group[language_id] }}</span>
+                                                                                                        {% for page_link in oct_page.page_links %}
+                                                                                                        <a href="{{ page_link[language_id].link }}" title="{{ page_link[language_id].title }}" class="ds-menu-list-landings-link fsz-14">{{ page_link[language_id].title }}</a>
+                                                                                                        {% endfor %}
+                                                                                                    </li>
+                                                                                                    {% endif %}
+                                                                                                {% endfor %}
+                                                                                            </ul>
+                                                                                        </li>
+                                                                                    {% endif %}
+                                                                                </ul>
+                                                                            </div>
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </li>
+                                                            {% endfor %}
+                                                            {% if child.oct_pages %}
+                                                                <li class="ds-menu-list-landings">
+                                                                    <ul>
+                                                                        {% for oct_page in child.oct_pages %}
+                                                                            {% if oct_page.page_links is not empty %}
+                                                                            <li class="d-flex flex-column">
+                                                                                <span class="ds-megamenu-children-title fw-700 mb-2">{{ oct_page.page_group[language_id] }}</span>
+                                                                                {% for page_link in oct_page.page_links %}
+                                                                                <a href="{{ page_link[language_id].link }}" title="{{ page_link[language_id].title }}" class="ds-menu-list-landings-link fsz-14">{{ page_link[language_id].title }}</a>
+                                                                                {% endfor %}
+                                                                            </li>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                </li>
+                                                            {% endif %}
+                                                        </ul>
+                                                    </div>
+                                            </div>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                    {% if oct_category.oct_pages %}
+                                        <li class="ds-menu-list-landings">
+                                            <ul>
+                                                {% for oct_page in oct_category.oct_pages %}
+                                                    {% if oct_page.page_links is not empty %}
+                                                    <li class="d-flex flex-column">
+                                                        <span class="ds-megamenu-children-title fw-700 mb-2">{{ oct_page.page_group[language_id] }}</span>
+                                                        {% for page_link in oct_page.page_links %}
+                                                        <a href="{{ page_link[language_id].link }}" title="{{ page_link[language_id].title }}" class="ds-menu-list-landings-link fsz-14">{{ page_link[language_id].title }}</a>
+                                                        {% endfor %}
+                                                    </li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        {% elseif oct_category.view == '2' %}
+                            <div class="ds-megamenu-child-wrapper">
+                                <div class="ds-megamenu-child-title fw-700 fsz-20 dark-text mb-4">{{ oct_category.name }}</div>
+                                <div class="d-flex">
+                                    <div class="ds-megamenu-children flex-grow-1 flex-column flex-xl-row">
+                                        {% if oct_category.oct_pages %}
+                                            <div class="ds-megamenu-children-item">
+                                                {% for oct_page in oct_category.oct_pages %}
+                                                    {% if oct_page.page_links is not empty %}
+                                                        <span class="ds-megamenu-children-title fw-700">{{ oct_page.page_group[language_id] }}</span>
+                                                        <ul class="list-unstyled fsz-14">
+                                                            {% for page_link in oct_page.page_links %}
+                                                            <li>
+                                                                <a href="{{ page_link[language_id].link }}" title="{{ page_link[language_id].title }}">{{ page_link[language_id].title }}</a>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        {% if oct_category.children %}
+                                            {% for child in oct_category.children %}
+                                                <div class="ds-megamenu-children-item">
+                                                    <a href="{{ child.href }}" title="{{ child.name }}" class="ds-megamenu-children-title fw-700">{{ child.name }}</a>
+                                                    {% if child.children %}
+                                                        <ul class="list-unstyled fsz-14">
+                                                            {% for ch in child.children %}
+                                                            <li>
+                                                                <a href="{{ ch.href }}" title="{{ ch.name }}">{{ ch.name }}</a>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if oct_category.children and oct_category.type == 'category' %}
+                    <div class="ds-menu-maincategories-dropdown position-absolute{% if oct_category.view == '1' %} ds-menu-maincategories-dropdown-narrow{% endif %}">
+                        <div class="ds-sidebar-header d-flex align-items-center justify-content-between py-2 px-3 d-xl-none">
+                            <div class="ds-sidebar-header-back fw-700 dark-text fsz-16 d-flex align-items-center" data-sidebar="catalogback">
+                                <span class="menu-back-icon"></span>
+                                {{ oct_category.name }}
+                            </div>
+                            <button type="button" class="button button-light br-10 ds-sidebar-close" data-sidebar="catalogclose" aria-label="Close">
+                                <span class="menu-close-icon"></span>
+                            </button>
+                        </div>
+                        <!-- 1 = menu list, 2 = menu grid -->
+                        {% if oct_category.view == '1' %}
+                            <div class="ds-menu-catalog-inner">
+                                <ul class="ds-menu-catalog-items">
+                                    {% for child in oct_category.children %}
+                                        <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                            <a href="{{ child.href }}">{{ child.name }}</a>
+                                            {% if child.children or child.oct_pages %}
+                                                <span class="menu-chevron-icon"></span>
+                                                <div class="ds-menu-catalog">
+                                                    <div class="ds-sidebar-header d-flex align-items-center justify-content-between py-2 px-3 d-xl-none">
+                                                        <div class="ds-sidebar-header-back fw-700 dark-text fsz-16 d-flex align-items-center" data-sidebar="catalogback">
+                                                            <span class="menu-back-icon"></span>
+                                                            {{ child.name }}
+                                                        </div>
+                                                        <button type="button" class="button button-light br-10 ds-sidebar-close" data-sidebar="catalogclose" aria-label="Close">
+                                                            <span class="menu-close-icon"></span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="ds-menu-catalog-inner">
+                                                        <ul class="ds-menu-catalog-items">
+                                                            {% for ch in child.children %}
+                                                                <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                                                    <a href="{{ ch.href }}">{{ ch.name }}</a>
+                                                                    {% if ch.children or ch.oct_pages %}
+                                                                        <span class="menu-chevron-icon"></span>
+                                                                        <div class="ds-menu-catalog">
+                                                                            <div class="ds-sidebar-header d-flex align-items-center justify-content-between py-2 px-3 d-xl-none">
+                                                                                <div class="ds-sidebar-header-back fw-700 dark-text fsz-16 d-flex align-items-center"
+                                                                                    data-sidebar="catalogback">
+                                                                                    <span class="menu-back-icon"></span>
+                                                                                    {{ ch.name }}
+                                                                                </div>
+                                                                                <button type="button" class="button button-light br-10 ds-sidebar-close" data-sidebar="catalogclose" aria-label="Close">
+                                                                                    <span class="menu-close-icon"></span>
+                                                                                </button>
+                                                                            </div>
+                                                                            <div class="ds-menu-catalog-inner">
+                                                                                <ul class="ds-menu-catalog-items">
+                                                                                    {% for child in ch.children %}
+                                                                                        <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                                                                            <a href="{{ child.href }}" class="flex-grow-1">{{ child.name }}</a>
+                                                                                        </li>
+                                                                                    {% endfor %}
+                                                                                    {% if ch.oct_pages %}
+                                                                                        <li class="ds-menu-list-landings">
+                                                                                            <ul>
+                                                                                                {% for oct_page in ch.oct_pages %}
+                                                                                                    {% if oct_page.page_links is not empty %}
+                                                                                                    <li class="d-flex flex-column ">
+                                                                                                        <span class="ds-megamenu-children-title fw-700 mb-2">{{ oct_page.page_group[language_id] }}</span>
+                                                                                                        {% for page_link in oct_page.page_links %}
+                                                                                                        <a href="{{ page_link[language_id].link }}" title="{{ page_link[language_id].title }}" class="ds-menu-list-landings-link fsz-14">{{ page_link[language_id].title }}</a>
+                                                                                                        {% endfor %}
+                                                                                                    </li>
+                                                                                                    {% endif %}
+                                                                                                {% endfor %}
+                                                                                            </ul>
+                                                                                        </li>
+                                                                                    {% endif %}
+                                                                                </ul>
+                                                                            </div>
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </li>
+                                                            {% endfor %}
+                                                            {% if child.oct_pages %}
+                                                                <li class="ds-menu-list-landings">
+                                                                    <ul>
+                                                                        {% for oct_page in child.oct_pages %}
+                                                                            {% if oct_page.page_links is not empty %}
+                                                                            <li class="d-flex flex-column">
+                                                                                <span class="ds-megamenu-children-title fw-700 mb-2">{{ oct_page.page_group[language_id] }}</span>
+                                                                                {% for page_link in oct_page.page_links %}
+                                                                                <a href="{{ page_link[language_id].link }}" title="{{ page_link[language_id].title }}" class="ds-menu-list-landings-link fsz-14">{{ page_link[language_id].title }}</a>
+                                                                                {% endfor %}
+                                                                            </li>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                </li>
+                                                            {% endif %}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                    {% if oct_category.oct_pages %}
+                                        <li class="ds-menu-list-landings">
+                                            <ul>
+                                                {% for oct_page in oct_category.oct_pages %}
+                                                    {% if oct_page.page_links is not empty %}
+                                                    <li class="d-flex flex-column">
+                                                        <span class="ds-megamenu-children-title fw-700 mb-2">{{ oct_page.page_group[language_id] }}</span>
+                                                        {% for page_link in oct_page.page_links %}
+                                                        <a href="{{ page_link[language_id].link }}" title="{{ page_link[language_id].title }}" class="ds-menu-list-landings-link fsz-14">{{ page_link[language_id].title }}</a>
+                                                        {% endfor %}
+                                                    </li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        {% elseif oct_category.view == '2' %}
+                            <div class="ds-megamenu-child-wrapper">
+                                <div class="d-flex flex-column flex-xl-row p-3">
+                                    {% if oct_category.oct_pages %}
+                                        <div class="col-xl-3 p-3 p-xl-0">
+                                            {% for oct_pages in oct_category.oct_pages %}
+                                                {% for oct_page in oct_pages %}
+                                                    <ul class="ds-menu-list-landings dark-text mb-4 pe-xl-3">
+                                                        <li class="d-flex flex-column">
+                                                            {% if oct_page.page_links is not empty %}
+                                                                <span class="ds-megamenu-children-title fw-700">{{ oct_page.page_group[language_id] }}</span>
+                                                                {% for page_link in oct_page.page_links %}
+                                                                    <a class="ds-menu-list-landings-link fsz-14" href="{{ page_link[language_id].link }}" title="{{ page_link[language_id].title }}">{{ page_link[language_id].title }}</a>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </li>
+                                                    </ul>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="ds-megamenu-children flex-grow-1 d-flex flex-wrap dark-text px-3 px-xl-0">
+                                        {% if oct_category.children %}
+                                            {% for child in oct_category.children %}
+                                                <div class="ds-megamenu-children-item">
+                                                    {% if child.oct_image %}
+                                                        <a href="{{ child.href }}" title="{{ child.name }}" class="ds-megamenu-children-title fw-600 mb-2 d-flex align-items-center mb-3">
+                                                            {% if child.oct_image %}
+                                                                <img class="me-3" src="{{ child.oct_image }}" alt="{{ oct_category.name }}" width="{{ oct_category.subcat_image_width }}" height="{{ oct_category.subcat_image_height }}" loading="lazy" />
+                                                            {% endif %}
+                                                            <span class="fsz-14">{{ child.name }}</span>
+                                                        </a>
+                                                    {% else %}
+                                                        <a href="{{ child.href }}" title="{{ child.name }}" class="ds-megamenu-children-title fw-600 mb-3 d-block">{{ child.name }}</a>
+                                                    {% endif %}
+                                                    {% if child.children %}
+                                                        <ul class="list-unstyled fsz-14">
+                                                            {% for ch in child.children %}
+                                                                <li class="my-1">
+                                                                    <a href="{{ ch.href }}" title="{{ ch.name }}">{{ ch.name }}</a>
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% elseif oct_category.children and oct_category.type == 'oct_blogcategory' %}
+                    <div class="ds-menu-maincategories-dropdown position-absolute ds-menu-maincategories-dropdown-narrow ds-menu-maincategories-dropdown-blog">
+                        <div class="ds-sidebar-header d-flex align-items-center justify-content-between py-2 px-3 d-xl-none">
+                            <div class="ds-sidebar-header-back fw-700 dark-text fsz-16 d-flex align-items-center" data-sidebar="catalogback">
+                                <span class="menu-back-icon"></span>
+                                {{ oct_category.name }}
+                            </div>
+                            <button type="button" class="button button-light br-10 ds-sidebar-close" data-sidebar="catalogclose" aria-label="Close">
+                                <span class="menu-close-icon"></span>
+                            </button>
+                        </div>
+                        <div class="ds-menu-catalog-inner">
+                            <ul class="ds-menu-catalog-items">
+                                {% for child in oct_category.children %}
+                                    <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                        <a href="{{ child.href }}">{{ child.name }}</a>
+                                        {% if child.children %}
+                                            <span class="menu-chevron-icon"></span>
+                                            <div class="ds-menu-catalog">
+                                                <div class="ds-sidebar-header d-flex align-items-center justify-content-between py-2 px-3 d-xl-none">
+                                                    <div class="ds-sidebar-header-back fw-700 dark-text fsz-16 d-flex align-items-center" data-sidebar="catalogback">
+                                                        <span class="menu-back-icon"></span>
+                                                        {{ child.name }}
+                                                    </div>
+                                                    <button type="button" class="button button-light br-10 ds-sidebar-close" data-sidebar="catalogclose" aria-label="Close">
+                                                        <span class="menu-close-icon"></span>
+                                                    </button>
+                                                </div>
+                                                <div class="ds-menu-catalog-inner">
+                                                    <ul class="ds-menu-catalog-items">
+                                                        {% for ch in child.children %}
+                                                            <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                                                <a class="flex-grow-1" href="{{ ch.href }}">{{ ch.name }}</a>
+                                                                {% if ch.children %}
+                                                                    <span class="menu-chevron-icon"></span>
+                                                                    <div class="ds-menu-catalog">
+                                                                        <div class="ds-sidebar-header d-flex align-items-center justify-content-between py-2 px-3 d-xl-none">
+                                                                            <div class="ds-sidebar-header-back fw-700 dark-text fsz-16 d-flex align-items-center"
+                                                                                data-sidebar="catalogback">
+                                                                                <span class="menu-back-icon"></span>
+                                                                                {{ ch.name }}
+                                                                            </div>
+                                                                            <button type="button" class="button button-light br-10 ds-sidebar-close" data-sidebar="catalogclose" aria-label="Close">
+                                                                                <span class="menu-close-icon"></span>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div class="ds-menu-catalog-inner">
+                                                                            <ul class="ds-menu-catalog-items">
+                                                                                {% for ch2 in ch.children %}
+                                                                                    <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                                                                        <a class="flex-grow-1" href="{{ ch2.href }}">{{ ch2.name }}</a>
+                                                                                    </li>
+                                                                                {% endfor %}
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endif %}
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% elseif oct_category.type == 'link' %}
+                    {% if oct_category.sub_links %}
+                        <div class="ds-menu-maincategories-dropdown position-absolute ds-menu-maincategories-dropdown-narrow ds-menu-maincategories-dropdown-link">
+                            <div class="ds-sidebar-header d-flex align-items-center justify-content-between py-2 px-3 d-xl-none">
+                                <div class="ds-sidebar-header-back fw-700 dark-text fsz-16 d-flex align-items-center" data-sidebar="catalogback">
+                                    <span class="menu-back-icon"></span>
+                                    {{ oct_category.name }}
+                                </div>
+                                <button type="button" class="button button-light br-10 ds-sidebar-close" data-sidebar="catalogclose" aria-label="Close">
+                                    <span class="menu-close-icon"></span>
+                                </button>
+                            </div>
+                            <div class="ds-menu-catalog-inner">
+                                <ul class="ds-menu-catalog-items">
+                                    {% for sub in oct_category.sub_links %}
+                                        <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                            <a href="{{ sub.href }}" {{ oct_category.target|raw }}>
+                                                {{ sub.title }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% elseif oct_category.children and oct_category.type == 'manufacturer' %}
+                    <div class="ds-menu-maincategories-dropdown position-absolute{% if not oct_category.show_image %} ds-menu-maincategories-dropdown-narrow{% endif %}">
+                        <div class="ds-sidebar-header d-flex align-items-center justify-content-between py-2 px-3 d-xl-none">
+                            <div class="ds-sidebar-header-back fw-700 dark-text fsz-16 d-flex align-items-center" data-sidebar="catalogback">
+                                <span class="menu-back-icon"></span>
+                                {{ oct_category.name }}
+                            </div>
+                            <button type="button" class="button button-light br-10 ds-sidebar-close" data-sidebar="catalogclose" aria-label="Close">
+                                <span class="menu-close-icon"></span>
+                            </button>
+                        </div>
+                        <div class="{% if oct_category.show_image %}ds-megamenu-child-wrapper{% else %}ds-menu-catalog-inner{% endif %}">
+                            {% if oct_category.show_image %}
+                                <div class="ds-megamenu-children ds-megamenu-children-manufacturers flex-grow-1 d-flex flex-wrap flex-column flex-xl-row dark-text p-xl-3">
+                                    {% for child in oct_category.children %}
+                                        <div class="ds-megamenu-children-item text-xl-center p-3">
+                                            <a href="{{ child.href }}" title="{{ child.name }}" class="ds-megamenu-children-title fw-700 d-flex flex-xl-column align-items-center px-3 py-2 p-xl-0">
+                                                {% if child.oct_image %}
+                                                    <img class="my-xl-2 me-3 mx-xl-auto" src="{{ child.oct_image }}" alt="{{ oct_category.name }}" width="{{ oct_category.subcat_image_width }}" height="{{ oct_category.subcat_image_height }}" loading="lazy" />
+                                                {% endif %}
+                                                <span class="flex-grow-1">{{ child.name }}</span>
+                                            </a>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <ul class="ds-menu-catalog-items">
+                                    {% for child in oct_category.children %}
+                                        <li class="ds-menu-catalog-item d-flex align-items-center justify-content-between fsz-14 dark-text">
+                                            <a class="flex-grow-1" href="{{ child.href }}">{{ child.name }}</a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            requestAnimationFrame(function() {
+                horizontalMenu();
+            });
+        });
+    </script>
+{% endif %}

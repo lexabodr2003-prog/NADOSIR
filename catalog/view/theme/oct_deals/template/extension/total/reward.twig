@@ -1,0 +1,49 @@
+<div class="ds-cart-column-item pb-3 mb-3">
+    <div class="ds-cart-column-item-title d-flex align-items-center justify-content-between secondary-text">
+		{{ heading_title }}
+		<svg class="ms-3" xmlns="http://www.w3.org/2000/svg" width="10" height="6"
+			viewBox="0 0 10 6" fill="none">
+			<path
+				d="M5.24831 5.67345C5.05631 5.67345 4.86428 5.60048 4.71829 5.45348L0.718285 1.45348C0.425285 1.16048 0.425285 0.685449 0.718285 0.392449C1.01129 0.099449 1.48632 0.099449 1.77932 0.392449L5.24929 3.86242L8.71926 0.392449C9.01226 0.099449 9.4873 0.099449 9.7803 0.392449C10.0733 0.685449 10.0733 1.16048 9.7803 1.45348L5.7803 5.45348C5.6323 5.60048 5.44031 5.67345 5.24831 5.67345Z"
+				fill="#003459" />
+		</svg>
+	</div>
+    <div id="collapse-reward" class="orm-group ds-cart-column-item-block-group">
+		<label for="input-reward" class="control-label fsz-12 light-text mb-2 mt-3">{{ entry_reward }}</label>
+		<input type="text" name="reward" value="{{ reward }}" placeholder="{{ entry_reward }}" id="input-reward" class="form-control fsz-12" />
+		<button type="button" id="button-reward" data-loading-text="{{ text_loading }}"  class="button button-outline button-outline-primary br-7 input-with-btn w-100 mt-3 fsz-12" />{{ button_reward }}</button>
+		<script>
+		$('#button-reward').on('click', function() {
+			$.ajax({
+				url: 'index.php?route=extension/total/reward/reward',
+				type: 'post',
+				data: 'reward=' + encodeURIComponent($('input[name=\'reward\']').val()),
+				dataType: 'json',
+				cache: false,
+				beforeSend: function() {
+					$('#button-reward').button('loading');
+				},
+				complete: function() {
+					$('#button-reward').button('reset');
+				},
+				success: function(json) {
+					$('.alert-dismissible').remove();
+
+					if (json['error']) {
+						$('.breadcrumb').after('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+						$('html, body').animate({ scrollTop: 0 }, 'slow');
+					}
+
+					if (json['redirect']) {
+						location = json['redirect'];
+					}
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+				}
+			});
+		});
+		</script>
+	</div>
+</div>

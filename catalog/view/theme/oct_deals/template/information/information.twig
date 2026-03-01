@@ -1,0 +1,65 @@
+{{ header }}
+<div id="information-information" class="container-fluid container-xl flex-grow-1">
+    <nav aria-label="breadcrumb">
+        <ul class="breadcrumb ds-breadcrumb fsz-12">
+        {% for breadcrumb in breadcrumbs %}
+            {% if loop.last %}
+                <li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+            {% else %}
+                <li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </nav>
+    {% if oct_deals_data.micro is defined and oct_deals_data.micro %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement":
+        [
+            {% for breadcrumb in breadcrumbs %}
+                {% if loop.first %}
+                {% else %}
+                {
+                    "@type": "ListItem",
+                    "position": {{ loop.index -1 }},
+                    "item":
+                    {
+                        "@id": "{{ breadcrumb.href }}",
+                        "name": "{{ breadcrumb.text }}"
+                    }
+                }{% if not loop.last %},{% endif %}
+                {% endif %}
+            {% endfor %}
+        ]
+    }
+    </script>
+    {% endif %}
+	<main>
+		<div class="row">
+			<div class="col-12 ds-page-title pb-3">
+				<h1>{{ heading_title }}</h1>
+			</div>
+		</div>
+		<div class="content-top-box">{{ content_top }}</div>
+		<div class="row g-3">
+			{{ column_left }}
+			{% if column_left and column_right %}
+				{% set class = 'col-xl-6' %}
+			{% elseif column_left or column_right %}
+				{% set class = 'col-xl-9' %}
+			{% else %}
+				{% set class = 'col-xl-12' %}
+			{% endif %}
+			<div id="content" class="{{ class }}">
+				<div class="ds-information content-block fw-300 secondary-text">
+					{{ description }}
+				</div>
+			</div>
+			{{ column_right }}
+		</div>
+    	{{ content_bottom }}
+	</main>
+</div>
+{{ footer }}

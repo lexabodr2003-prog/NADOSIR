@@ -1,0 +1,86 @@
+{{ header }}
+<div id="account-recurring" class="container-fluid container-xl flex-grow-1">
+	<nav aria-label="breadcrumb">
+        <ul class="breadcrumb ds-breadcrumb fsz-12">
+        {% for breadcrumb in breadcrumbs %}
+            {% if loop.last %}
+                <li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+            {% else %}
+                <li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </nav>
+	<main>
+		<div class="row">
+			<div class="col-12 ds-page-title pb-3">
+				<h1>{{ heading_title }}</h1>
+			</div>
+		</div>
+		<div class="content-top-box">{{ content_top }}</div>
+        <div class="ds-account row g-3">
+			{{ column_left }}
+		    {% if column_left and column_right %}
+		    	{% set class = 'col-xl-6' %}
+		    {% elseif column_left or column_right %}
+		    	{% set class = 'col-xl-9' %}
+		    {% else %}
+		    	{% set class = 'col-xl-12' %}
+		    {% endif %}
+		    <div id="content" class="{{ class }}">
+                <div class="content-block h-100">
+					<div class="h3 mt-0 mb-1">{{ text_recurring_detail }}</div>
+					<hr>
+					<div class="ds-account-text">
+						<div class="ds-account-text-order">{{ text_order_recurring_id }}:<span class="dark-text">#{{ order_recurring_id }}</span></div>
+						<div class="ds-account-text-order">{{ text_date_added }}:<span class="dark-text">{{ date_added }}</span></div>
+						<div class="ds-account-text-order">{{ text_status }}:<span class="dark-text">{{ status }}</span></div>
+						<div class="ds-account-text-order">{{ text_payment_method }}:<span class="dark-text">{{ payment_method }}</span></div>
+						<div class="ds-account-text-order">{{ text_order_id }}:<span class="dark-text"><a href="{{ order }}">#{{ order_id }}</a></span></div>
+						<div class="ds-account-text-order">{{ text_product }}:<span class="dark-text"><a href="{{ product }}">#{{ product_name }}</a></span></div>
+						<div class="ds-account-text-order">{{ text_quantity }}:<span class="dark-text">{{ product_quantity }}</span></div>
+					</div>
+					<div class="h3 mt-3 mb-1">{{ text_description }}</div>
+					<div class="ds-account-text">
+						<div class="ds-account-text-order">{{ recurring_description }}</div>
+					</div>
+					<div class="h3 mt-3 mb-1">{{ text_reference }}</div>
+					<div class="ds-account-text">
+						<div class="ds-account-text-order">{{ reference }}</div>
+					</div>
+					<div class="h3 mt-3 mb-1">{{ text_transaction }}</div>
+				    <div class="table-responsive fsz-14 fw-300">
+				        <table class="table table-hover">
+				          <thead class="thead-dark">
+				            <tr>
+				              <th>{{ column_date_added }}</th>
+				              <th>{{ column_type }}</th>
+				              <th>{{ column_amount }}</th>
+				            </tr>
+				          </thead>
+				          <tbody>
+				          {% if transactions %}
+				          {% for transaction in transactions %}
+				          <tr>
+				            <td>{{ transaction.date_added }}</td>
+				            <td>{{ transaction.type }}</td>
+				            <td>{{ transaction.amount }}</td>
+				          </tr>
+				          {% endfor %}
+				          {% else %}
+				          <tr>
+				            <td colspan="3" class="text-center">{{ text_no_results }}</td>
+				          </tr>
+				          {% endif %}
+				            </tbody>
+				        </table>
+				    </div>
+					{{ recurring }}
+			    </div>
+			    {{ column_right }}
+			</div>
+		</div>
+		{{ content_bottom }}
+	</main>
+</div>
+{{ footer }}

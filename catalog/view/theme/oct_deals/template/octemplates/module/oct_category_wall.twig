@@ -1,0 +1,48 @@
+{% if categories is not empty %}
+<div class="py-3 fw-500 dark-text fsz-20">{{ heading_title }}</div>
+<div class="row g-2 g-md-3 ds-category-wall">
+	{% for category in categories %}
+		<div class="ds-category-wall-item">
+			{% if category.children %}
+				<div class="content-block d-flex align-items-start">
+					{% if (category.thumb) %}
+						<img src="{{ category.thumb }}" alt="{{ category.name }}" width="{{ category.width }}" height="{{ category.height }}" loading="lazy" />
+					{% endif %}
+					<div class="ds-category-wall-item-links ps-3">
+						<a href="{{ category.href }}" class="ds-category-wall-title dark-text fw-500 d-inline-block fsz-16 mb-3">{{ category.name }}</a>
+						<div class="ds-category-wall-item-list">
+							{% set countstop = 1 %}
+							{% for child in category.children %}
+								{% set countstop = countstop + 1 %}
+								<a href="{{ child.href }}" class="fsz-14 d-inline-block secondary-text py-1 px-2 br-4 fw-300">{{ child.name }}</a>
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+			{% else %}
+				<a href="{{ category.href }}" class="content-block d-flex align-items-start" title="{{ category.name }}">
+					{% if (category.thumb) %}
+					<img src="{{ category.thumb }}" alt="{{ category.name }}" width="{{ category.width }}" height="{{ category.height }}" />
+					{% endif %}
+					<span class="ds-category-wall-title dark-text fw-500 d-inline-block fsz-14 ps-3 align-self-center">{{ category.name }}</span>
+				</a>
+			{% endif %}
+		</div>
+	{% endfor %}
+	</div>
+	<div class="row d-sm-none">
+		<div class="col">
+			<button type="button" class="button button-primary br-7 mt-3 w-100" data-sidebar="catalog">
+				<svg width="20" height="20" viewbox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<g>
+						<rect x="1.42857" y="1.42859" width="7.14286" height="7.14286" rx="2" stroke="#FDFDFD"></rect>
+						<rect x="11.4286" y="11.1858" width="7.14286" height="7.14286" rx="2" stroke="#FDFDFD"></rect>
+						<rect x="1.42857" y="11.4286" width="7.14286" height="7.14286" rx="2" stroke="#FDFDFD"></rect>
+						<rect x="11.4286" y="1.30725" width="7.14286" height="7.14286" rx="2" stroke="#FDFDFD"></rect>
+					</g>
+				</svg>
+				<span class="button-text">{{ oct_menu_catalog }}</span>
+			</button>
+		</div>
+	</div>
+{% endif %}

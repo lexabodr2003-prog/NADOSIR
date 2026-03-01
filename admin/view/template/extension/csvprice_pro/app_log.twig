@@ -1,0 +1,38 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid csvprice_pro_container">
+        {% if warning %}
+            <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ warning }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        {% if success %}
+            <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        {{ app_header }}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="text-right">
+                    <a href="{{ download }}" data-toggle="tooltip" title="{{ button_download }}" class="btn btn-primary btn-sm"><i class="fa fa-download"></i></a>
+                    <a onclick="confirm('{{ text_confirm }}') ? location.href = '{{ clear }}' : false;" data-toggle="tooltip" title="{{ button_clear }}" class="btn btn-danger btn-sm"><i class="fa fa-eraser"></i></a>
+                </div>
+                <div style="margin-top:10px;">
+                    <textarea wrap="off" rows="15" readonly class="form-control">{{ log }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ app_footer }}
+</div>
+{{ footer }}

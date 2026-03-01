@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html dir="{{ direction }}" lang="{{ lang }}">
+<head>
+<meta charset="UTF-8" />
+<title>{{ title }}</title>
+<base href="{{ base }}" />
+{% if description %}
+<meta name="description" content="{{ description }}" />
+{% endif %}
+{% if keywords %}
+<meta name="keywords" content="{{ keywords }}" />
+{% endif %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+<script type="text/javascript" src="view/javascript/jquery/jquery-3.7.1.min.js"></script>
+<script type="text/javascript" src="view/javascript/bootstrap/js/bootstrap.min.js"></script>
+<link href="view/stylesheet/bootstrap.css" type="text/css" rel="stylesheet" />
+<link href="view/javascript/font-awesome/css/font-awesome.min.css" type="text/css" rel="stylesheet" />
+<script src="view/javascript/jquery/datetimepicker/moment/moment.min.js" type="text/javascript"></script>
+<script src="view/javascript/jquery/datetimepicker/moment/moment-with-locales.min.js" type="text/javascript"></script>
+<script src="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<link href="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" media="screen" />
+<link type="text/css" href="view/stylesheet/stylesheet.css" rel="stylesheet" media="screen" />
+{% for style in styles %}
+<link type="text/css" href="{{ style.href }}" rel="{{ style.rel }}" media="{{ style.media }}" />
+{% endfor %}
+{% for link in links %}
+<link href="{{ link.href }}" rel="{{ link.rel }}" />
+{% endfor %}
+<script src="view/javascript/common.js" type="text/javascript"></script>
+{% for script in scripts %}
+<script type="text/javascript" src="{{ script }}"></script>
+{% endfor %}
+</head>
+<body>
+<div id="container">
+<header id="header" class="navbar navbar-static-top">
+  <div class="container-fluid">
+    <div id="header-logo" class="navbar-header"><a href="{{ home }}" class="navbar-brand"><img src="view/image/logo.png" alt="{{ heading_title }}" title="{{ heading_title }}" /></a></div>
+    {% if logged %}<a href="#" id="button-menu" class="hidden-md hidden-lg"><span class="fa fa-bars"></span></a>
+    <ul class="nav navbar-nav navbar-right">
+			{% if module_csvprice_pro_status %}
+	<li class="dropdown">
+		<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+			<img alt="CSV Price Pro import/export" title="CSV Price Pro import/export" id="csvprice_pro-menu" class="img-circle" style="padding-left:6px;padding-right:6px;height:32px;" src=" data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAABDCAYAAADHyrhzAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAzkSURBVHja1FwJdBT1Gf/m2OyVc5MQYkhUEFQ88FlfPYpixbb2tSqCVShSLQoiFalYLQp4IKIVREEseB/VJ4e3VhQVr4KIFh4BhApKkETuXEuSze7OTL9v5xvcbDeZY2eD/d77sdnZnf/+5zff/f8PQu8R90A3SF/GyYg+iF6IUkQBQkRcEpE81SvfmAVHNe8DEIQheOwCxCbGfxB12Z6knKVxfYgBiF8hBiOORZR18t3Hm3L8G0d88wWUtzQQEUTSA4je/HkcsQtRjXgX8R5iy/8DGT0QQxEjEGdZGH+PIoj3FEQj6tjNn4JXiRMZ45OIMOZYyfgNohHxEeJ5xFuI9h8bGeWIqxCjEcfYOO/hNjlnx9Dta+GkA7VIBPTDY+NNzilEDGF8hliIeAnRmulFiBmen8OT/xQx0w4RoiBsUUVxgSAIcN1Xn/BR4SbWLqtyJuJZxArEhYeTjFNZTR9hpwg2iKCXmW2yt/7BVYvh5AM7yTx+isdGOZzL6YhXEY+xOXUrGRMQyxG/sHuioBOxMirKS09sqIMhNeuMeUxD+DO4ORJiDDvZ87uDjCBiPmIeotjJDyIVigYwPSZKkWvQafpjUWLoYnaObsjxiNcQf84mGeQklyL+5FgNda14JSrJy/s17YHLt35BRBDBt+k8uSY05oOIOXaChFUyjkAsQfw6w0mG8YrvC3t8MGHjCrx6jY5diTgtS/nOjYi/s6N3JbSWMxE/czoj8hN82x+PSPLaC3ZugsG1X9EHPfHYX7KcWI5hrbuOEzjHmpGHeDITIpJkF178HFlVYO7KF6GwvdVwxEd3QzlwDWK6qZmo8RgYUOhV6UDeDBdMI3FbEHMbPP66UVtXQ3HbQdIKStHHQffJZMQfuzSTsj4DktRZhHgsAgdqv4aEYgtC2KWJrI+K0oKytma4cssqkDSVxp6Kx0PdSIbATpUKvzVpySgsO6rD18m+JTkH9tZswLcSeeNhiOMymISGw87GtLt5xLY10FuvSgfi8Uuh+4Wq5Ie5eDz4v2aikGkwyFQw7heVHw0lFcei2UTrrdiaifP8IOzxLhq4eyvM+PxVXf30BMsHh0co073VqgM9Bf1GMK+0AnJ8QdBUdSlnm04kpgnCDF88Fh+36WPdPPRQ+ks4vHJzuqCQGlopq1yMBMxEIp7NK+kF9XVb4wKId+LxQQivzR9dipnEx8FYOwzctc04Rk2aa4mow0gGaWXEjAy6a1RG36yqyhtFPY9saNxTg9qhfIba/RTHaqvSQNFI0yix0pKPL4cfqSSbST5iLP99AmrHOAkzxSP6/kSPLKDNxn/22RibMr/NApKBPgPerjoRfuySTMYwbs8ZMhE1ol+wsBQCCNSUb/HYLIvj1nBpn6CxBcl4t7K/22Eya20/yt1HpnxGPctbKHuj6NLSuAe4q0TfG2Ay7v2g9y05uGJMi7a5OW/yOcOJ5wzHIR/4MmJBMhlU9p6V5ssjMbI8HcgvWRkoKIWD9bvDmINM5+q1s1T+34jnOvwihu31oV6wK1AA5Zh4uSBfcitBcmGsXtwtazUu6IJOGivkde9E/+EpqTwOvP48QIdIHaVlXQx+V+od8yMZa3ocBd/lYbDSNLfImOGSlvXm3CNxdwWTjtX5mqYO9+eFoLDn0RRZNE7E0qnoUm4FdkxB8SdysOZpkzxumspcctAujOPh6xeJjCqKHiYnTFNi7aH80krw+ALkTNdwNZss1LK/NzWOHvpFVYVZA1zNtSh0u7UCRo3lHiJHkFKTL9Nq2ARRkqC06niQJJnUfTZ0XOV6FLGuq0GioutrVqSJH7owDoW6fkTGSRYd0fVoIn3zS6sgWFRG2rETj/2NP9ttJexSxRYXJTfJiJJPg8wXkkgZTiIyrK51lCCmqHEs5I7og54m4XvJC29grajtMoahE60OVcBLvU91y4kaQosuL7iQbx1D/9hZZxiJznSw158LxRXHUCOI4uRozjZNsySfGoeF/QdBAxaALhNCGro3wzGqiAw7K1hk9HdgqPWR7wgRIfHYl1YnQk60JjeUDd/xNUeXTKRQ5JrEjpyNuBx9BhT0qAIJU20FTYfahWZQEHIsAoH2FsiCkKl+lcH5QbpFQQcnTkVnuszjDeyt7H8GxNrbqGljrcEhe+GZWAtMeO2Brk1FsF1+HOCEb5HD2kWWwdlKPDndG5CQqTmBfPAGC6z3AHGeSwZfDbsrKiDUug/EJD4UTHvyWsJw7eJ5OlH2CXkF9P0bjhIaIkJxqFa0HvE4ErLDjiukkt6PjvTJS8dBuMAPotIx9CoYebdV9oW7HpkMgYjtXQZxTsR+zpml7ZDidF8DOd4ptmtvVYPG4nwQJBVCjU1QGP4BRc1NUNLQBAuHXw87y490GnE+4ZBvVxQiI5MychQ7VMuiSgLs7xkCSelcIQNtERBVNRNnep/NRhQYVev+DHuJ0636HTKRqDcHTcE8C/XbMxHqvZQnvf8G9EVnO9IkQua76M4FfQ+XBRNRob4sBLEcT4KYTvUVyXp2yBg7c7gdMTvlGHXaqm2MUUdkbHMhxtM6SMjMV0T8PmgoKejSRBKmhKn+qgGWrY+2U9Ky4e+4+jQkzM7UquPZRmRstHFCV1VtlxvTyAccKC9Gn2G+C0LDkJrfYsmVCezE/Rw97kiJIi9xqDUTWizbKHKD5IAL2jGps6JPRK1ozQtAU1FeQkNMG5PRCFT3GwDrjzUt6qgpMyzpPe07vTxZyVhrzRwQ7SvdTGTUcG6fqRQh/tqZ42z35Zj6CkNyYlH4tlcVbK/ssqCmZu7kNO2HySklxhoLoZa+s1vkROUDl+qDqxDnpVP7+tJCy+GSvu+NqbC/sDTxdycynJOrVKGu3fUpxzp261NcFJtS3DDgZYaT+wGqk/cyYhZachGIAm3iwqxOg6ZQHrSgmdjJHQKRNnjoD7dANMeXzlRIC2/r4vQb2Y8ZUsOEpJPtoG+uPZQfrMcLWBQLevtrkqiSKmvUvKHJ4wXRxWoiv5d4vx59rumfA/kBek3UE+jAROF05OAdGkfAQxROE58r9vy0HMcqV0m784g22fUzaUSRuVyddOwZ1tzUNZ/l3E9lMtC/aZJwZXuB36d5PKqoqKDKEohxBV9FfpXxNZ44LvB7qcN7/L5CpCFdghBT8NrbMMFqDvixUsVzFXsZJREZkz1oKiVQtn9XapE40WJ2TB2wFfy+kaval5Oq2lhyl0xOTBJvmCYK0bgoRcNBXZ21QxohJEyANMP8VUsUW/RLRETE49G3MKn2IzflIrVllTD/95Pg7nk3J390E995014StRoQ/+JeKQntD30TcRG//wiSdvHI4cLcxMU3FhdAE0JJ5AGannkI4PiVzEN0obWndWxN0GLPFTZOJwd7GehPIADP7m7QdxAHQF9WPLQ1Qq45rkqfP5k7+gAk5jQOTeqhVMzpq3Mh861VRdjS7vWlJli5DrLjd5MKN2pTPseZ65sdfjSNLVMiM9OVS8pAITCkDg1EIlsGfWmYPPwWnD05QI52AtcvhtzLptbBOwu9VjSmnkxtq/che7t2rcjrqBFDT1+/Sn1zfCJtyQVB+DCDOVGGPRBMnmBKVyg0gb5rt/UwEdGMWnFXTJLUif+YZfRDR2V4c4q5bgG7ZJB8zA2SbhcMqU835+avO6N6NZy75j0iopgjSKYyjE3NNhmGXb3azVx8H5flhyr21MG0BVOMhItyij4ujO0xG0c0aa7Sdua13UjGvBZ/sGb0KwvhrHWfGFuqJ7g0NhVrjzolg2Qvx/Vt3UDE5rgkP1a+73u4dul84xhVwYUujP1PxA2QZrujHTKA+x1kb1uz7CtmNucGG8Yvmgv54UbSinNsJlhdEUHjmHaLrD58Q73EixMFXXbkg4jXt7h37XYYtnyRMa9bwcHaR4pQp2sk1yXgFhmGhhAhb7tMRIy0otXviw1f9gJU7Ek8yXgROHgYsEMWrz9HdwWnCuA2GSQ7uPE6C0ye6rEhSxrzCj687J3FcNujtxMRBZwTON3VQmn3NRyFbG1icfIoJyVjtD/0EtCf3cgowVJF8d5gW4s2dsl8oyVIW7ZPcWpu3Ad9ysnJmTzk+xa3+EhL6h2O8UTE69903ufvwxnrqdJO7Mmc5GCcHRyC6XHQdU4vKNPHv/eylpxLFwb2lip3olbMiXhkmPj8obSbepdH2hjjO9BX9KjumA8Z7u1yawsN7euiJbBHuMN0YUoPMp3MbvEF6+6fMwlO27CaiKCnncZa/D0qw+mJSgo9O10L72mqVjekB2sLPex3Dqt/8rOl1Zh2n131fU3zitFnQrA1LCIZL3IjJp3QI1Tb2Se8xd2psNuTztZ/JrKX7xyBthWewM0UAvUw54YDwearXn+CiDASrMHsew5yOKzlzLea8xvaotQCWZT/CjAA4op0cjdCvp4AAAAASUVORK5CYII=">
+		</a>
+	    <ul class="dropdown-menu dropdown-menu-right">
+			<li class="dropdown-header"><b>CSV Price Pro import/export</b></li>
+			<li role="separator" class="divider"></li>
+			{% for item in csvprice_pro_menu %}
+				{% if item.target %}
+				<li role="separator" class="divider"></li>
+				<li><a href="{{ item.url }}" target="_blank">{{ item.title }} <i class="fa fa-external-link"></i></a></li>
+				{% else %}
+				<li><a href="{{ item.url }}">{{ item.title }}</a></li>
+				{% endif %}
+			{% endfor %}
+        </ul>
+      </li>
+			{% endif %}
+      <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="{{ image }}" alt="{{ firstname }} {{ lastname }}" title="{{ username }}" id="user-profile" class="img-circle" />{{ firstname }} {{ lastname }} <i class="fa fa-caret-down fa-fw"></i></a>
+        <ul class="dropdown-menu dropdown-menu-right">
+          <li><a href="{{ profile }}"><i class="fa fa-user-circle-o fa-fw"></i> {{ text_profile }}</a></li>
+          <li role="separator" class="divider"></li>
+          <li class="dropdown-header">{{ text_store }}</li>
+          {% for store in stores %}
+          <li><a href="{{ store.href }}" target="_blank">{{ store.name }}</a></li>
+          {% endfor %}
+          <li role="separator" class="divider"></li>
+          <li class="dropdown-header">{{ text_help }}</li>
+          <li><a href="https://www.opencart.com" target="_blank"><i class="fa fa-opencart fa-fw"></i> {{ text_homepage }}</a></li>
+          <li><a href="https://docs.opencart.com" target="_blank"><i class="fa fa-file-text-o fa-fw"></i> {{ text_documentation }}</a></li>
+          <li><a href="https://forum.opencart.com" target="_blank"><i class="fa fa-comments-o fa-fw"></i> {{ text_support }}</a></li>
+        </ul>
+      </li>
+      <li><a href="{{ logout }}"><i class="fa fa-sign-out"></i> <span class="hidden-xs hidden-sm hidden-md">{{ text_logout }}</span></a></li>
+    </ul>
+    {% endif %} </div>
+</header>

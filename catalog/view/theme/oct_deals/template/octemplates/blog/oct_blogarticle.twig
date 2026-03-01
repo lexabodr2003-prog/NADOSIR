@@ -1,0 +1,271 @@
+{{ header }}
+<div class="container-fluid container-xl flex-grow-1">
+	<nav aria-label="breadcrumb">
+        <ul class="breadcrumb ds-breadcrumb fsz-12">
+        {% for breadcrumb in breadcrumbs %}
+            {% if loop.last %}
+                <li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+            {% else %}
+                <li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </nav>
+	<main>
+		{% if oct_deals_data.micro is defined and oct_deals_data.micro %}
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "BreadcrumbList",
+			"itemListElement":
+			[
+				{% for breadcrumb in breadcrumbs %}
+					{% if loop.first %}
+					{% else %}
+					{
+						"@type": "ListItem",
+						"position": {{ loop.index -1 }},
+						"item":
+						{
+							"@id": "{{ breadcrumb.href }}",
+							"name": "{{ breadcrumb.text }}"
+						}
+					}{% if not loop.last %},{% endif %}
+					{% endif %}
+				{% endfor %}
+			]
+		}
+		</script>
+		<script type="application/ld+json">{{ article_microdata|raw }}</script>
+		{% endif %}
+		
+		<div class="row">
+			<div class="col-12 ds-page-title pb-3">
+				<h1>{{ heading_title }}</h1>
+			</div>
+		</div>
+		<div class="content-top-box">{{ content_top }}</div>
+		<div class="ds-blog-post row g-3">
+			{{ column_left }}
+			{% if column_left and column_right %}
+				{% set class = 'col-xl-6' %}
+			{% elseif column_left or column_right %}
+				{% set class = 'col-xl-9' %}
+			{% else %}
+				{% set class = 'col-xl-12' %}
+			{% endif %}
+			<div id="content" class="{{ class }}">
+				<div class="content-block fsz-14 fw-300 secondary-text">
+					{% if thumb %}
+					<div class="ds-blog-post-photo br-4 overflow-hidden mb-3">
+						<img src="{{ thumb }}" alt="{{ heading_title }}" class="img-fluid" width="{{ thumb_width }}" height="{{ thumb_height }}" />
+					</div>
+					{% endif %}
+					<div class="ds-blog-post-text pb-3 fsz-16">
+						{{ description }}
+						{% if tags %}
+						<p class="ds-product-tags">{{ text_tags }}
+							{% for i in 0..tags | length - 1 %}
+								<a href="{{ tags[i].href }}">{{ tags[i].tag }}</a>{% if i < (tags|length - 1) %},{% endif %}
+							{% endfor %}
+						</p>
+						{% endif %}
+					</div>
+					{% if images %}
+					<div class="ds-blog-post-gallery pb-3 mt-3">
+						<div class="h3 mb-3">{{ entry_dop_photo }}</div>
+						<div class="ds-blog-post-gallery-items d-flex">
+							{% for image in images %}
+								<a href="{{ image.popup }}" data-fancybox="images" class="ds-blog-post-gallery-item br-4 overflow-hidden">
+									<img class="img-fluid" src="{{ image.thumb }}" alt="" width="{{ image.thumb_width }}" height="{{ image.thumb_height }}" loading="lazy" aria-label="Open gallery" />
+									<span class="d-none d-xl-flex align-items-center justify-content-center"></span>
+								</a>
+							{% endfor %}
+						</div>
+					</div>
+					{% endif %}
+					<div class="ds-blog-post-info d-flex py-3 mb-3 secondary-text fw-400">
+						<div class="ds-blog-post-info-item ds-blog-post-info-item-date d-flex align-items-center">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+								<path
+									d="M12.9231 1.32208H11.8974V0.706693C11.8974 0.367001 11.6217 0.0913086 11.2821 0.0913086C10.9424 0.0913086 10.6667 0.367001 10.6667 0.706693V1.32208H5.33333V0.706693C5.33333 0.367001 5.05764 0.0913086 4.71795 0.0913086C4.37826 0.0913086 4.10256 0.367001 4.10256 0.706693V1.32208H3.07692C1.09292 1.32208 0 2.415 0 4.399V13.0144C0 14.9984 1.09292 16.0913 3.07692 16.0913H12.9231C14.9071 16.0913 16 14.9984 16 13.0144V4.399C16 2.415 14.9071 1.32208 12.9231 1.32208ZM3.07692 2.55285H4.10256V3.16823C4.10256 3.50792 4.37826 3.78362 4.71795 3.78362C5.05764 3.78362 5.33333 3.50792 5.33333 3.16823V2.55285H10.6667V3.16823C10.6667 3.50792 10.9424 3.78362 11.2821 3.78362C11.6217 3.78362 11.8974 3.50792 11.8974 3.16823V2.55285H12.9231C14.217 2.55285 14.7692 3.10505 14.7692 4.399V5.01439H1.23077V4.399C1.23077 3.10505 1.78297 2.55285 3.07692 2.55285ZM12.9231 14.8605H3.07692C1.78297 14.8605 1.23077 14.3083 1.23077 13.0144V6.24515H14.7692V13.0144C14.7692 14.3083 14.217 14.8605 12.9231 14.8605ZM5.55489 8.91182C5.55489 9.36474 5.18812 9.73233 4.73438 9.73233C4.28145 9.73233 3.90966 9.36474 3.90966 8.91182C3.90966 8.4589 4.27324 8.09131 4.72616 8.09131H4.73438C5.1873 8.09131 5.55489 8.4589 5.55489 8.91182ZM8.83694 8.91182C8.83694 9.36474 8.47017 9.73233 8.01643 9.73233C7.5635 9.73233 7.19171 9.36474 7.19171 8.91182C7.19171 8.4589 7.55529 8.09131 8.00821 8.09131H8.01643C8.46935 8.09131 8.83694 8.4589 8.83694 8.91182ZM12.119 8.91182C12.119 9.36474 11.7522 9.73233 11.2985 9.73233C10.8456 9.73233 10.4738 9.36474 10.4738 8.91182C10.4738 8.4589 10.8373 8.09131 11.2903 8.09131H11.2985C11.7514 8.09131 12.119 8.4589 12.119 8.91182ZM5.55489 12.1939C5.55489 12.6468 5.18812 13.0144 4.73438 13.0144C4.28145 13.0144 3.90966 12.6468 3.90966 12.1939C3.90966 11.7409 4.27324 11.3734 4.72616 11.3734H4.73438C5.1873 11.3734 5.55489 11.7409 5.55489 12.1939ZM8.83694 12.1939C8.83694 12.6468 8.47017 13.0144 8.01643 13.0144C7.5635 13.0144 7.19171 12.6468 7.19171 12.1939C7.19171 11.7409 7.55529 11.3734 8.00821 11.3734H8.01643C8.46935 11.3734 8.83694 11.7409 8.83694 12.1939ZM12.119 12.1939C12.119 12.6468 11.7522 13.0144 11.2985 13.0144C10.8456 13.0144 10.4738 12.6468 10.4738 12.1939C10.4738 11.7409 10.8373 11.3734 11.2903 11.3734H11.2985C11.7514 11.3734 12.119 11.7409 12.119 12.1939Z"
+									fill="#9CA3AF" />
+							</svg>
+							<span class="ms-1">{{ date_added }}</span>
+						</div>
+						{% if review_status %}
+						<div class="ds-blog-post-info-item ds-blog-post-info-item-comments d-flex align-items-center">
+							<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
+								<path
+									d="M1.39062 16.0913C1.26522 16.0913 1.14342 16.0896 1.02407 16.0853C0.591639 16.0749 0.212715 15.7981 0.0648226 15.3804C-0.0839341 14.96 0.0389696 14.5026 0.376267 14.2155C1.18232 13.5651 1.50477 12.8455 1.6345 12.3517C0.564664 11.0725 0 9.45778 0 7.65972C0 3.20307 3.46811 0.0913086 8.43243 0.0913086C13.3968 0.0913086 16.8649 3.20394 16.8649 7.65972C16.8649 12.1155 13.3968 15.2281 8.43243 15.2281C7.40584 15.2281 6.42158 15.0889 5.49704 14.8139C4.31823 15.8405 2.69398 16.0913 1.39062 16.0913ZM1.06292 14.788C1.06465 14.788 1.06626 14.788 1.06799 14.788C1.0654 14.7889 1.06379 14.7889 1.06292 14.788ZM8.43328 1.38861C4.23263 1.38861 1.29814 3.96761 1.29814 7.65972C1.29814 9.24761 1.82136 10.6539 2.8125 11.7263C2.94655 11.8716 3.00791 12.0706 2.97677 12.2669C2.83148 13.1931 2.37499 14.0693 1.67272 14.788C2.67596 14.7517 4.02509 14.5207 4.85536 13.6351C5.0292 13.4483 5.29903 13.3817 5.54033 13.4656C6.43546 13.7752 7.40841 13.9318 8.43328 13.9318C12.6339 13.9318 15.5684 11.3527 15.5684 7.66057C15.5684 3.96846 12.6339 1.38861 8.43328 1.38861ZM12.5414 5.92915C12.5414 5.57109 12.2508 5.2805 11.8927 5.2805H4.97382C4.61576 5.2805 4.32517 5.57109 4.32517 5.92915C4.32517 6.2872 4.61576 6.5778 4.97382 6.5778H11.8927C12.2508 6.5778 12.5414 6.2872 12.5414 5.92915ZM9.94679 9.38861C9.94679 9.03055 9.6562 8.73996 9.29814 8.73996H4.97382C4.61576 8.73996 4.32517 9.03055 4.32517 9.38861C4.32517 9.74666 4.61576 10.0373 4.97382 10.0373H9.29814C9.6562 10.0373 9.94679 9.74666 9.94679 9.38861Z"
+									fill="#9CA3AF" />
+							</svg>
+							<span class="ms-1">{{ comments_total }}</span>
+						</div>
+						{% endif %}
+						<div class="ds-blog-post-info-item ds-blog-post-info-item-views d-flex align-items-center">
+							<svg xmlns="http://www.w3.org/2000/svg" width="21" height="17" viewBox="0 0 21 17" fill="none">
+								<path
+									d="M20.4626 6.16918C19.1073 3.89925 16.0651 0.0913086 10.9296 0.0913086C5.79415 0.0913086 2.75197 3.89925 1.39662 6.16918C0.687456 7.35421 0.687456 8.82737 1.39662 10.0134C2.75197 12.2834 5.79415 16.0913 10.9296 16.0913C16.0651 16.0913 19.1073 12.2834 20.4626 10.0134C21.1718 8.82737 21.1718 7.35525 20.4626 6.16918ZM19.134 9.21858C17.9469 11.2067 15.3012 14.5429 10.9296 14.5429C6.55802 14.5429 3.91234 11.2077 2.72525 9.21858C2.31028 8.52283 2.31028 7.65877 2.72525 6.96303C3.91234 4.9749 6.55802 1.63869 10.9296 1.63869C15.3012 1.63869 17.9469 4.97387 19.134 6.96303C19.55 7.65981 19.55 8.52283 19.134 9.21858ZM10.9296 3.70421C8.51002 3.70421 6.54253 5.67273 6.54253 8.09131C6.54253 10.5099 8.51002 12.4784 10.9296 12.4784C13.3492 12.4784 15.3167 10.5099 15.3167 8.09131C15.3167 5.67273 13.3492 3.70421 10.9296 3.70421ZM10.9296 10.93C9.3637 10.93 8.09092 9.65724 8.09092 8.09131C8.09092 6.52537 9.3637 5.2526 10.9296 5.2526C12.4956 5.2526 13.7683 6.52537 13.7683 8.09131C13.7683 9.65724 12.4956 10.93 10.9296 10.93Z"
+									fill="#9CA3AF" />
+							</svg>
+							<span class="ms-1">{{ comments_viewed }}</span>
+						</div>
+					</div>
+					{% if review_status %}
+					<button type="button" class="button button-primary br-7 px-5 fw-400" data-bs-toggle="modal" data-bs-target="#blogCommentModal">{{ text_add_comment }}</button>
+					<div class="ds-blog-post-comments mt-3 pt-3">
+						<div class="modal fade" id="blogCommentModal" tabindex="-1" aria-labelledby="blogCommentModalLabel" aria-hidden="true">
+							<div class="modal-dialog modal-dialog-centered">
+								<div class="modal-content">
+									<div class="modal-header p-0 pb-4">
+										<h5 class="modal-title fsz-20 fw-700 d-flex align-items-center justify-content-between" id="blogCommentModalLabel">{{ text_write }}</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+											<svg xmlns="http://www.w3.org/2000/svg" width="12" height="13" viewBox="0 0 12 13" fill="none">
+												<path d="M11.8029 11.5725C12.0633 11.8329 12.0633 12.2551 11.8029 12.5155C11.6731 12.6453 11.5025 12.7111 11.3319 12.7111C11.1612 12.7111 10.9906 12.6462 10.8608 12.5155L5.99911 7.65384L1.13743 12.5155C1.00766 12.6453 0.837017 12.7111 0.666369 12.7111C0.495722 12.7111 0.325075 12.6462 0.195312 12.5155C-0.0651039 12.2551 -0.0651039 11.8329 0.195312 11.5725L5.057 6.71085L0.195312 1.8492C-0.0651039 1.58878 -0.0651039 1.16657 0.195312 0.906158C0.455727 0.645742 0.877907 0.645742 1.13832 0.906158L6.00001 5.76787L10.8617 0.906158C11.1221 0.645742 11.5443 0.645742 11.8047 0.906158C12.0651 1.16657 12.0651 1.58878 11.8047 1.8492L6.943 6.71085L11.8029 11.5725Z" fill="#00A8E8" />
+											</svg>
+										</button>
+									</div>
+									<div class="modal-body p-0">
+										<form method="post" enctype="multipart/form-data" id="form-comment">
+											<div class="input-group my-4">
+												<span class="input-group-text" id="usernameIconBlogComment">
+													<svg xmlns="http://www.w3.org/2000/svg" width="14" height="17" viewBox="0 0 14 17" fill="none">
+														<path
+															d="M7.00726 7.47837C5.1217 7.47837 3.58848 5.94434 3.58848 4.05959C3.58848 2.17483 5.1217 0.640808 7.00726 0.640808C8.89282 0.640808 10.426 2.17483 10.426 4.05959C10.426 5.94434 8.89282 7.47837 7.00726 7.47837ZM7.00726 1.84744C5.78696 1.84744 4.79511 2.83928 4.79511 4.05959C4.79511 5.27989 5.78696 6.27174 7.00726 6.27174C8.22756 6.27174 9.21941 5.27989 9.21941 4.05959C9.21941 2.83928 8.22676 1.84744 7.00726 1.84744ZM13.2342 15.7237V13.3257C13.2342 11.1852 12.0228 8.685 8.60883 8.685H5.39115C1.9772 8.685 0.765747 11.1844 0.765747 13.3257V15.7237C0.765747 16.0567 1.03603 16.327 1.36906 16.327C1.70209 16.327 1.97238 16.0567 1.97238 15.7237V13.3257C1.97238 12.5205 2.21933 9.89162 5.39115 9.89162H8.60883C11.7807 9.89162 12.0276 12.5197 12.0276 13.3257V15.7237C12.0276 16.0567 12.2979 16.327 12.6309 16.327C12.964 16.327 13.2342 16.0567 13.2342 15.7237Z"
+															fill="#00171F"></path>
+													</svg>
+												</span>
+												<input type="text" name="name" class="form-control" id="inputNameComment" placeholder="{{ entry_name }}" value="{{ customer_name }}"  aria-label="Username" aria-describedby="usernameIconBlogComment">
+											</div>
+											<div class="form-group pb-3">
+												<textarea id="inputReviewComment" name="text" class="form-control" placeholder="{{ oct_article_your_comment }}" rows="7"></textarea>
+											</div>
+											<div class="pb-3 dark-text fsz-12 modal-small-text">{{ text_note }}</div>
+											{% if captcha %}
+											<div class="form-group">
+												{{ captcha }}
+											</div>
+											{% endif %}
+											<button type="button" id="button-comment" class="button button-primary br-7 w-100">{{ button_continue }}</button>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="article-comments" class="dark-text fsz-14"></div>
+					</div>
+					{% endif %}
+				</div>
+			</div>
+			{{ column_right }}
+		</div>
+	</main>
+	{% if products %}
+		{{ products }}
+	{% endif %}
+	{% if articles %}
+	<div id="rm-related-article" class="row mt-3 mt-md-0 py-3 p-md-0 pt-xl-3 g-3 g-xl-4 ds-module">
+		<div class="fw-500 dark-text fsz-20 mt-0 mt-md-3 mb-2 mb-md-0">{{ text_related_articles }}</div>
+		{% for article in articles %}
+			<div class="ds-last-news-item">
+				<div class="content-block d-flex flex-sm-column p-2 p-md-3 h-100">
+					<a href="{{ article.href }}" title="{{ article.name }}" class="me-2 me-sm-0">
+						<img src="{{ article.thumb }}" class="img-fluid w-md-100" alt="{{ article.name }}" width="{{ article.width }}" height="{{ article.height }}" loading="lazy" />
+					</a>
+					<div class="ds-last-news-item-info mt-sm-3 w-100 h-100 d-flex flex-column">
+						<a href="{{ article.href }}" class="ds-last-news-item-title d-inline-block dark-text fsz-16 fw-500 mb-3">{{ article.name }}</a>
+						<div class="d-flex align-items-center justify-content-between light-text fsz-12 mt-auto">
+							<div class="ds-last-news-item-category d-flex align-items-center">
+								<svg class="me-1" width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path
+										d="M11.3077 12.3535H2.69231C0.956308 12.3535 0 11.4401 0 9.78209V2.92494C0 1.26689 0.956308 0.353516 2.69231 0.353516H5.5641C5.70697 0.353516 5.84412 0.407688 5.94464 0.504374L7.94056 2.41066H11.3077C13.0437 2.41066 14 3.32403 14 4.98209V9.78209C14 11.4401 13.0437 12.3535 11.3077 12.3535ZM2.69231 1.38209C1.5601 1.38209 1.07692 1.84357 1.07692 2.92494V9.78209C1.07692 10.8635 1.5601 11.3249 2.69231 11.3249H11.3077C12.4399 11.3249 12.9231 10.8635 12.9231 9.78209V4.98209C12.9231 3.90072 12.4399 3.43923 11.3077 3.43923H7.71795C7.57508 3.43923 7.43793 3.38506 7.33742 3.28837L5.3415 1.38209H2.69231Z"
+										fill="#9CA3AF" />
+								</svg>
+								{% set key = 0 %}
+								{% for blog_category_name in article.blog_categories %}
+									{% set key = key + 1 %}
+									{{ blog_category_name }}{% if key < article.blog_categories|length %},{% endif %}
+								{% endfor %}
+							</div>
+							<div class="ds-last-news-item-date d-flex align-items-center">
+								<svg class="me-1" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path
+										d="M9.69231 0.923565H8.92308V0.462027C8.92308 0.207258 8.71631 0.000488281 8.46154 0.000488281C8.20677 0.000488281 8 0.207258 8 0.462027V0.923565H4V0.462027C4 0.207258 3.79323 0.000488281 3.53846 0.000488281C3.28369 0.000488281 3.07692 0.207258 3.07692 0.462027V0.923565H2.30769C0.819692 0.923565 0 1.74326 0 3.23126V9.6928C0 11.1808 0.819692 12.0005 2.30769 12.0005H9.69231C11.1803 12.0005 12 11.1808 12 9.6928V3.23126C12 1.74326 11.1803 0.923565 9.69231 0.923565ZM2.30769 1.84664H3.07692V2.30818C3.07692 2.56295 3.28369 2.76972 3.53846 2.76972C3.79323 2.76972 4 2.56295 4 2.30818V1.84664H8V2.30818C8 2.56295 8.20677 2.76972 8.46154 2.76972C8.71631 2.76972 8.92308 2.56295 8.92308 2.30818V1.84664H9.69231C10.6628 1.84664 11.0769 2.2608 11.0769 3.23126V3.6928H0.923077V3.23126C0.923077 2.2608 1.33723 1.84664 2.30769 1.84664ZM9.69231 11.0774H2.30769C1.33723 11.0774 0.923077 10.6633 0.923077 9.6928V4.61587H11.0769V9.6928C11.0769 10.6633 10.6628 11.0774 9.69231 11.0774ZM4.16617 6.61587C4.16617 6.95557 3.89109 7.23126 3.55078 7.23126C3.21109 7.23126 2.93224 6.95557 2.93224 6.61587C2.93224 6.27618 3.20493 6.00049 3.54462 6.00049H3.55078C3.89047 6.00049 4.16617 6.27618 4.16617 6.61587ZM6.6277 6.61587C6.6277 6.95557 6.35263 7.23126 6.01232 7.23126C5.67263 7.23126 5.39378 6.95557 5.39378 6.61587C5.39378 6.27618 5.66647 6.00049 6.00616 6.00049H6.01232C6.35201 6.00049 6.6277 6.27618 6.6277 6.61587ZM9.08924 6.61587C9.08924 6.95557 8.81417 7.23126 8.47386 7.23126C8.13417 7.23126 7.85532 6.95557 7.85532 6.61587C7.85532 6.27618 8.12801 6.00049 8.4677 6.00049H8.47386C8.81355 6.00049 9.08924 6.27618 9.08924 6.61587ZM4.16617 9.07741C4.16617 9.4171 3.89109 9.6928 3.55078 9.6928C3.21109 9.6928 2.93224 9.4171 2.93224 9.07741C2.93224 8.73772 3.20493 8.46203 3.54462 8.46203H3.55078C3.89047 8.46203 4.16617 8.73772 4.16617 9.07741ZM6.6277 9.07741C6.6277 9.4171 6.35263 9.6928 6.01232 9.6928C5.67263 9.6928 5.39378 9.4171 5.39378 9.07741C5.39378 8.73772 5.66647 8.46203 6.00616 8.46203H6.01232C6.35201 8.46203 6.6277 8.73772 6.6277 9.07741ZM9.08924 9.07741C9.08924 9.4171 8.81417 9.6928 8.47386 9.6928C8.13417 9.6928 7.85532 9.4171 7.85532 9.07741C7.85532 8.73772 8.12801 8.46203 8.4677 8.46203H8.47386C8.81355 8.46203 9.08924 8.73772 9.08924 9.07741Z"
+										fill="#9CA3AF" />
+								</svg>
+								{{ article.date_added }}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+	{% endif %}
+	{{ content_bottom }}
+</div>
+<script>
+	$("#inputNameComment, #inputReviewComment").on("change paste keyup", function() {
+		$(this).removeClass('error_style');
+	});
+
+	$('#article-comments').delegate('.pagination a', 'click', function(e) {
+		const headerHeight = document.querySelector('header').offsetHeight;
+
+	    e.preventDefault();
+	    $('#article-comments').load(this.href);
+        scrollToElement('.ds-blog-post-comments', null, -headerHeight);
+	});
+
+	$('#article-comments').load('index.php?route=octemplates/blog/oct_blogarticle/comment&blogarticle_id={{ blogarticle_id }}');
+
+	$('#button-comment').on('click', function() {
+		$.ajax({
+			url: 'index.php?route=octemplates/blog/oct_blogarticle/write&blogarticle_id={{ blogarticle_id }}',
+			type: 'post',
+			dataType: 'json',
+			cache: false,
+			data: $('#form-comment').serialize(),
+			beforeSend: function() {
+				$('#button-comment').button('loading');
+	            masked('body', true);
+
+                $('#button-comment').data('original-content', $('#button-comment').html());
+				$('#button-comment').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>').prop('disabled', true);
+			},
+			complete: function() {
+				masked('body', false);
+
+				setTimeout(function () {
+					$('#button-comment').html($('#button-comment').data('original-content')).prop('disabled', false);
+				}, 600);
+			},
+			success: function(json) {
+				$('.alert-dismissible').remove();
+
+				if (json['error']) {
+					let errors = '';
+
+					$.each(json['error'], function(i, val) {
+						if (val) {
+							$('#form-comment [name="' + i + '"]').addClass('error_style');
+							errors += '<div class="alert-text-item">' + val + '</div>';
+						}
+					});
+
+					scNotify('danger', errors);
+				}
+
+				if (json['success']) {
+					scNotify('success', json['success']);
+					$('#blogCommentModal').modal('hide');
+					$('input[name=\'name\']').val('');
+					$('textarea[name=\'text\']').val('');
+					$('input[name=\'rating\']:checked').prop('checked', false);
+				}
+			}
+		});
+	});
+</script>
+{{ footer }}

@@ -1,0 +1,67 @@
+{% if banners %}
+	{% if heading_title is not empty %}
+		<div class="py-3 fw-500 dark-text fsz-20">
+			{{ heading_title }}
+		</div>
+	{% endif %}
+	<div id="ds-carousel-{{ module }}" class="ds-carousel swiper d-flex{% if heading_title is empty %} mt-3{% endif %}">
+		<div class="swiper-wrapper">
+			{% for banner in banners %}
+				{% if banner.link %}
+					<a href="{{ banner.link }}" class="ds-carousel-item swiper-slide d-block">
+				{% else %}
+					<span class="ds-carousel-item swiper-slide d-block">
+				{% endif %}
+						<span class="content-block d-flex flex-column align-items-center h-100">
+							<img src="{{ banner.image }}" alt="{{ banner.title }}" width="{{ banner.width }}" height="{{ banner.height }}" class="d-block mx-auto mb-2 br-4" loading="lazy" />
+							<span class="ds-carousel-title dark-text text-center fw-500">{{ banner.title }}</span>
+						</span>
+				{% if banner.link %}
+					</a>
+				{% else %}
+					</span>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<div class="swiper-button-next swiper-button-next-{{ module }}  button button-secondary button-with-icon br-4 overflow-hidden d-flex align-items-center justify-content-center py-3 px-1">
+			<svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="4" height="6" viewBox="0 0 4 6" fill="none">
+				<path d="M3.73679 3.00062C3.73679 3.12186 3.69071 3.24312 3.59789 3.33532L1.07197 5.86123C0.886949 6.04626 0.586974 6.04626 0.401951 5.86123C0.216928 5.67621 0.216928 5.37623 0.401951 5.19121L2.59316 3L0.401951 0.808788C0.216928 0.623765 0.216928 0.32379 0.401951 0.138767C0.586974 -0.0462565 0.886949 -0.0462565 1.07197 0.138767L3.59789 2.66468C3.69071 2.75814 3.73679 2.87937 3.73679 3.00062Z" fill="#003459"></path>
+			</svg>
+		</div>
+		<div class="swiper-button-prev swiper-button-prev-{{ module }} button button-secondary button-with-icon br-4 overflow-hidden d-flex align-items-center justify-content-center py-3 px-1">
+			<svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="4" height="6" viewBox="0 0 4 6" fill="none">
+				<path d="M0.263207 2.99938C0.263207 2.87814 0.309287 2.75688 0.402114 2.66468L2.92803 0.138767C3.11305 -0.0462558 3.41303 -0.0462558 3.59805 0.138767C3.78307 0.323791 3.78307 0.623765 3.59805 0.808788L1.40684 3L3.59805 5.19121C3.78307 5.37624 3.78307 5.67621 3.59805 5.86123C3.41303 6.04626 3.11305 6.04626 2.92803 5.86123L0.402114 3.33532C0.309287 3.24186 0.263207 3.12063 0.263207 2.99938Z" fill="#003459"></path>
+			</svg>
+		</div>
+	</div>
+	<script>
+		$(document).ready(function () {
+			var carouselSwiper = new Swiper('#ds-carousel-{{ module }}', {
+				slidesPerView: 2,
+				spaceBetween: 20,
+				autoplay: {
+					delay: 5000,
+					disableOnInteraction: false
+				},
+				navigation: {
+					nextEl: '.swiper-button-next-{{ module }}',
+					prevEl: '.swiper-button-prev-{{ module }}'
+				},
+				breakpoints: {
+					1600: {
+						slidesPerView: 6
+					},
+					1200: {
+						slidesPerView: 6
+					},
+					768: {
+						slidesPerView: 4
+					},
+					480: {
+						slidesPerView: 2
+					}
+				}
+			});
+		});
+	</script>
+{% endif %}

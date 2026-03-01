@@ -1,0 +1,82 @@
+{{ header }}
+<div id="account-tracking" class="container-fluid container-xl flex-grow-1">
+ 	<nav aria-label="breadcrumb">
+        <ul class="breadcrumb ds-breadcrumb fsz-12">
+        {% for breadcrumb in breadcrumbs %}
+            {% if loop.last %}
+                <li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+            {% else %}
+                <li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </nav>
+    <main>
+        <div class="row">
+            <div class="col-12 ds-page-title pb-3">
+                <h1>{{ heading_title }}</h1>
+            </div>
+        </div>
+        <div class="content-top-box">{{ content_top }}</div>
+        <div class="ds-account row g-3">
+            {{ column_left }}
+            {% if column_left and column_right %}
+                {% set class = 'col-xl-6' %}
+            {% elseif column_left or column_right %}
+                {% set class = 'col-xl-9' %}
+            {% else %}
+                {% set class = 'col-xl-12' %}
+            {% endif %}
+            <div id="content" class="{{ class }}">
+                <div class="content-block h-100">
+                    <div class="h3 mt-0 mb-3">{{ text_description }}</div>
+                    <form class="form-horizontal">
+                        <fieldset class="p-0">
+                            <div class="form-group mb-3">
+                                <label class="dark-text fsz-14 fw-500 mb-1" for="input-code">{{ entry_code }}</label>
+                                <textarea cols="40" rows="5" placeholder="{{ entry_code }}" id="input-code" class="form-control">{{ code }}</textarea>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="dark-text fsz-14 fw-500 mb-1" for="input-generator">
+                                    <span data-bs-toggle="tooltip" title="{{ help_generator }}">{{ entry_generator }}</span>
+    							</label>
+                                <input type="text" name="product" value="" placeholder="{{ entry_generator }}" id="input-generator" class="form-control"/>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="dark-text fsz-14 fw-500 mb-1" for="input-link">{{ entry_link }}</label>
+                                <textarea name="link" cols="40" rows="5" placeholder="{{ entry_link }}" id="input-link" class="form-control"></textarea>
+                            </div>
+                        </form>
+                        <a href="{{ continue }}" class="button button-primary br-7 ds-account-login-button">{{ button_continue }}</a>
+                    </fieldset>
+                </div>
+            </div>
+            {{ column_right }}
+        </div>
+        {{ content_bottom }}
+    </main>
+</div>
+<script type="text/javascript">
+    <!--
+    $('input[name=\'product\']').autocomplete({
+        'source': function(request, response) {
+            $.ajax({
+                url: 'index.php?route=account/tracking/autocomplete&filter_name=' + encodeURIComponent(request) + '&tracking=' + encodeURIComponent($('#input-code').val()),
+                dataType: 'json',
+                cache: false,
+                success: function(json) {
+                    response($.map(json, function(item) {
+                        return {label: item['name'], value: item['link']}
+                    }));
+                }
+            });
+        },
+        'select': function(item) {
+            $('input[name=\'product\']').val(item['label']);
+            $('textarea[name=\'link\']').val(item['value']);
+        }
+    });
+
+    //-->
+</script>
+{{ footer }}

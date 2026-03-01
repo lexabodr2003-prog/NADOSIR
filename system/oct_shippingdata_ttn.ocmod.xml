@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<modification>
+	<code>oct_shippingdata_ttn_sms</code>
+	<name>Octemplates - Shipping Data TTN + sms</name>
+	<version>1.0.0</version>
+	<author>Octemplates</author>
+	<link>https://octemplates.net/</link>
+	
+	<file path="admin/model/sale/order.php|catalog/model/account/order.php">
+		<operation>
+			<search><![CDATA[public function getOrderProducts(]]></search>
+			<add position="before"><![CDATA[
+                public function getOrderTTNNumber($order_id) {
+                    $fields_to_check = [
+                        'novaposhta_cn_number',
+                        'rozetka_delivery_cn_number',
+                        'ukrposhta_cn_number'
+                    ];
+
+                    $existing_fields = [];
+
+                    $table_structure = $this->db->query("DESCRIBE `" . DB_PREFIX . "order`")->rows;
+                    $columns = array_column($table_structure, 'Field');
+
+                    foreach ($fields_to_check as $field) {
+                        if (in_array($field, $columns)) {
+                            $existing_fields[] = "`" . $field . "`";
+                        }
+                    }
+
+                    if (!$existing_fields) {
+                        return [];
+                    }
+
+                    $sql = "SELECT " . implode(", ", $existing_fields) . " FROM `" . DB_PREFIX . "order` WHERE `order_id` = '" . (int)$order_id . "' LIMIT 1";
+                    $result = $this->db->query($sql)->row;
+
+                    return $result ?: [];
+                }
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="admin/controller/sale/order.php">
+		<operation>
+			<search><![CDATA[$data['shipping_address'] = str_replace]]></search>
+			<add position="before"><![CDATA[
+                $data['can_edit'] = $this->user->hasPermission('modify', 'sale/order');
+                $this->document->addScript('view/javascript/octemplates/bootstrap-notify/bootstrap-notify.min.js');
+                $this->document->addScript('view/javascript/octemplates/oct_main.js');
+                $this->document->addStyle('view/stylesheet/oct_deals.css');
+
+                $ttns = $this->model_sale_order->getOrderTTNNumber((int)$this->request->get['order_id']);
+
+                $data['text_shipping_ttn'] = '';
+                $data['shipping_ttn_url'] = '';
+                $data['shipping_ttn'] = '';
+                $data['shipping_ttn_icon'] = '';
+                $data['button_ttn_tracking'] = $this->language->get('button_ttn_tracking');
+                $data['order_id'] = (int)$this->request->get['order_id'];
+
+                $shipping_methods = [
+                    'novaposhta' => [
+                        'url'  => 'https://novaposhta.ua/tracking/',
+                        'icon' => '../image/catalog/deals/novaposhta.svg'
+                    ],
+                    'rozetka_delivery' => [
+                        'url'  => 'https://rozetka.delivery/tracking/parcel?parcel_id=',
+                        'icon' => '../image/catalog/deals/rozetka.svg'
+                    ],
+                    'ukrposhta' => [
+                        'url'  => 'https://track.ukrposhta.ua/tracking_UA.html?barcode=',
+                        'icon' => '../image/catalog/deals/Ukrposhta.svg'
+                    ]
+                ];
+
+                foreach ($shipping_methods as $k => $method) {
+                    if (!empty($ttns[$k . '_cn_number'])) {
+                        $full_ttn = trim($ttns[$k . '_cn_number']);
+
+                        if (in_array($k, ['novaposhta', 'rozetka_delivery']) && strlen($full_ttn) > 4) {
+                            $data['shipping_ttn'] = substr($full_ttn, 0, -4) . ' ' . substr($full_ttn, -4);
+                        } elseif ($k === 'ukrposhta' && preg_match('/^\d{13}$/', $full_ttn)) {
+                            $data['shipping_ttn'] = sprintf('%s %s %s',
+                                substr($full_ttn, 0, 5),
+                                substr($full_ttn, 5, 4),
+                                substr($full_ttn, 9, 4)
+                            );
+                        } else {
+                            $data['shipping_ttn'] = $full_ttn;
+                        }
+
+                        $data['shipping_ttn_number'] = $full_ttn;
+                        $data['text_shipping_ttn'] = $this->language->get('text_ttn_' . $k);
+                        $data['shipping_ttn_url'] = $method['url'] . $full_ttn;
+                        $data['shipping_ttn_icon'] = $method['icon'];
+                        $data['shipping_type'] = $k;
+                        break;
+                    }
+                }
+                $sms_module_settings = $this->config->get('oct_sms_settings') ?? [];
+                $data['oct_sms_token'] = $sms_module_settings['oct_sms_token'] ?? '';
+                $data['oct_sms_status'] = $sms_module_settings['order_templates'] ?? 0;
+                $admin_user_token = $this->session->data['user_token'] ?? '';
+
+                $site_link = (!empty($this->request->server['HTTPS']) && (($this->request->server['HTTPS'] === 'on') || ($this->request->server['HTTPS'] == 1))) ? HTTPS_CATALOG : HTTP_CATALOG;
+                $admin_site_link = (!empty($this->request->server['HTTPS']) && (($this->request->server['HTTPS'] === 'on') || ($this->request->server['HTTPS'] == 1))) ? HTTPS_SERVER : HTTP_SERVER;
+                $data['shipping_ttn_send_url'] = $site_link . "index.php?route=octemplates/events/helper/manualSendTtn";
+                $data['admin_sms_notify_url'] = $admin_site_link . "index.php?route=octemplates/module/oct_sms_notify&user_token=" . $admin_user_token;
+                $data['oct_sms_settings'] = $sms_module_settings;
+                $data['current_lang_id'] = (int)$this->config->get('config_language_id');
+                $data['order_sms_edit'] = $this->config->get('oct_sms_settings')['order_sms_edit'] ?? 0;
+			]]></add>
+		</operation>
+	</file>
+
+    <file path="catalog/controller/account/logout.php">
+      <operation>
+        <search><![CDATA[$this->customer->logout();]]></search>
+        <add position="after"><![CDATA[
+        unset($this->session->data['oct_form_data']);
+        ]]></add>
+      </operation>
+    </file>
+
+    <file path="catalog/controller/account/order.php">
+		<operation>
+			<search><![CDATA[$data['shipping_address'] = str_replace]]></search>
+			<add position="before"><![CDATA[
+                $ttns = $this->model_account_order->getOrderTTNNumber((int)$this->request->get['order_id']);
+
+                $data['text_shipping_ttn'] = '';
+                $data['shipping_ttn_url'] = '';
+                $data['shipping_ttn'] = '';
+                $data['shipping_ttn_icon'] = '';
+                $data['button_ttn_tracking'] = $this->language->get('button_ttn_tracking');
+                $data['module_account_payment_address_view'] = $this->config->get('module_account_payment_address_view') ?? 0;
+
+                $shipping_methods = [
+                    'novaposhta' => [
+                        'url'  => 'https://novaposhta.ua/tracking/',
+                        'icon' => 'image/catalog/deals/novaposhta.svg'
+                    ],
+                    'rozetka_delivery' => [
+                        'url'  => 'https://rozetka.delivery/tracking/parcel?parcel_id=',
+                        'icon' => 'image/catalog/deals/rozetka.svg'
+                    ],
+                    'ukrposhta' => [
+                        'url'  => 'https://track.ukrposhta.ua/tracking_UA.html?barcode=',
+                        'icon' => 'image/catalog/deals/Ukrposhta.svg'
+                    ]
+                ];
+
+                foreach ($shipping_methods as $k => $method) {
+                    if (!empty($ttns[$k . '_cn_number'])) {
+                        $data['text_shipping_ttn'] = $this->language->get('text_ttn_' . $k);
+                        $data['shipping_ttn_url'] = $method['url'] . $ttns[$k . '_cn_number'];
+                        $data['shipping_ttn'] = $ttns[$k . '_cn_number'];
+                        $data['shipping_ttn_icon'] = $method['icon'];
+                        break;
+                    }
+                }
+			]]></add>
+		</operation>
+		<operation>
+			<search><![CDATA[$data['products'][] = array(]]></search>
+			<add position="before"><![CDATA[
+				$this->load->model('tool/image');
+			]]></add>
+		</operation>
+
+		<operation>
+			<search><![CDATA[
+				'option'   => $option_data,
+			]]></search>
+			<add position="after"><![CDATA[
+				'image'    => isset($product_info['image']) && is_file(DIR_IMAGE . $product_info['image'])
+					? $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_oct_deals_image_additional_width') ?? 80, $this->config->get('theme_oct_deals_image_additional_height') ?? 80)
+					: $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_oct_deals_image_additional_width') ?? 80, $this->config->get('theme_oct_deals_image_additional_height') ?? 80),
+				'href'     => $this->url->link('product/product', 'product_id=' . $product['product_id']),
+                'image_width' => $this->config->get('theme_oct_deals_image_additional_width') ?? 80,
+                'image_height' => $this->config->get('theme_oct_deals_image_additional_height') ?? 80,
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="admin/language/en-gb/sale/order.php|catalog/language/en-gb/account/order.php">
+		<operation>
+			<search><![CDATA[// Text]]></search>
+			<add position="before"><![CDATA[
+			$_['text_ttn_novaposhta'] = 'TTN Nova Poshta';
+			$_['text_ttn_rozetka_delivery'] = 'TTN ROZETKA Delivery';
+			$_['text_ttn_ukrposhta'] = 'TTN Ukrposhta';
+			$_['button_ttn_tracking'] = 'Tracking';
+            $_['button_send_sms'] = 'Send SMS';
+            $_['button_ttn_copy'] = 'Copy';
+            $_['text_copied'] = 'Copied';
+            $_['text_sended'] = 'Message sent';
+            $_['text_confirm_send_sms'] = 'Send TTN for order №%s?';
+            $_['text_alert_sms'] = 'Please activate and configure the SMS template "Custom SMS Templates (Orders)" in the module "Octemplates - SMS Notify"';
+            $_['text_sms_modal'] = 'Send SMS to the client';
+            $_['text_chose_sms_template'] = 'Choose an SMS template';
+            $_['button_cancel'] = 'Cancel';
+            $_['button_send'] = 'Send';
+            $_['text_no_templates'] = 'No SMS templates available';
+            $_['text_order_sms_shortcodes'] = 'Available shortcodes for SMS:';
+            $_['text_edit_sms_message'] = 'Edit SMS message';
+            $_['text_email_notify'] = 'Also send a message to e-mail (standard when changing status)';
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="admin/language/ru-ru/sale/order.php|catalog/language/ru-ru/account/order.php">
+		<operation>
+			<search><![CDATA[// Text]]></search>
+			<add position="before"><![CDATA[
+			$_['text_ttn_novaposhta'] = 'ТТН Новая почта';
+			$_['text_ttn_rozetka_delivery'] = 'ТТН ROZETKA Delivery';
+			$_['text_ttn_ukrposhta'] = 'ТТН Укрпочта';
+			$_['button_ttn_tracking'] = 'Отследить';
+            $_['button_send_sms'] = 'Отправить SMS';
+            $_['button_ttn_copy'] = 'Копировать';
+            $_['text_copied'] = 'Скопировано';
+            $_['text_sended'] = 'Сообщение отправлено';
+            $_['text_confirm_send_sms'] = 'Отправить ТТН для заказа №%s?';
+            $_['text_alert_sms'] = 'Пожалуйста, активируйте и настройте SMS-шаблон "Кастомные SMS шаблоны (заказы)" в модуле "Octemplates - SMS Notify"';
+            $_['text_sms_modal'] = 'Отправить SMS клиенту';
+            $_['text_chose_sms_template'] = 'Выберите шаблон SMS';
+            $_['button_cancel'] = 'Отменить';
+            $_['button_send'] = 'Отправить';
+            $_['text_no_templates'] = 'Шаблонов SMS нет';
+            $_['text_order_sms_shortcodes'] = 'Доступные шорткоды для SMS:';
+            $_['text_edit_sms_message'] = 'Текст сообщения (можно изменить)';
+            $_['text_email_notify'] = 'Отправить также сообщение на e-mail (стандартное при изменении статуса)';
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="admin/language/uk-ua/sale/order.php|catalog/language/uk-ua/account/order.php">
+		<operation>
+			<search><![CDATA[// Text]]></search>
+			<add position="before"><![CDATA[
+			$_['text_ttn_novaposhta'] = 'ТТН Нова Пошта';
+			$_['text_ttn_rozetka_delivery'] = 'ТТН ROZETKA Delivery';
+			$_['text_ttn_ukrposhta'] = 'ТТН Укрпошта';
+			$_['button_ttn_tracking'] = 'Відстежити';
+            $_['button_send_sms'] = 'Відправити SMS';
+            $_['button_ttn_copy'] = 'Копіювати';
+            $_['text_copied'] = 'Скопійовано';
+            $_['text_sended'] = 'Повідомлення відправлено';
+            $_['text_confirm_send_sms'] = 'Відправити TTN для замовлення №%s?';
+            $_['text_alert_sms'] = 'Будь ласка, активуйте та налаштуйте SMS-шаблон "Кастомні SMS шаблони (замовлення)" в модулі "Octemplates - SMS Notify"';
+            $_['text_sms_modal'] = 'Відправити SMS клієнту';
+            $_['text_chose_sms_template'] = 'Оберіть шаблон SMS';
+            $_['button_cancel'] = 'Скасувати';
+            $_['button_send'] = 'Відправити';
+            $_['text_no_templates'] = 'SMS шаблонів немає';
+            $_['text_order_sms_shortcodes'] = 'Доступні шорткоди для SMS:';
+            $_['text_edit_sms_message'] = 'Текст повідомлення (можна змінити)';
+            $_['text_email_notify'] = 'Відправити також повідомлення на e-mail (стандартне при зміні статусу)';
+			]]></add>
+		</operation>
+	</file>
+
+    <file path="admin/view/template/sale/order_info.twig">
+
+        <operation>
+            <search index="0"><![CDATA[<td>{{ telephone }}</td>]]></search>
+            <add position="replace"><![CDATA[
+                <td>{{ telephone }}
+                <!-- OCT SMS Notify -->
+                {% if can_edit %}
+                    {% if not oct_sms_status %}
+                        <button type="button"
+                                class="btn btn-success btn-xs btn-alert-sms" 
+                                data-toggle="tooltip"
+                                title="{{ button_send_sms }}">
+                            <i class="fa fa-sms" aria-hidden="true"></i>
+                        </button>
+                    {% else %} 
+                        <button type="button"
+                                class="btn btn-success btn-xs btn-send-ttn"
+                                data-order-id="{{ order_id }}"
+                                data-shipping-ttn="{{ shipping_ttn_number }}"
+                                data-oct-token="{{ oct_sms_token }}"
+                                data-shipping-type="{{ shipping_type }}"
+                                data-shipping-tracking-url="{{ shipping_ttn_url }}"
+                                data-toggle="tooltip"
+                                title="{{ button_send_sms }}">
+                        <i class="fa fa-sms" aria-hidden="true"></i>
+                        </button>
+                    {% endif %} 
+                {% endif %}
+                <!-- OCT SMS Notify -->
+                </td>
+            ]]></add>
+        </operation>
+
+        <operation>
+            <search index="0"><![CDATA[</tbody>]]></search>
+            <add position="before"><![CDATA[
+                <!-- START Shipping TTN -->
+                <script>
+                var order_templates = {{ oct_sms_settings.order_templates is defined ? oct_sms_settings.order_templates|json_encode|raw : '[]' }};
+                </script>
+                {% if shipping_ttn %}
+                    <tr>
+                        <td>
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" style="width: 24px; height: 24px;"/>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ text_shipping_ttn }}: <b>{{ shipping_ttn|raw }}</b></span> 
+                                <div class="text-right" style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; gap:4px; padding-left: 16px;">
+                                    <button class="btn btn-info btn-xs" data-clipboard-text="{{ shipping_ttn_number }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button"><i class="fa fa-copy" aria-hidden="true"></i></button>                       
+                                    <a class="btn btn-info btn-xs" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" role="button" rel="noopener noreferrer"><i class="fa fa-truck" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if oct_sms_settings.order_templates is defined %}
+                <div class="modal fade" id="smsTemplateModal" tabindex="-1" role="dialog" aria-labelledby="smsTemplateModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрити"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="smsTemplateModalLabel">{{ text_sms_modal }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="smsTemplateForm">
+                        <div class="form-group">
+                            <label for="sms_template_select">{{ text_chose_sms_template }}</label>
+                            <select class="form-control" id="sms_template_select" name="sms_template"></select>
+                        </div>
+                        <div class="form-group"{% if not order_sms_edit %} style="display: none;"{% endif %}>
+                            <label for="sms_template_custom">{{ text_edit_sms_message }}</label>
+                            <textarea class="form-control" id="sms_template_custom" name="sms_template_custom" rows="3" {% if not order_sms_edit %}disabled="disabled" style="display: none;"{% endif %}></textarea>
+                            <div class="help-block">
+                            <b>{{ text_order_sms_shortcodes }}</b><br>
+                            <span>[store]</span> <br>
+                            <span>[customer_name]</span><br>
+                            <span>[ttn]</span><br>
+                            <span>[tracking_url]</span><br>
+                            <span>[order_id]</span><br>
+                            <span>[total]</span><br>
+                            <span>[city]</span><br>
+                            <span>[address]</span><br>
+                            </div>
+                        </div>
+                        <div class="form-check" style="display: flex; gap: 8px;">
+                            <input type="checkbox" class="form-check-input" id="email_notify" name="email_notify" value="1" style="flex: 0 0 14px; height: 14px;"/> 
+                            <label class="form-check-label" for="email_notify">{{ text_email_notify }}</label>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+                        <button type="button" class="btn btn-success" id="smsTemplateSendBtn">{{ button_send }}</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <script>
+                    function fillSmsTemplatesModal() {
+                        var $select = $('#sms_template_select');
+                        var $textarea = $('#sms_template_custom');
+                        var current_lang_id = '{{ current_lang_id }}';
+                        $select.empty();
+
+                        if (!order_templates.length) {
+                            $select.append('<option disabled>No templates</option>');
+                            $textarea.val('');
+                            return;
+                        }
+
+                        order_templates.forEach(function(tpl, i) {
+                            var name = tpl.system_name ? tpl.system_name : ('SMS ' + (i + 1));
+                            $select.append('<option value="' + i + '">' + name + '</option>');
+                        });
+
+                        var text0 = order_templates[0] && order_templates[0].lang && order_templates[0].lang[current_lang_id]
+                            ? order_templates[0].lang[current_lang_id].text
+                            : '';
+                        $textarea.val(text0);
+
+                        $select.off('change').on('change', function () {
+                            var idx = $(this).val();
+                            var text = (order_templates[idx] && order_templates[idx].lang && order_templates[idx].lang[current_lang_id])
+                                ? order_templates[idx].lang[current_lang_id].text
+                                : '';
+                            $textarea.val(text);
+                        });
+                    }
+
+                    $(document).ready(function () {
+
+                        $('.btn-send-ttn').off('click').on('click', function () {
+                            fillSmsTemplatesModal();
+                            $('#smsTemplateModal').modal('show');
+                        });
+
+                        $('#smsTemplateModal').on('show.bs.modal', function () {
+                            fillSmsTemplatesModal();
+                        });
+
+                        $('#smsTemplateSendBtn').on('click', function () {
+                            var sms_id = $('#sms_template_select').val();
+                            var sms_message = $('#sms_template_custom').val();
+                            var $btn = $('.btn-send-ttn'); 
+                            var order_id = $btn.data('order-id');
+                            var shipping_ttn = $btn.data('shipping-ttn');
+                            var oct_sms_token = $btn.data('oct-token');
+                            var tracking_url = $btn.data('shipping-tracking-url');
+                            var order_status_id = $('#input-order-status').val();
+                            var email_notify = $('#email_notify').is(':checked') ? 1 : 0;
+
+                            if (!sms_id) {
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ shipping_ttn_send_url }}',
+                                type: 'post',
+                                dataType: 'json',
+                                data: {
+                                    order_id: order_id,
+                                    order_status_id: order_status_id,
+                                    order_sms_id: sms_id,
+                                    {% if order_sms_edit %}
+                                    sms_message: sms_message,
+                                    {% endif %}
+                                    email_notify: email_notify,
+                                    shipping_ttn: shipping_ttn,
+                                    oct_sms_token: oct_sms_token,
+                                    tracking_url: tracking_url
+                                },
+                                beforeSend: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', true).addClass('btn-warning').html('<i class="fa fa-spinner fa-spin"></i>');
+                                },
+                                complete: function () {
+                                    $('#smsTemplateSendBtn').prop('disabled', false).removeClass('btn-warning').html('{{ button_send }}');
+                                },
+                                success: function (json) {
+                                    if (json.success) {
+                                        usNotify('success', '{{ text_sended }}');
+                                        $('#smsTemplateModal').modal('hide');
+                                        $('#history').load('index.php?route=sale/order/history&user_token={{ user_token }}&order_id={{ order_id }}');
+                                    } else if (json.error) {
+                                        alert('❌ ' + json.error);
+                                    } else {
+                                        alert('⚠️ unknown error');
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('❌ Error');
+                                }
+                            });
+                        });
+
+                    });
+                </script>
+                {% endif %}
+                <script>
+                       $(document).ready(function () {
+                            $('.btn-alert-sms').on('click', function () {
+                                alert('{{ text_alert_sms }}');
+                                window.location = '{{ admin_sms_notify_url }}';
+                            });
+
+                            $('[data-clipboard-text]').on('click', function() {
+                                var textToCopy = $(this).data('clipboard-text');
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    usNotify('success', '{{ text_copied }}');
+                                }).catch(function(err) {
+                                    console.error('Failed to copy:', err);
+                                });
+                            });
+                        });
+                </script>
+                <!-- END Shipping TTN -->
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/view/theme/*/template/account/order_info.twig">
+        <operation>
+            <search index="0"><![CDATA[<div class="table-responsive fsz-14 fw-300]]></search>
+            <add position="before"><![CDATA[
+                    {% if shipping_ttn %}
+                    <!-- START Shipping TTN -->
+                    <div class="d-flex flex-column flex-md-row align-items-md-center my-3 gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if shipping_ttn_icon %}
+                                <img src="{{ shipping_ttn_icon }}" alt="{{ text_shipping_ttn }}" class="img-thumbnail" width="24" height="24"/>
+                            {% endif %}
+                            <span class="dark-text">{{ text_shipping_ttn }}: <b>{{ shipping_ttn }}</b></span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 flex-grow-1 justify-content-md-end">
+                            <a class="button button-primary br-7" href="{{ shipping_ttn_url }}" target="_blank" data-toggle="tooltip" title="{{ button_ttn_tracking }}" data-clipboard-text="{{ shipping_ttn }}" role="button" rel="noopener noreferrer">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="16" viewBox="0 0 19 16" fill="none">
+                                    <path d="M18.0244 6.22877C16.8124 4.199 14.0921 0.793945 9.5 0.793945C4.90786 0.793945 2.18755 4.199 0.975598 6.22877C0.341467 7.28842 0.341467 8.60571 0.975598 9.66629C2.18755 11.6961 4.90786 15.1011 9.5 15.1011C14.0921 15.1011 16.8124 11.6961 18.0244 9.66629C18.6585 8.60571 18.6585 7.28934 18.0244 6.22877ZM16.8363 8.95553C15.7748 10.7333 13.4091 13.7165 9.5 13.7165C5.59091 13.7165 3.22515 10.7342 2.16366 8.95553C1.79259 8.3334 1.79259 7.56076 2.16366 6.93863C3.22515 5.16085 5.59091 2.17761 9.5 2.17761C13.4091 2.17761 15.7748 5.15992 16.8363 6.93863C17.2083 7.56168 17.2083 8.3334 16.8363 8.95553ZM9.5 4.0246C7.33639 4.0246 5.57707 5.78484 5.57707 7.94753C5.57707 10.1102 7.33639 11.8705 9.5 11.8705C11.6636 11.8705 13.4229 10.1102 13.4229 7.94753C13.4229 5.78484 11.6636 4.0246 9.5 4.0246ZM9.5 10.4859C8.09974 10.4859 6.96163 9.34778 6.96163 7.94753C6.96163 6.54727 8.09974 5.40916 9.5 5.40916C10.9003 5.40916 12.0384 6.54727 12.0384 7.94753C12.0384 9.34778 10.9003 10.4859 9.5 10.4859Z" fill="var(--ds-white-color)"></path>
+                                </svg>
+                                <span class="button-text">{{ button_ttn_tracking }}</span>
+                            </a>
+                            <buttton type="button" class="button button-outline button-outline-primary br-7" data-clipboard-text="{{ shipping_ttn }}" data-toggle="tooltip" title="{{ button_ttn_copy }}" role="button">
+                                <svg width="18" height="21" viewBox="0 0 18 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.7863 6.06681L12.9083 1.18876C12.7707 1.0512 12.5853 0.974121 12.3911 0.974121H7.90325C5.95008 0.974121 4.83017 2.09412 4.83017 4.04729V4.87656H4.00081C2.04764 4.87656 0.927734 5.99655 0.927734 7.94973V17.901C0.927734 19.8532 2.04764 20.9741 4.00081 20.9741H11.0244C12.9776 20.9741 14.0975 19.8541 14.0975 17.901V17.0717H14.9269C16.88 17.0717 18 15.9517 18 13.9985V6.58388C18.0009 6.38973 17.9239 6.20339 17.7863 6.06681ZM13.1229 3.47266L15.5023 5.85217H14.8302C13.6009 5.85217 13.1229 5.37315 13.1229 4.14485V3.47266ZM12.6351 17.901C12.6351 19.059 12.1834 19.5107 11.0254 19.5107H4.00176C2.84274 19.5107 2.3921 19.059 2.3921 17.901V7.94973C2.3921 6.79168 2.84371 6.33997 4.00176 6.33997H4.83113V13.9985C4.83113 15.9507 5.95103 17.0717 7.9042 17.0717H12.636V17.901H12.6351ZM14.9278 15.6083H7.9042C6.74518 15.6083 6.29454 15.1566 6.29454 13.9985V4.04729C6.29454 2.88924 6.74615 2.43754 7.9042 2.43754H11.6604V4.14485C11.6604 6.18973 12.7862 7.31558 14.8311 7.31558H16.5384V13.9985C16.5375 15.1566 16.0859 15.6083 14.9278 15.6083Z" fill="var(--ds-white-color)"></path>
+                                </svg>
+                                <span class="button-text">{{ button_ttn_copy }}</span>
+                            </buttton>
+                        </div>
+                    </div>
+                    <script>
+                    $(document).ready(function() {
+                        $('[data-clipboard-text]').on('click', function() {
+                            var $button = $(this);
+                            var textToCopy = $button.data('clipboard-text');
+                            
+                            navigator.clipboard.writeText(textToCopy).then(function() {
+                            var originalText = $button.find('.button-text').text();
+                            $button.find('.button-text').text('{{ text_copied }}');
+                            $button.removeClass('button-outline-primary').addClass('button-success');
+                            
+                            setTimeout(function() {
+                                $button.find('.button-text').text(originalText);
+                                $button.removeClass('button-success').addClass('button-outline-primary');
+                            }, 2600);
+                            }).catch(function(err) {
+                            console.error('Failed to copy:', err);
+                            });
+                        });
+                    });
+                    </script>
+                    <!-- END Shipping TTN -->
+                    {% endif %}
+                ]]></add>
+        </operation>
+    </file>
+</modification>

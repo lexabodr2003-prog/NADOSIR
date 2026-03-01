@@ -1,0 +1,191 @@
+{{ header }}
+<div id="product-compare" class="container-fluid container-xl flex-grow-1">
+	<nav aria-label="breadcrumb">
+		<ul class="breadcrumb ds-breadcrumb fsz-12">
+		{% for breadcrumb in breadcrumbs %}
+			{% if loop.last %}
+				<li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+			{% else %}
+				<li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+			{% endif %}
+		{% endfor %}
+		</ul>
+    </nav>
+    <main>
+        <div class="row">
+            <div class="col-12 ds-page-title pb-3">
+                <h1>{{ heading_title }}</h1>
+            </div>
+        </div>
+        <div class="content-top-box">{{ content_top }}</div>
+        {% if success %}
+            <script>
+                scNotify('success', '{{ success }}');
+            </script>
+        {% endif %}
+        <divclass="row g-3">
+            {{ column_left }}
+            {% if column_left and column_right %}
+                {% set class = 'col-xl-6 is-cols' %}
+            {% elseif column_left or column_right %}
+                {% set class = 'col-xl-9' %}
+            {% else %}
+                {% set class = 'col-xl-12 no-col' %}
+            {% endif %}
+            <div id="content"  class="{{ class }}">
+                <div class="content-block fsz-14 p-0 overflow-hidden">
+                    {% if products %}
+                        <div class="table-responsive">
+                            <table class="table ds-table-compare">
+                                <tbody>
+                                    <tr class="ds-table-compare-head">
+                                        <td class="fw-700">{{ text_name }}</td>
+                                        {% for product in products %}
+                                            <td class="ds-table-product-name text-center">
+                                                <a href="{{ product.href }}" class="fw-500 secondary-text">{{ product.name }}</a>
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr class="ds-table-compare-img">
+                                        <td class="align-middle">{{ text_image }}</td>
+                                        {% for product in products %}
+                                            <td class="text-center">
+                                                {% if product.thumb %}
+                                                    <img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}"/>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr class="ds-table-compare-price">
+                                        <td>{{ text_price }}</td>
+                                        {% for product in products %}
+                                            <td class="ds-module-price text-center">
+                                                {% if product.price %}
+                                                    {% if not product.special %}
+                                                        <span class="fw-700 fsz-16 secondary-text">{{ product.price }}</span>
+                                                    {% else %}
+                                                        <span class="text-decoration-line-through fsz-12 light-text me-2">{{ product.price }}</span>
+                                                        <span class="fw-700 fsz-16 secondary-text">{{ product.special }}</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr class="ds-table-compare-model">
+                                        <td>{{ text_model }}</td>
+                                        {% for product in products %}
+                                            <td class="text-center">{{ product.model }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr class="ds-table-compare-producer">
+                                        <td>{{ text_manufacturer }}</td>
+                                        {% for product in products %}
+                                            <td class="text-center">{{ product.manufacturer }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr class="ds-table-compare-available">
+                                        <td>{{ text_availability }}</td>
+                                        {% for product in products %}
+                                            <td class="text-center">{{ product.availability }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% if review_status %}
+                                        <tr class="ds-table-compare-rating">
+                                            <td class="align-middle">{{ text_rating }}</td>
+                                            {% for product in products %}
+                                                <td class="text-center">
+                                                    <div class="ds-module-rating d-inline-flex align-items-center justify-content-center mb-1 br-4">
+                                                        <div class="ds-module-rating-stars d-flex align-items-center">
+                                                            {% for i in 1..5 %}
+                                                                {% if product.rating < i %}
+                                                                    <span class="ds-module-rating-star"></span>
+                                                                {% else %}
+                                                                    <span class="ds-module-rating-star ds-module-rating-star-is"></span>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="fsz-12 light-text">{{ product.reviews }}</div>
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endif %}
+                                    <tr class="ds-table-compare-weight">
+                                        <td>{{ text_weight }}</td>
+                                        {% for product in products %}
+                                            <td class="text-center">{{ product.weight }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr class="ds-table-compare-sizes">
+                                        <td>{{ text_dimension }}</td>
+                                        {% for product in products %}
+                                            <td class="text-center">{{ product.length }}
+                                                x
+                                                {{ product.width }}
+                                                x
+                                                {{ product.height }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% for attribute_group in attribute_groups %}
+                                        <tr>
+                                            <td class="ds-table-compare-title" colspan="{{ products|length + 1 }}">
+                                                <strong>{{ attribute_group.name }}</strong>
+                                            </td>
+                                        </tr>
+                                        {% for key, attribute in attribute_group.attribute %}
+                                            <tr>
+                                                <td>{{ attribute.name }}</td>
+                                                {% for product in products %}
+                                                    {% if product.attribute[key] %}
+                                                        <td class="text-center">
+                                                            {{ product.attribute[key] }}</td>
+                                                    {% else %}
+                                                        <td></td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% endfor %}
+                                    <tr class="ds-table-compare-btn">
+                                        <td></td>
+                                        {% for product in products %}
+                                            <td class="text-center">
+                                                <div class="d-inline-flex flex-column align-items-stretch">
+                                                    {% if product.can_buy %}
+                                                        <button type="button" aria-label="To cart" class="button button-outline button-outline-primary br-7 mb-3 fsz-12 ds-module-cart-btn"/>
+                                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M13.3333 4.10256H11.4872V3.48718C11.4872 1.5639 9.92328 0 8 0C6.07672 0 4.51282 1.5639 4.51282 3.48718V4.10256H2.66666C1.64923 4.10256 0.820511 4.93046 0.820511 5.94872V12.9231C0.820511 14.9071 1.91343 16 3.89743 16H12.1026C14.0866 16 15.1795 14.9071 15.1795 12.9231V5.94872C15.1795 4.93046 14.3508 4.10256 13.3333 4.10256ZM5.74359 3.48718C5.74359 2.24246 6.75528 1.23077 8 1.23077C9.24472 1.23077 10.2564 2.24246 10.2564 3.48718V4.10256H5.74359V3.48718ZM13.9487 12.9231C13.9487 14.217 13.3965 14.7692 12.1026 14.7692H3.89743C2.60349 14.7692 2.05128 14.217 2.05128 12.9231V5.94872C2.05128 5.60903 2.32779 5.33333 2.66666 5.33333H4.51282V7.17949C4.51282 7.51918 4.78851 7.79487 5.1282 7.79487C5.4679 7.79487 5.74359 7.51918 5.74359 7.17949V5.33333H10.2564V7.17949C10.2564 7.51918 10.5321 7.79487 10.8718 7.79487C11.2115 7.79487 11.4872 7.51918 11.4872 7.17949V5.33333H13.3333C13.6722 5.33333 13.9487 5.60903 13.9487 5.94872V12.9231Z"
+                                                                    fill="#00A8E8"></path>
+                                                            </svg>
+                                                            <span class="button-text">{{ button_cart }}</span>
+                                                        </button>
+                                                    {% else %}
+                                                        {% if oct_stock_notifier_status and oct_stock_notifier_status %}
+                                                            <button type="button" onclick="octStockNotifier('{{ product.product_id }}');" aria-label="Notice" class="button button-outline button-outline-primary br-8 fsz-12 w-100 mb-3">{{ button_oct_stock_notifier }}</button>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    <input type="hidden" name="product_id" value="{{ product.product_id }}" />
+                                                    <a href="{{ product.remove }}" class="button button-danger br-7 d-inline-flex fsz-12 text-decoration-none">{{ button_remove }}</a>
+        	                                    </div>
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                       <div class="p-3">
+                            <p class="fw-500 dark-text">{{ text_empty }}</p>
+                            <div class="buttons mt-3">
+                                <a href="{{ continue }}" class="button button-primary br-7 d-inline-flex">{{ button_continue }}</a>
+                            </div>
+                       </div>
+                    {% endif %}
+            </div>
+            {{ column_right }}
+        </div>
+        {{ content_bottom }}
+    </main>
+</div>
+{{ footer }}

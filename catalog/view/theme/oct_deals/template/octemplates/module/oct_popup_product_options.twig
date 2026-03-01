@@ -1,0 +1,490 @@
+<div class="modal fade" id="productOptionModal" tabindex="-1" aria-labelledby="productOptionModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header p-0 pb-4">
+				<h5 class="modal-title fsz-20 fw-700 d-flex align-items-center justify-content-between" id="productOptionModalLabel">{{ heading_title }}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+					<svg xmlns="http://www.w3.org/2000/svg" width="12" height="13" viewbox="0 0 12 13" fill="none">
+						<path d="M11.8029 11.5725C12.0633 11.8329 12.0633 12.2551 11.8029 12.5155C11.6731 12.6453 11.5025 12.7111 11.3319 12.7111C11.1612 12.7111 10.9906 12.6462 10.8608 12.5155L5.99911 7.65384L1.13743 12.5155C1.00766 12.6453 0.837017 12.7111 0.666369 12.7111C0.495722 12.7111 0.325075 12.6462 0.195312 12.5155C-0.0651039 12.2551 -0.0651039 11.8329 0.195312 11.5725L5.057 6.71085L0.195312 1.8492C-0.0651039 1.58878 -0.0651039 1.16657 0.195312 0.906158C0.455727 0.645742 0.877907 0.645742 1.13832 0.906158L6.00001 5.76787L10.8617 0.906158C11.1221 0.645742 11.5443 0.645742 11.8047 0.906158C12.0651 1.16657 12.0651 1.58878 11.8047 1.8492L6.943 6.71085L11.8029 11.5725Z" fill="#00A8E8"/>
+					</svg>
+				</button>
+			</div>
+			<form method="post" enctype="multipart/form-data" id="options-form" class="modal-body p-0 pt-4">
+				{% if stock_warning %}
+					<div class="alert alert-danger">
+						<i class="fa fa-exclamation-circle"></i>
+						{{ stock_warning }}
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+					</div>
+				{% endif %}
+				{% if minimum > 1 %}
+					<div class="alert alert-info">
+						<i class="fa fa-info-circle"></i>
+						{{ text_minimum }}
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+					</div>
+				{% endif %}
+				{% if not stock_warning %}
+					<div class="popup-form-opt-box">
+                        <div class="modal-body-product flex-grow-1 mb-4 border-0">
+                            <div class="d-flex">
+                                {% if thumb is defined %}
+                                    <div class="modal-body-product-img p-2 br-7 overflow-hidden me-1">
+                                        <img src="{{ thumb }}"  width="120" height="120" alt="{{ product_name }}">
+                                    </div>
+                                {% endif %}
+                                <div class="modal-body-product-info ps-3 dark-text flex-grow-1 d-flex flex-column">
+                                    <div class="modal-body-product-title fw-500 mb-2 fsz-14">{{ product_name }}</div>
+                                    {% if price %}
+                                        {% if not special %}
+                                            <div class="ds-price-new fw-600 dark-text pb-3">{{ price }}</div>
+                                        {% else %}
+                                            <div class="d-flex">
+                                                <div class="ds-price-old light-text text-decoration-line-through fsz-12">{{ price }}</div>
+                                                <div id="popup-product-you-save" class="ds-module-sticker br-8 fw-600 red-bg ms-2">{{ you_save }}</div>
+                                            </div>
+                                            <div class="ds-price-new fw-600 red-text">{{ special }}</div>
+                                            <div class="fsz-10 light-text pb-3">{{ text_you_save }} <span class="ds-you-save-price">{{ you_save_price }}</span></div>
+                                        {% endif %}
+                                    {% endif %}
+                                    <div class="ds-module-quantity d-inline-flex align-items-center justify-content-start br-8 mt-auto align-self-start">
+                                        <button type="button" aria-label="Minus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="updatePurchaseValue(true, false, false);">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <g>
+                                                    <path d="M3.33333 7.5L12.6667 7.5C12.9427 7.5 13.1667 7.724 13.1667 8C13.1667 8.276 12.9427 8.5 12.6667 8.5L3.33333 8.5C3.05733 8.5 2.83333 8.276 2.83333 8C2.83333 7.724 3.05733 7.5 3.33333 7.5Z" fill="#25314C"></path>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                        <input type="text" id="popup-input-quantity" class="form-control" name="quantity" value="{{ minimum }}" inputmode="numeric" aria-label="Quantity">
+                                        <button type="button"  aria-label="Plus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="updatePurchaseValue(false, true, false);">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <g>
+                                                    <path d="M2.83341 8.00009C2.83341 7.72409 3.05741 7.50009 3.33341 7.50009L7.50008 7.50009L7.50008 3.33342C7.50008 3.05742 7.72408 2.83342 8.00008 2.83342C8.27608 2.83342 8.50008 3.05742 8.50008 3.33342L8.50008 7.50009L12.6667 7.50008C12.9427 7.50008 13.1667 7.72408 13.1667 8.00008C13.1667 8.27608 12.9427 8.50008 12.6667 8.50008L8.50008 8.50009L8.50008 12.6668C8.50008 12.9428 8.27608 13.1668 8.00008 13.1668C7.72408 13.1668 7.50008 12.9428 7.50008 12.6668L7.50008 8.50009L3.33342 8.50009C3.05742 8.50009 2.83342 8.27609 2.83341 8.00009Z" fill="#25314C"></path>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                        <input type="hidden" id="min_quantity" value="{{ minimum }}" name="min_quantity">
+                                        <input type="hidden" id="max-purchase-quantity" value="{{ max_quantity }}" name="max_quantity">
+                                    </div>
+                                    <input name="product_id" value="{{ product_id }}" type="hidden">
+                                    <script>
+                                        {% if not isInCart %}
+                                            let popupProductId = {{ product_id }};
+                                            let cartIdsHolder = document.querySelector("[data-cart-ids]");
+
+                                            if (cartIdsHolder && cartIdsHolder.dataset.cartIds && cartIdsHolder.dataset.cartIds.length > 0) {
+                                                let cartIds = cartIdsHolder.dataset.cartIds.split(',');
+                                                let index = cartIds.indexOf(popupProductId.toString());
+
+                                                if (index > -1) {
+                                                    cartIds.splice(index, 1);
+                                                    cartIdsHolder.dataset.cartIds = cartIds.join(',');
+                                                }
+                                            }
+                                        {% else %}
+                                            setCartBtnAdded();
+                                        {% endif %}
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+						{% if options %}
+                            <div class="ds-product-options modal-body-options mt-3 border-bottom-0" id="ds-purchase-options-box">
+                                {% for option in options %}
+                                    {% if option.type == 'select' %}
+                                        <div class="form-group">
+                                            <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="options-popup-input-option{{ option.product_option_id }}">{{ option.name }}
+                                                {% if option.required %}
+                                                    <span class="required"> *</span>
+                                                {% endif %}
+                                            </label>
+                                            <select name="option[{{ option.product_option_id }}]" id="options-popup-input-option{{ option.product_option_id }}" class="form-select form-control">
+                                                <option value="">{{ text_select }}</option>
+                                                {% for option_value in option.product_option_value %}
+                                                    <option value="{{ option_value.product_option_value_id }}">{{ option_value.name }}
+                                                        {% if option_value.price %}
+                                                            ({{ option_value.price_prefix }}{{ option_value.price }})
+                                                        {% endif %}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    {% endif %}
+                                    {% if option.type == 'radio' %}
+                                        <div class="form-group">
+                                            <label class="ds-control-label fw-500 dark-text fsz-14 mb-2">{{ option.name }}
+                                                {% if option.required %}
+                                                    <span class="required"> *</span>{% endif %}
+                                            </label>
+                                            <div id="options-popup-input-option{{ option.product_option_id }}" class="options-box d-flex flex-wrap">
+                                                {% for option_value in option.product_option_value %}
+                                                    <div class="radio">
+                                                        <label data-bs-toggle="tooltip" data-bs-placement="top" class="option optid-{{ option.product_option_id }} not-selected {% if option_value.image %} radio-img{% else %}ds-radio{% endif %}" title="{{ option_value.name }} {% if option_value.price %}{{ option_value.price_prefix }}{{ option_value.price }}{% endif %}">
+                                                            <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" class="input-radio"/>
+                                                            {% if option_value.image %}
+                                                                <img src="{{ option_value.image }}" alt="{{ option_value.name }} {% if option_value.price %} {{ option_value.price_prefix }} {{ option_value.price }} {% endif %}" width="50" height="50" />
+                                                            {% else %}
+                                                                {{ option_value.name }}
+                                                            {% endif %}
+                                                        </label>
+                                                        <script>
+                                                            $(document).ready(function() {
+                                                                $(document).on('touchstart click', 'label.optid-{{ option.product_option_id }}', function(event) {
+                                                                    $('label.optid-{{ option.product_option_id }}').removeClass('selected').addClass('not-selected');
+                                                                    $(this).removeClass('not-selected').addClass('selected');
+                                                                });
+                                                            });
+                                                        </script>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    {% if option.type == 'checkbox' %}
+                                        <div class="form-group">
+                                            <div class="ds-control-label fw-500 dark-text fsz-14 mb-2">{{ option.name }}
+                                                {% if option.required %}
+                                                    <span class="required"> *</span>{% endif %}
+                                            </div>
+                                            <div id="options-popup-input-option{{ option.product_option_id }}">
+                                                {% for option_value in option.product_option_value %}
+                                                    <div class="form-check">
+                                                        <input type="checkbox" id="option[{{ option.product_option_id }}][{{ option_value.product_option_value_id }}]" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" class="form-check-input">
+                                                        <label class="form-check-label d-flex align-items-center" for="option[{{ option.product_option_id }}][{{ option_value.product_option_value_id }}]">
+                                                            {% if option_value.image %}<img src="{{ option_value.image }}" alt="{{ option_value.name }} {% if option_value.price %} {{ option_value.price_prefix }} {{ option_value.price }} {% endif %}" class="img-thumbnail" width="50" height="50" />{% endif %}
+                                                            {{ option_value.name }}
+                                                            {% if option_value.price %}
+                                                                ({{ option_value.price_prefix }}{{ option_value.price }})
+                                                            {% endif %}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    {% if option.type == 'text' %}
+                                        <div class="form-group">
+                                            <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="options-popup-input-option{{ option.product_option_id }}">{{ option.name }}
+                                                {% if option.required %}
+                                                    <span class="required"> *</span>
+                                                {% endif %}
+                                            </label>
+                                            <input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" placeholder="{{ option.name }}" id="options-popup-input-option{{ option.product_option_id }}" class="form-control" inputmode="text">
+                                        </div>
+                                    {% endif %}
+                                    {% if option.type == 'textarea' %}
+                                        <div class="form-group">
+                                            <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="options-popup-input-option{{ option.product_option_id }}">{{ option.name }}
+                                                {% if option.required %}
+                                                    <span class="required"> *</span>{% endif %}
+                                            </label>
+                                            <textarea name="option[{{ option.product_option_id }}]" rows="5" placeholder="{{ option.name }}" id="options-popup-input-option{{ option.product_option_id }}" class="form-control">{{ option.value }}</textarea>
+                                        </div>
+                                    {% endif %}
+                                    {% if option.type == 'file' %}
+                                        <div class="form-group">
+                                            <label class="ds-control-label fw-500 dark-text fsz-14 mb-2 d-block">{{ option.name }}
+                                                {% if option.required %}
+                                                    <span class="required"> *</span>{% endif %}
+                                            </label>
+                                            <button type="button" id="button-upload" data-loading-text="{{ text_loading }}" class="button button-outline button-outline-primary br-7">
+                                                <i class="fa fa-upload me-2"></i>
+                                                {{ button_upload }}</button>
+                                            <input type="hidden" name="option[{{ option.product_option_id }}]" value="" id="options-popup-input-option{{ option.product_option_id }}"/>
+                                        </div>
+                                    {% endif %}
+                                    {% if option.type == 'date' %}
+                                        <div class="form-group">
+                                            <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="options-popup-input-option{{ option.product_option_id }}">{{ option.name }}
+                                                {% if option.required %}
+                                                    <span class="required"> *</span>{% endif %}
+                                            </label>
+                                            <div class="input-group date">
+                                                <input type="date" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="options-popup-input-option{{ option.product_option_id }}" class="form-control"/>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    {% if option.type == 'datetime' %}
+                                        <div class="form-group">
+                                            <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="options-popup-input-option{{ option.product_option_id }}">{{ option.name }}
+                                                {% if option.required %}
+                                                    <span class="required"> *</span>{% endif %}
+                                            </label>
+                                            <div class="input-group datetime">
+                                                <input type="datetime-local" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="options-popup-input-option{{ option.product_option_id }}" class="form-control"/>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    {% if option.type == 'time' %}
+                                        <div class="form-group">
+                                            <label class="ds-control-label fw-500 dark-text fsz-14 mb-2" for="options-popup-input-option{{ option.product_option_id }}">{{ option.name }}
+                                                {% if option.required %}
+                                                    <span class="required"> *</span>{% endif %}
+                                            </label>
+                                            <div class="input-group time">
+                                                <input type="time" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="options-popup-input-option{{ option.product_option_id }}" class="form-control"/>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="modal-body-buttons d-flex flex-column flex-sm-row align-items-center justify-content-between pt-4 mt-4">
+                        <span class="blue-link fsz-14 fw-300 d-inline-flex align-items-center order-1 order-sm-0" data-bs-dismiss="modal">
+                            <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="7" height="13" viewBox="0 0 7 13" fill="none">
+                                <path
+                                    d="M6.28371 11.8492C6.43972 12.0052 6.43972 12.2588 6.28371 12.4148C6.20531 12.4932 6.1029 12.5316 6.00049 12.5316C5.89809 12.5316 5.79568 12.4924 5.71728 12.4148L0.117006 6.81454C-0.0390019 6.65854 -0.0390019 6.4049 0.117006 6.24889L5.71728 0.648622C5.87328 0.492614 6.12692 0.492614 6.28293 0.648622C6.43894 0.804629 6.43894 1.05827 6.28293 1.21427L0.965875 6.53133L6.28371 11.8492Z"
+                                    fill="#00A8E8" />
+                            </svg>
+                            {{ button_continue }}
+                        </span>
+                        {% if not stock_warning %}
+                            <button id="popup-options-cart-button" type="submit" class="button button-primary br-7 px-5 order-0 order-sm-1 mb-4 mb-sm-0">{{ button_checkout }}</button>
+                        {% endif %}
+                    </div>
+                    <script>
+                        $('#productOptionModal #popup-input-quantity').on('input', function(e) {
+                            updatePurchaseValue(false, false, true);
+                        });
+
+                        function updatePurchaseValue(minus, plus, manual) {
+                            let min = parseInt($('#productOptionModal #popup-input-quantity').val());
+                            let currentMinimum = parseInt($('#productOptionModal #min_quantity').val());
+                            let max = parseInt($('#productOptionModal #max-purchase-quantity').val());
+                            let use_minimum_step = {{ use_minimum_step ?? 0 }};
+
+                            if (max === 0)
+                                return;
+
+                            if (minus && min > 1) {
+                                if (min <= currentMinimum) {
+                                    $('#productOptionModal #popup-input-quantity').val(currentMinimum);
+                                    updatePurchasePrice();
+                                    return;
+                                } else if (min > max) {
+                                    $('#productOptionModal #popup-input-quantity').val(max);
+                                    updatePurchasePrice();
+                                    return;
+                                }
+
+                                let newValue;
+                                if (use_minimum_step && currentMinimum > 1) {
+                                    newValue = Math.max(currentMinimum, min - currentMinimum);
+                                } else {
+                                    newValue = min - 1;
+                                }
+                                $('#productOptionModal #popup-input-quantity').val(newValue);
+                            }
+
+                            if (plus) {
+                                if (max && min > max - 1) {
+                                    $('#productOptionModal #popup-input-quantity').val(max);
+                                    updatePurchasePrice();
+                                    return;
+                                } else if (min < currentMinimum) {
+                                    $('#productOptionModal #popup-input-quantity').val(currentMinimum);
+                                    updatePurchasePrice();
+                                    return;
+                                }
+
+                                let newValue;
+                                if (use_minimum_step && currentMinimum > 1) {
+                                    newValue = min + currentMinimum;
+                                    if (max && newValue > max) {
+                                        newValue = max;
+                                    }
+                                } else {
+                                    newValue = min + 1;
+                                }
+                                $('#productOptionModal #popup-input-quantity').val(newValue);
+                            }
+
+                            if (manual) {
+                                if (min <= currentMinimum) {
+                                    $('#productOptionModal #popup-input-quantity').val(currentMinimum);
+                                    updatePurchasePrice();
+                                    return;
+                                } else if (min > max) {
+                                    $('#productOptionModal #popup-input-quantity').val(max);
+                                    updatePurchasePrice();
+                                    return;
+                                }
+
+                                if (use_minimum_step && currentMinimum > 1) {
+                                    let adjustedValue = Math.ceil(min / currentMinimum) * currentMinimum;
+                                    if (max && adjustedValue > max) {
+                                        adjustedValue = Math.floor(max / currentMinimum) * currentMinimum;
+                                    }
+                                    $('#productOptionModal #popup-input-quantity').val(adjustedValue);
+                                    updatePurchasePrice();
+                                    return;
+                                }
+                            }
+
+                            updatePurchasePrice();
+                        }
+
+                        $("#productOptionModal input:not(.form-control), #productOptionModal select").on('change', function() {
+                            updatePurchasePrice();
+                        });
+
+                        {% if minimum > 1 %}
+                            updatePurchasePrice();
+                        {% endif %}
+
+                        function updatePurchasePrice() {
+                            let priceOld = document.querySelector('#productOptionModal .ds-price-old');
+                            let priceNew = document.querySelector('#productOptionModal .ds-price-new');
+                            let priceYouSave = document.querySelector('#productOptionModal .ds-you-save-price');
+
+                            $.ajax({
+                                type: 'post',
+                                url: 'index.php?route=octemplates/main/oct_functions/updatePrices',
+                                data: $('#productOptionModal input[type=\'text\'], #productOptionModal input[type=\'hidden\'], #productOptionModal input[type=\'radio\']:checked, #productOptionModal input[type=\'checkbox\']:checked, #productOptionModal select'),
+                                dataType: 'json',
+                                cache: false,
+                                success: function(json) {
+                                    {% if special %}
+                                        animatePrice(json['price'], priceOld);
+                                        animatePrice(json['special'], priceNew);
+                                    {% else %}
+                                        animatePrice(json['price'], priceNew);
+                                    {% endif %}
+
+                                    {% if you_save_price %}
+                                        animatePrice(json['you_save_price'], priceYouSave);
+                                    {% endif %}
+                                }
+                            });
+                        }
+                            
+                        $(document).on('click', '#productOptionModal #button-upload', function() {
+                            var node = this;
+                            $('#form-upload').remove();
+                            $('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
+                            $('#form-upload input[name=\'file\']').trigger('click');
+                            if (typeof timer != 'undefined') {
+                                clearInterval(timer);
+                            }
+                            timer = setInterval(function() {
+                                if ($('#form-upload input[name=\'file\']').val() != '') {
+                                    clearInterval(timer);
+                                    $.ajax({
+                                        url: 'index.php?route=tool/upload',
+                                        type: 'post',
+                                        dataType: 'json',
+                                        data: new FormData($('#form-upload')[0]),
+                                        cache: false,
+                                        contentType: false,
+                                        processData: false,
+                                        beforeSend: function() {
+                                            $(node).button('loading');
+                                        },
+                                        complete: function() {
+                                            $(node).button('reset');
+                                        },
+                                        success: function(json) {
+                                            $('#productOptionModal .text-danger').remove();
+                                            if (json['error']) {
+                                                $(node).parent().find('input').after('<div class="text-danger">' + json['error'] + '</div>');
+                                            }
+                                            if (json['success']) {
+                                                alert(json['success']);
+                                                $(node).parent().find('input').attr('value', json['code']);
+                                            }
+                                        },
+                                        error: function(xhr, ajaxOptions, thrownError) {
+                                            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                                        }
+                                    });
+                                }
+                            }, 500);
+                        });
+
+                        $('#productOptionModal #options-form').on('submit', function(e) {
+                            e.preventDefault();
+
+                            $.ajax({
+                                type: 'post',
+                                url:  'index.php?route=octemplates/module/oct_popup_product_options/add',
+                                dataType: 'json',
+                                cache: false,
+                                data: $('#productOptionModal #options-form').serialize(),
+
+                                beforeSend: function() {
+                                    masked('body', true);
+
+                                    $('#popup-options-cart-button').data('original-content', $('#popup-options-cart-button').html());
+                                    $('#popup-options-cart-button').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>').prop('disabled', true);
+                                },
+                                complete: function() {
+                                    masked('body', false);
+
+                                    setTimeout(function () {
+                                        $('#popup-options-cart-button').html($('#popup-options-cart-button').data('original-content')).prop('disabled', false);
+                                    }, 600);
+                                },
+                                success: function(json) {
+                                    if (json['error']) {
+                                        $('#productOptionModal .text-danger').remove();
+                                        let errorOption = '';
+
+                                        $.each(json['error']['option'], function(i, val) {
+                                            if (val) {
+                                                var element = $('#productOptionModal #options-popup-input-option' + i.replace('_', '-'));
+
+                                                if (element.parent().hasClass('input-group')) {
+                                                    element.parent().after('<div class="text-danger">' + val + '</div>');
+                                                } else {
+                                                    element.parent().after('<div class="text-danger mb-3">' + val + '</div>');
+                                                }
+
+                                                errorOption += '<div class="alert-text-item fsz-14 mt-2">' + val + '</div>';
+                                            }
+                                        });
+                                        
+                                        scNotify('danger', errorOption);
+
+                                        delete json['error']['option'];
+
+                                        $.each(json['error'], function(i, val) {
+                                            if (val) {
+                                                $('#productOptionModal [name="' + i + '"]').addClass('error_style');
+                                                errorOption += '<div class="alert-text-item fsz-14 mt-2">' + val + '</div>';
+                                            }
+                                        });
+                                        
+                                    } else {
+                                        if (json['success']) {
+                                            
+                                            if (json['isPopup']) {
+                                                octPopupCart();
+                                                } else {
+                                                scNotify('success', json['success']);
+                                                $('#productOptionModal').modal('hide');
+                                            }
+
+                                            let cartIdsHolder = document.querySelector("[data-cart-ids]");
+
+                                            if (json.oct_cart_ids && json.oct_cart_ids.length > 0 && cartIdsHolder) {
+                                                cartIdsHolder.dataset.cartIds = json.oct_cart_ids;
+                                                setCartBtnAdded();
+                                            }
+
+                                            // Need to set timeout otherwise it wont update the total
+                                            setTimeout(function () {
+                                                $('#cart .ds-cart-qty').addClass('active').html(json['total_products']);
+                                            }, 100);
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                            
+                    </script>
+                {% endif %}
+			</form>
+		</div>
+	</div>
+</div>

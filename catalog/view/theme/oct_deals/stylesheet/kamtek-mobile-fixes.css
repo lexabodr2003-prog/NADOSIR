@@ -1,0 +1,73 @@
+/**
+ * kamtek-mobile-fixes.css
+ * Исправления для мобильной версии сайта насосыдаром.рф
+ */
+
+/* ============================================================
+   П.8 БАННЕР: мобильные изображения без логотипа KAMTEK PRO
+   (логотип удалён из самих PNG-файлов через ImageMagick)
+   ============================================================ */
+@media (max-width: 767px) {
+  .ds-slideshow-plus-item-fullimg {
+    overflow: hidden;
+    max-height: 70vw;
+  }
+  .ds-slideshow-plus-item-fullimg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+  .ds-slideshow-plus-item-fullimg picture {
+    display: block;
+    height: 100%;
+  }
+}
+
+/* ============================================================
+   П.11 ВИДЕО: блок company-grid с Rutube
+   ============================================================ */
+
+/* Десктоп: два блока рядом */
+.company-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  margin: 20px 0;
+}
+
+/* Responsive wrapper для iframe 16:9 */
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Мобильный: в столбик, видео сначала */
+@media (max-width: 767px) {
+  .company-grid {
+    display: flex !important;
+    flex-direction: column;
+  }
+  .company-grid__video {
+    order: 1;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  .company-grid__content {
+    order: 2;
+  }
+}

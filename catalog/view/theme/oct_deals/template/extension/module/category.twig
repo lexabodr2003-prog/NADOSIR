@@ -1,0 +1,69 @@
+{% if categories and not oct_detect %}
+<div class="ds-column-categories d-flex flex-column">
+	<div class="ds-column-categories-title content-block fw-700 dark-text">{{ text_module_category }}</div>
+	<ul class="list-unstyled ds-column-categories-list fw-500 fsz-14 p-0 d-flex flex-column">
+		{% for category in categories %}
+			<li class="ds-column-categories-item content-block{% if category.category_id == category_id %} clicked{% endif %}">
+				<span class="d-flex justify-content-between">
+					<a href="{{ category.href }}">{{ category.name }}</a>
+					{% if category.children %}
+					<button class="ds-column-categories-toggle br-4 p-0 d-flex align-items-center justify-content-center" aria-label="Expand">
+                        <svg width="6" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.99938 4.08973C2.87814 4.08973 2.75688 4.04365 2.66468 3.95082L0.138767 1.42491C-0.0462558 1.23988 -0.0462558 0.93991 0.138767 0.754887C0.323791 0.569864 0.623765 0.569864 0.808788 0.754887L3 2.9461L5.19121 0.754887C5.37624 0.569864 5.67621 0.569864 5.86123 0.754887C6.04626 0.93991 6.04626 1.23988 5.86123 1.42491L3.33532 3.95082C3.24186 4.04365 3.12063 4.08973 2.99938 4.08973Z" fill="#9CA3AF" />
+                        </svg>
+                    </button>
+					{% endif %}
+				</span>
+				{% if category.children %}
+				<ul class="ds-column-categories-children ds-categories-2 list-unstyled ps-0{% if category.category_id == category_id %} active{% endif %}">
+				{% for child in category.children %}
+					<li class="ds-column-categories-item{% if child.category_id == child_id %} clicked{% endif %}">
+						<span class="d-flex justify-content-between">
+							<a href="{{ child.href }}">{{ child.name }}</a>
+							{% if child.children %}
+								<button type="button" class="ds-column-categories-toggle br-4 p-0 d-flex align-items-center justify-content-center" aria-label="Expand">
+									<svg width="6" height="5" viewBox="0 0 6 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M2.99938 4.08973C2.87814 4.08973 2.75688 4.04365 2.66468 3.95082L0.138767 1.42491C-0.0462558 1.23988 -0.0462558 0.93991 0.138767 0.754887C0.323791 0.569864 0.623765 0.569864 0.808788 0.754887L3 2.9461L5.19121 0.754887C5.37624 0.569864 5.67621 0.569864 5.86123 0.754887C6.04626 0.93991 6.04626 1.23988 5.86123 1.42491L3.33532 3.95082C3.24186 4.04365 3.12063 4.08973 2.99938 4.08973Z" fill="#9CA3AF" />
+									</svg>
+								</button>
+							{% endif %}
+						</span>
+						{% if child.children %}
+						<ul class="ds-column-categories-children ds-categories-3 list-unstyled ps-0{% if child.category_id == child_id %} active{% endif %}">
+				        	{% for child_3 in child.children %}
+								<li class="ds-column-categories-item{% if child_3.category_id == ch_id %} clicked{% endif %}">
+									<span class="d-flex justify-content-between">
+										<a href="{{ child_3.href }}">{{ child_3.name }}</a>
+										{% if child_3.children %}
+											<button type="button" class="ds-column-categories-toggle br-4 p-0 d-flex align-items-center justify-content-center" aria-label="Expand">
+												<span class="ds-btn-icon ds-btn-icon-chevron"></span>
+											</button>
+										{% endif %}
+									</span>
+									{% if child_3.children %}
+										<ul class="ds-column-categories-children ds-categories-3 list-unstyled ps-0{% if child_3.category_id == ch_id %} active{% endif %}">
+										{% for child_4 in child_3.children %}
+											<li class="ds-column-categories-item{% if child_4.category_id == child3_id %} active{% endif %}">
+												<span><a href="{{ child_4.href }}">{{ child_4.name }}</a></span>
+											</li>
+										{% endfor %}	
+										</ul>
+									{% endif %}
+								</li>
+							{% endfor %}
+						</ul>
+				        {% endif %}
+			        </li>
+				{% endfor %}
+				</ul>
+				{% endif %}
+			</li>
+		{% endfor %}
+	</ul>
+</div>
+<script>
+	window.addEventListener('DOMContentLoaded', () => {
+		toggleColumnCategories();
+	});
+</script>
+{% endif %}

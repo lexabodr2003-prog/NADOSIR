@@ -1,0 +1,17 @@
+{% if languages|length > 1 %}
+<div id="language">
+	<div class="ds-dropdown-title dark-text fsz-14 fw-500">{{ oct_sidebar_language }}:</div>
+	<form action="{{ action }}" class="ds-switcher d-flex align-items-center py-2 br-7" method="post" enctype="multipart/form-data" id="form-language">
+		{% for language in languages %}
+		<button type="button" class="br-7 d-flex align-items-center justify-content-center language-select{% if language.code == code %} active{% endif %}" name="{{ language.code }}" title="{{ language.name }}">
+			{% if language.code == code %}
+				<img src="{{ language.store_url }}catalog/language/{{ language.code }}/{{ language.code }}.png" alt="{{ language.name }}" title="{{ language.name }}" class="me-1" width="12" height="10" loading="lazy" />
+			{% endif %}
+			{{ language.oct_template_code }}
+		</button>
+		{% endfor %}
+		<input type="hidden" name="code" value="" />
+		<input type="hidden" name="redirect" value="{{ redirect }}" />
+	</form>
+</div>
+{% endif %}

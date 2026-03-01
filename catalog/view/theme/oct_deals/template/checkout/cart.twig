@@ -1,0 +1,159 @@
+{{ header }}
+<div id="checkout-cart" class="container-fluid container-xl flex-grow-1">
+	<nav aria-label="breadcrumb">
+        <ul class="breadcrumb ds-breadcrumb fsz-12">
+        {% for breadcrumb in breadcrumbs %}
+            {% if loop.last %}
+                <li class="breadcrumb-item ds-breadcrumb-item">{{ breadcrumb.text }}</li>
+            {% else %}
+                <li class="breadcrumb-item ds-breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </nav>
+	<main>
+		<div class="row">
+			<div class="col-12 ds-page-title pb-3">
+				<h1>{{ heading_title }}{% if weight %} ({{ weight }}){% endif %}</h1>
+			</div>
+		</div>
+		<div class="content-top-box">{{ content_top }}</div>
+		{% if attention %}
+			<script>
+				scNotify('warning', '{{ attention }}');
+			</script>
+		{% endif %}
+		{% if success %}
+			<script>
+				scNotify('success', '{{ success }}');
+			</script>
+		{% endif %}
+			<div class="row g-3">
+				<div class="col-lg-8">
+					<div class="content-block">
+						<form action="{{ action }}" method="post" enctype="multipart/form-data" id="content">
+							{% for product in products %}
+								<div class="ds-cart-item">
+									<div class="ds-cart-item-info d-flex mb-3 position-relative">
+										{% if product.thumb %}
+											<div class="ds-cart-item-img me-3">
+												<a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" width="48" height="48"></a>
+											</div>
+										{% endif %}
+										<div class="ds-cart-item-desc">
+											<div class="ds-cart-item-title fw-300">
+												<a href="{{ product.href }}" class="dark-text mb-2 d-inline-block">{{ product.name }}</a>{% if not product.stock %}<span class="required"> ***</span>{% endif %}
+											</div>
+											<div class="ds-cart-item-options">
+												{% if product.option %}
+													{% for option in product.option %}
+														<div class="ds-cart-item-option fsz-12">{{ option.name }}: {{ option.value }}</div>
+													{% endfor %}
+												{% endif %}
+												<div class="ds-cart-item-option fsz-12">{{ column_model }}: {{ product.model }}</div>
+												{% if product.reward %}
+													<div class="ds-cart-item-option fsz-12">{{ product.reward }}</div>
+												{% endif %}
+												{% if product.recurring %}
+													<div class="ds-cart-item-option fsz-12">{{ text_recurring_item }} {{ product.recurring }}</div>
+												{% endif %}
+											</div>
+										</div>
+										<button class="no-btn position-absolute" aria-label="Delete" onclick="cart.remove('{{ product.cart_id }}');">
+											<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+											<path
+												d="M13.7783 12.2207C14.0713 12.5137 14.0713 12.9888 13.7783 13.2818C13.6323 13.4278 13.4403 13.5017 13.2483 13.5017C13.0563 13.5017 12.8643 13.4288 12.7183 13.2818L7.24828 7.81173L1.77828 13.2818C1.63228 13.4278 1.44028 13.5017 1.24828 13.5017C1.05628 13.5017 0.864285 13.4288 0.718285 13.2818C0.425285 12.9888 0.425285 12.5137 0.718285 12.2207L6.18829 6.75076L0.718285 1.28079C0.425285 0.987785 0.425285 0.51275 0.718285 0.21975C1.01129 -0.07325 1.48629 -0.07325 1.77929 0.21975L7.24929 5.68978L12.7193 0.21975C13.0123 -0.07325 13.4873 -0.07325 13.7803 0.21975C14.0733 0.51275 14.0733 0.987785 13.7803 1.28079L8.31028 6.75076L13.7783 12.2207Z"
+												fill="#D84040" />
+											</svg>
+										</button>
+									</div>
+									<div class="ds-cart-item-actions d-flex align-items-center justify-content-between">
+										<div class="ds-cart-item-buttons d-flex">
+											<div class="ds-module-quantity d-flex align-items-center justify-content-center br-8 me-2">
+												<button type="button" aria-label="Minus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="$('#input-quantity-{{ product.cart_id }}').val(~~$('#input-quantity-{{ product.cart_id }}').val()-1);">
+													<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+	                                                    <g>
+	                                                        <path
+	                                                            d="M3.33333 7.5L12.6667 7.5C12.9427 7.5 13.1667 7.724 13.1667 8C13.1667 8.276 12.9427 8.5 12.6667 8.5L3.33333 8.5C3.05733 8.5 2.83333 8.276 2.83333 8C2.83333 7.724 3.05733 7.5 3.33333 7.5Z"
+	                                                            fill="#25314C"></path>
+	                                                    </g>
+	                                                </svg>
+												</button>
+												<input type="text" id="input-quantity-{{ product.cart_id }}" class="form-control" name="quantity[{{ product.cart_id }}]" value="{{ product.quantity }}" aria-label="Quantity" inputmode="numeric">
+												<button type="button" aria-label="Plus" class="ds-module-quantity-btn d-flex align-items-center justify-content-center" onclick="$('#input-quantity-{{ product.cart_id }}').val(~~$('#input-quantity-{{ product.cart_id }}').val()+1);">
+													<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+	                                                    <g>
+	                                                        <path
+	                                                            d="M2.83341 8.00009C2.83341 7.72409 3.05741 7.50009 3.33341 7.50009L7.50008 7.50009L7.50008 3.33342C7.50008 3.05742 7.72408 2.83342 8.00008 2.83342C8.27608 2.83342 8.50008 3.05742 8.50008 3.33342L8.50008 7.50009L12.6667 7.50008C12.9427 7.50008 13.1667 7.72408 13.1667 8.00008C13.1667 8.27608 12.9427 8.50008 12.6667 8.50008L8.50008 8.50009L8.50008 12.6668C8.50008 12.9428 8.27608 13.1668 8.00008 13.1668C7.72408 13.1668 7.50008 12.9428 7.50008 12.6668L7.50008 8.50009L3.33342 8.50009C3.05742 8.50009 2.83342 8.27609 2.83341 8.00009Z"
+	                                                            fill="#25314C"></path>
+	                                                    </g>
+	                                                </svg>
+												</button>
+											</div>
+											<button type="submit" class="button button-outline button-outline-secondary p-2 br-7" title="{{ button_update }}" aria-label="Update">
+												<svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+	                                                <path
+	                                                    d="M15.9475 8.88702C15.5061 12.942 12.0894 16 8 16C5.21272 16 2.66995 14.5469 1.23077 12.2552V14.5641C1.23077 14.9038 0.955077 15.1795 0.615385 15.1795C0.275692 15.1795 0 14.9038 0 14.5641V10.4615C0 10.1218 0.275692 9.84615 0.615385 9.84615H4.71795C5.05764 9.84615 5.33333 10.1218 5.33333 10.4615C5.33333 10.8012 5.05764 11.0769 4.71795 11.0769H1.98558C3.12609 13.3136 5.43754 14.7692 8 14.7692C11.4601 14.7692 14.35 12.1829 14.7242 8.75401C14.7603 8.41513 15.0671 8.17305 15.4018 8.20833C15.7407 8.24526 15.9836 8.54897 15.9475 8.88702ZM15.3846 0.820513C15.0449 0.820513 14.7692 1.09621 14.7692 1.4359V3.74479C13.3301 1.4531 10.7873 0 8 0C3.91138 0 0.49474 3.05801 0.052484 7.11298C0.0155609 7.45103 0.259304 7.75474 0.597356 7.79167C0.61951 7.79413 0.64251 7.79487 0.664663 7.79487C0.974817 7.79487 1.2414 7.56107 1.27504 7.24599C1.64919 3.81707 4.53992 1.23077 7.9992 1.23077C10.5625 1.23077 12.8731 2.68636 14.0136 4.92308H11.2821C10.9424 4.92308 10.6667 5.19877 10.6667 5.53846C10.6667 5.87815 10.9424 6.15385 11.2821 6.15385H15.3846C15.7243 6.15385 16 5.87815 16 5.53846V1.4359C16 1.09621 15.7243 0.820513 15.3846 0.820513Z"
+	                                                    fill="#9CA3AF" />
+	                                            </svg>
+											</button>
+										</div>
+										<div class="ds-cart-item-price text-end">
+											<div class="ds-cart-item-price-total dark-text fw-500">{{ column_total }}: {{ product.total }}</div>
+											<div class="ds-cart-item-price-one fsz-12 lh-sm"><p class="light-text">{{ column_price }}:</p><p class="mt-0 light-text">{{ product.price }}</p></div>
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+							{% for voucher in vouchers %}
+								<div class="ds-cart-item content-block p-2 p-md-3">
+									<div class="d-flex align-items-center justify-content-between">
+										<div class="dark-text fw-300 me-2">{{ voucher.description }}</div>
+										<button type="button" class="no-btn" onclick="voucher.remove('{{ voucher.key }}');">
+											<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+												<path d="M13.7783 12.2207C14.0713 12.5137 14.0713 12.9888 13.7783 13.2818C13.6323 13.4278 13.4403 13.5017 13.2483 13.5017C13.0563 13.5017 12.8643 13.4288 12.7183 13.2818L7.24828 7.81173L1.77828 13.2818C1.63228 13.4278 1.44028 13.5017 1.24828 13.5017C1.05628 13.5017 0.864285 13.4288 0.718285 13.2818C0.425285 12.9888 0.425285 12.5137 0.718285 12.2207L6.18829 6.75076L0.718285 1.28079C0.425285 0.987785 0.425285 0.51275 0.718285 0.21975C1.01129 -0.07325 1.48629 -0.07325 1.77929 0.21975L7.24929 5.68978L12.7193 0.21975C13.0123 -0.07325 13.4873 -0.07325 13.7803 0.21975C14.0733 0.51275 14.0733 0.987785 13.7803 1.28079L8.31028 6.75076L13.7783 12.2207Z" fill="#D84040"></path>
+											</svg>
+										</button>	
+									</div>
+								</div>
+							{% endfor %}
+						</form>
+						{% if oct_byoneclick is defined and oct_byoneclick %}
+							{{ oct_byoneclick }}
+						{% endif %}
+					</div>
+				</div>
+				<div class="col-lg-4">
+					<div class="ds-sticky-column ds-cart-column content-block fsz-14 sticky-md-top">
+						{% if modules %}
+							<div class="ds-cart-column-title dark-text fw-500 mb-2">{{ text_next }}</div>
+							<div class="ds-cart-column-text fsz-12 pb-2 mb-3">{{ text_next_choice }}</div>
+							{% for module in modules %}
+								{{ module }}
+							{% endfor %}
+							<script>
+								window.addEventListener('DOMContentLoaded', () => {
+									stickyColumn();
+								});
+							</script>
+						{% endif %}
+						<div class="ds-cart-column-total text-end  mb-2">
+							{% for total in totals %}
+								<div class="ds-cart-column-total-item mb-1 d-flex align-items-center justify-content-between">
+									{{ total.title }}: <span class="dark-text fw-600 fsz-16">{{ total.text }}</span>
+								</div>
+							{% endfor %}
+						</div>
+						<a href="{{ checkout }}" class="button button-primary br-7 fsz-14 fw-400 w-100 mt-2">
+							<span class="button-text">{{ button_checkout }}</span>
+						</a>
+						{% if error_warning %}
+							<div class="required">{{ error_warning }}</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		{{ content_bottom }}
+	</main>
+</div>
+{{ footer }}

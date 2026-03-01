@@ -1,0 +1,43 @@
+{% if oct_alert_status is defined and oct_alert_status %}
+    {% if (oct_alert_data.orders is defined and oct_alert_data.orders) or (oct_alert_data.products is defined and oct_alert_data.products) or (oct_alert_data.oct_modules is defined and oct_alert_data.oct_modules) %}
+    <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" style="padding:0 20px;">{% if oct_alerts > 0 %}<span class="label label-danger pull-left" style="position:absolute;top:10px;left:6px;">{{ oct_alerts }}</span>{% endif %} <i class="fa fa-bell fa-lg"></i></a>
+        <ul class="dropdown-menu dropdown-menu-right" style="padding: 6px 10px;">
+            {% if (oct_alert_data.oct_modules is defined and oct_alert_data.oct_modules) and (oct_total_reviews is defined or oct_total_found_cheaper is defined or oct_total_calls is defined or oct_total_stock_notifier is defined) %}
+            <li class="dropdown-header">{{ text_oct_modules }}</li>
+            {% if oct_popup_call_phone is defined and oct_popup_call_phone %}
+            <li><a href="{{ oct_popup_call_phone }}" style="padding: 5px 5px;"><span class="label label-warning pull-right">{{ oct_total_calls }}</span>{{ text_oct_calls }}</a></li>
+            {% endif %}
+            {% if oct_abandoned_cart is defined and oct_abandoned_cart %}
+            <li><a href="{{ oct_abandoned_cart }}" style="padding: 5px 5px;"><span class="label label-warning pull-right">{{ oct_total_abandoned_cart }}</span>{{ text_oct_abandoned }}</a></li>
+            {% endif %}
+            {% if oct_stock_notifier is defined and oct_stock_notifier %}
+            <li><a href="{{ oct_stock_notifier }}" style="padding: 5px 5px;"><span class="label label-warning pull-right">{{ oct_total_stock_notifier }}</span>{{ oct_stock_notifier_admin_header }}</a></li>
+            {% endif %}
+            {% if oct_popup_found_cheaper is defined and oct_popup_found_cheaper %}
+            <li><a href="{{ oct_popup_found_cheaper }}" style="padding: 5px 5px;"><span class="label label-warning pull-right">{{ oct_total_found_cheaper }}</span>{{ text_oct_found_cheaper }}</a></li>
+            {% endif %}
+            {% if oct_reviews is defined and oct_reviews %}
+            <li><a href="{{ oct_reviews }}" style="padding: 5px 5px;"><span class="label label-warning pull-right">{{ oct_total_reviews }}</span>{{ text_oct_reviews }}</a></li>
+            {% endif %}
+            {% if oct_faqs is defined and oct_faqs %}
+            <li><a href="{{ oct_faqs }}" style="padding: 5px 5px;"><span class="label label-warning pull-right">{{ oct_total_faqs }}</span>{{ text_oct_faqs }}</a></li>
+            <li class="divider"></li>
+            {% endif %}
+            {% endif %}
+            {% if oct_alert_data.orders is defined and oct_alert_data.orders %}
+            <li class="dropdown-header">{{ text_oct_order }}</li>
+            <li><a href="{{ processing_status }}" style="padding: 5px 5px;"><span class="label label-warning pull-right">{{ processing_status_total }}</span>{{ text_processing_status }}</a></li>
+            <li><a href="{{ complete_status }}" style="padding: 5px 5px;"><span class="label label-success pull-right">{{ complete_status_total }}</span>{{ text_complete_status }}</a></li>
+            <li><a href="{{ return }}" style="padding: 5px 5px;"><span class="label label-danger pull-right">{{ return_total }}</span>{{ text_return }}</a></li>
+            <li class="divider"></li>
+            {% endif %}
+            {% if oct_alert_data.products is defined and oct_alert_data.products %}
+            <li class="dropdown-header">{{ text_oct_product }}</li>
+            <li><a href="{{ product }}" style="padding: 5px 5px;"><span class="label label-danger pull-right">{{ product_total }}</span>{{ text_stock }}</a></li>
+            <li><a href="{{ review }}" style="padding: 5px 5px;"><span class="label label-danger pull-right">{{ review_total }}</span>{{ text_review }}</a></li>
+            {% endif %}
+        </ul>
+    </li>
+    {% endif %}
+{% endif %}

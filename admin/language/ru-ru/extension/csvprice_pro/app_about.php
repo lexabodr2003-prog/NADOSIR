@@ -1,0 +1,24 @@
+<?php
+$_['heading_title'] = 'О модуле';
+$_['heading_title_normal'] = 'CSV Price Pro import/export %s';
+$_['text_module'] = 'Модули';
+$_['text_extension'] = 'Расширения';
+$_['text_license_key'] = 'Лицензия';
+$_['text_app_name'] = 'Расширение/Модуль';
+$_['text_app_version'] = 'Версия';
+$_['text_home_page'] = 'Официальный сайт';
+$_['text_empty_license'] = '<mark>Лицензионный ключ отсутствует</mark>';
+$_['text_support_email'] = 'Техническая поддержка';
+$_['text_success_license_key'] = 'Лицензионный ключ успешно установлен!';
+$_['text_show'] = 'Показать';
+$_['text_support_request'] = 'Вы можете связаться с нами по электронной почте <a href="mailto:support@costaslabs.com" target="_blank">support@costaslabs.com</a> или заполнив форму ниже';
+$_['text_send_support_success'] = 'Ваш запрос в службу технической поддержки успешно отправлен,  мы свяжемся с вами как можно скорее.';
+$_['text_send_support_danger'] = 'Что то пошло не так, не удалось отправить запрос, пожалйста с нами по электронной почте support@costaslabs.com и сообщите о проблеме.';
+$_['home_page'] = 'ocmod.costaslabs.com';
+$_['support_email'] = 'support@costaslabs.com';
+$_['button_save'] = 'Сохранить';
+$_['entry_license_key'] = 'Лицензия';
+$_['entry_email'] = 'Ваш Email';
+$_['entry_message'] = 'Текст сообщения';
+$_['entry_support_request'] = 'Написать в техническую поддержку';
+$_['error_permission'] = 'Warning: You do not have permission to modify CSV Price Pro import/export!';

@@ -1,0 +1,18 @@
+{% if currencies|length > 1 %}
+    <div id="currency" class="curency">
+    <div class="ds-dropdown-title dark-text fsz-14 fw-500">{{ oct_sidebar_currency }}:</div>
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-currency" class="ds-switcher d-flex align-items-center py-2 br-7">
+            {% for currency in currencies %}
+            <button type="button" class="br-7 d-flex align-items-center justify-content-center currency-select{% if currency.code == code %} active{% endif %}" name="{{ currency.code }}">
+                {% if currency.symbol_left %}
+                {{ currency.symbol_left }}
+                {% else %}
+                {{ currency.symbol_right }}
+                {% endif %}
+            </button>
+            {% endfor %}
+            <input type="hidden" name="code" value="" />
+            <input type="hidden" name="redirect" value="{{ redirect }}" />
+        </form>
+    </div>
+{% endif %}
