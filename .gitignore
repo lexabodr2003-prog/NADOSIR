@@ -1,0 +1,33 @@
+# Sensitive configs
+config.php
+admin/config.php
+
+# Cache and temp files  
+storage/cache/*
+storage/session/*
+storage/logs/*
+storage/modification_broken_backup/
+*.tmp
+*.log
+
+# Upload files (heavy)
+storage/upload/*
+image/cache/*
+
+# Backup files
+*.zip
+*.tar
+*.tar.gz
+*.backup
+kamtek.zip
+kamtek_project.zip
+Archive.tar
+deleted-files.zip
+
+# PHP temp scripts  
+regen_mods_temp.php
+php.ini.backup
+.htaccess.backup_debug
+
+# System
+.DS_Store
