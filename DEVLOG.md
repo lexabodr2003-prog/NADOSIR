@@ -414,3 +414,33 @@ Thorough investigation of rendered HTML revealed:
 ### Изменённые файлы
 -  (patch: добавлен button('reset') в search callback)
 -  (v7.0: AJAX timeout, улучшенный watchdog)
+
+## Session 7 – Hotfix: Revert broken button reset, proper isLoading fix (2026-03-01)
+
+### Проблема
+После v7.0 поломался Android: бесконечная загрузка теперь и там.
+
+### Root-cause v7.0 бага
+ использует  — асинхронный вызов.
+Последовательность v7.0 была:
+  1.  → ставит setTimeout(reset_fn, 0) в очередь
+  2.  → сразу записывает правильный текст
+  3. setTimeout срабатывает → перезаписывает html обратно на 
+  4. Итог: html исходный, кнопка работает, но текст сбросился
+
+Дополнительно: ajaxPrefilter добавлял  ко ВСЕМ Ajax URL,
+что могло ломать другие запросы на сайте.
+
+### Исправления v7.1
+1. Откатили  из search() callback
+2. Добавили прямой сброс флага isLoading через данные плагина (без setTimeout):
+   
+   — это выполняется синхронно, сразу после обновления html, не задействует setTimeout
+3. ocfilter-mobile-fix.js v7.1: удалён ajaxPrefilter, оставлен только ajaxSetup(timeout)
+
+### Файлы
+- ocfilter.js: isLoading fix (2 места: total=0 и total>0)
+- ocfilter-mobile-fix.js: v7.1 без ajaxPrefilter
+
+### Тесты
+3/3 раунда: HTTP 200, mobile-fix v7.1, isLoading fix=2, AJAX 200

@@ -1,21 +1,16 @@
 /**
- * OCFilter mobile fix v7.0
+ * OCFilter mobile fix v7.1
  * Fixes for: iOS Safari 15+, iOS Yandex Browser, Opera iOS, Android
  *
- * v7.0 Changes vs v6.0:
- * - CRITICAL FIX: jQuery $.ajax timeout override to prevent stuck loading state
- * - CRITICAL FIX: Watchdog now detects loadingText ("Загрузка...") in button HTML
- * - CRITICAL FIX: Forces button('reset') if loading stuck > 8s
- * - Added global $.ajaxSetup with timeout:15000 for all OCFilter AJAX requests
- * - Improved stuck detection: checks both ocf-disabled class AND loadingText content
- * - Added direct AJAX interceptor via $.ajaxPrefilter to ensure timeout
+ * v7.1 Changes vs v7.0:
+ * - REVERTED: removed ajaxPrefilter that was breaking AJAX URLs
+ * - KEPT: jQuery.ajaxSetup timeout=15000 (safe, global)
+ * - KEPT: improved stuck button watchdog (detects "загрузка" text)
+ * - KEPT: all reinit/watchdog/touch logic
  */
 (function() {
   'use strict';
 
-  // =============================================
-  // Device detection
-  // =============================================
   var ua = navigator.userAgent;
   var isIOS = /iPad|iPhone|iPod/.test(ua) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -26,35 +21,18 @@
     ? [100, 300, 700, 1200, 2000, 3000, 5000, 7000]
     : [200, 500, 1200, 2500, 5000];
 
-  console.log('[OCFilter v7.0] iOS='+isIOS+' Yandex='+isYandexBrowser+' Mobile='+isMobile);
+  console.log('[OCFilter v7.1] iOS='+isIOS+' Yandex='+isYandexBrowser+' Mobile='+isMobile);
 
   // =============================================
-  // CRITICAL: Set jQuery AJAX timeout (run early, retry until jQuery loads)
+  // Set jQuery AJAX global timeout (safe, no URL modification)
   // =============================================
   function installAjaxTimeout() {
     if (typeof jQuery === 'undefined') {
       setTimeout(installAjaxTimeout, 100);
       return;
     }
-    // Set global timeout for ALL ajax requests - prevents stuck loading on iOS
     jQuery.ajaxSetup({ timeout: 15000 });
-
-    // Extra: intercept OCFilter AJAX calls and add cache-busting + timeout
-    jQuery.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-      if (options.url && options.url.indexOf('ocfilter') !== -1) {
-        if (!options.timeout || options.timeout < 10000) {
-          options.timeout = 15000;
-        }
-        // Add cache buster for iOS Safari ITP
-        var sep = options.url.indexOf('?') !== -1 ? '&' : '?';
-        if (options.url.indexOf('_ios_t=') === -1) {
-          options.url += sep + '_ios_t=' + Math.floor(Date.now() / 30000);
-        }
-        console.log('[OCFilter v7.0] AJAX intercepted:', options.url.slice(0, 100));
-      }
-    });
-
-    console.log('[OCFilter v7.0] jQuery AJAX timeout=15s installed');
+    console.log('[OCFilter v7.1] jQuery AJAX timeout=15s installed');
   }
 
   // =============================================
@@ -72,7 +50,7 @@
   }
 
   // =============================================
-  // Get ocfilter.js absolute URL from page
+  // Get ocfilter.js absolute URL
   // =============================================
   function getOCFilterScriptUrl(idx) {
     idx = idx || '1';
@@ -98,7 +76,7 @@
   // Load ocfilter.js via XHR + eval (iOS-safe)
   // =============================================
   function loadOCFilterScript(scriptUrl, onLoaded) {
-    if (typeof $.fn.ocfilter !== 'undefined') {
+    if (typeof jQuery !== 'undefined' && typeof jQuery.fn.ocfilter !== 'undefined') {
       onLoaded();
       return;
     }
@@ -151,7 +129,7 @@
           anyInited = true;
         }
       } catch(e) {
-        console.warn('[OCFilter v7.0] reinit error:', e);
+        console.warn('[OCFilter v7.1] reinit error:', e);
       }
     });
     return anyInited;
@@ -195,94 +173,73 @@
   }
 
   // =============================================
-  // CRITICAL: Watchdog - detect and fix stuck loading button
+  // Watchdog: detect stuck loading button and force-reset after 8s
   // =============================================
   function installWatchdog() {
     if (typeof jQuery === 'undefined') return;
     var $ = jQuery;
 
-    // Monitor for stuck loading state every 2 seconds
-    var stuckWatchInterval = setInterval(function() {
+    setInterval(function() {
       $('[data-ocf="button"]').each(function() {
         var $b = $(this);
         var html = ($b.html() || '').toLowerCase();
-        var isDisabled = $b.hasClass('ocf-disabled') || $b.attr('disabled');
+        var isDisabled = $b.hasClass('ocf-disabled') || !!$b.attr('disabled');
         var isLoading = html.indexOf('fa-spin') !== -1 ||
                         html.indexOf('загрузка') !== -1 ||
                         html.indexOf('loading') !== -1;
 
         if (isDisabled && isLoading) {
-          // Check how long it's been stuck
-          var stuckSince = $b.data('stuck-since');
+          var stuckSince = $b.data('_ocf_stuck');
           if (!stuckSince) {
-            $b.data('stuck-since', Date.now());
-            console.log('[OCFilter v7.0] Watchdog: detected stuck loading button');
+            $b.data('_ocf_stuck', Date.now());
+            console.warn('[OCFilter v7.1] Watchdog: stuck loading detected');
           } else if (Date.now() - stuckSince > 8000) {
-            // Stuck for > 8 seconds - force reset
-            console.warn('[OCFilter v7.0] Watchdog: forcing button reset after 8s stuck');
-            $b.removeData('stuck-since');
-
-            // Use ocfButton plugin reset if available
-            var pluginKey = 'ocf.button';
-            var pluginData = $b.data(pluginKey);
-            if (pluginData && typeof pluginData.setState === 'function') {
-              pluginData.isLoading = false;
-              pluginData.isLoading = false;
-            }
-
-            // Force DOM reset
+            console.warn('[OCFilter v7.1] Watchdog: force-reset after 8s');
+            $b.removeData('_ocf_stuck');
+            // Direct plugin flag reset
+            var pd = $b.data('ocf.button');
+            if (pd) pd.isLoading = false;
+            // DOM reset
             $b.removeClass('ocf-disabled').removeAttr('disabled').prop('disabled', false);
-            var resetText = $b.data('resetText');
-            if (resetText) {
-              $b.html(resetText);
+            var rt = $b.data('resetText');
+            if (rt) {
+              $b.html(rt);
             } else {
-              // Try to get textSelect from config
               var cfg = window['_ocf_config_1'];
-              if (cfg && cfg.textSelect) {
-                $b.html(cfg.textSelect);
-              }
+              if (cfg && cfg.textSelect) $b.html(cfg.textSelect);
             }
           }
         } else {
-          // Not stuck - clear timer
-          $b.removeData('stuck-since');
+          $b.removeData('_ocf_stuck');
         }
       });
     }, 2000);
 
     $(document).off('click.ocfw touchend.ocfw').on(
       'click.ocfw touchend.ocfw',
-      '[data-ocf="button"], [data-ocf-discard], [data-filter-key], .ocf-btn-mobile-fixed, [data-ocf="mobile"]',
+      '[data-ocf="mobile"], .ocf-btn-mobile-fixed',
       function(e) {
-        var $btn = $(e.currentTarget);
-
-        // Special handling for mobile open button
-        if ($btn.attr('data-ocf') === 'mobile' || $btn.closest('.ocf-btn-mobile-fixed').length) {
-          setTimeout(function() {
-            var $container = $('[id^="ocf-module-"]').first();
-            var isVisible = $container.hasClass('ocf-open') ||
-              $container.find('.ocf-content').is(':visible') ||
-              $('[id^="ocf-module-"]').data('ocfilter') !== undefined;
-
-            if (!isVisible || needsInit()) {
-              forceReinit(null);
-            }
-          }, 1500);
-        }
+        setTimeout(function() {
+          var $container = $('[id^="ocf-module-"]').first();
+          var isVisible = $container.hasClass('ocf-open') ||
+            $container.find('.ocf-content').is(':visible') ||
+            $('[id^="ocf-module-"]').data('ocfilter') !== undefined;
+          if (!isVisible || needsInit()) {
+            forceReinit(null);
+          }
+        }, 1500);
       }
     );
   }
 
   // =============================================
-  // iOS touch trigger: reinit on first filter touch
+  // iOS touch trigger
   // =============================================
   function installTouchTrigger() {
     if (!isMobile) return;
-
     var triggered = false;
     function touchHandler(e) {
       if (triggered || !needsInit()) return;
-
       var t = e.target;
       var inOCF = false;
       while (t && t !== document.body) {
@@ -291,12 +248,10 @@
               t.className.indexOf('ocf-container') !== -1 ||
               t.className.indexOf('ocf-btn-mobile') !== -1
             ))) {
-          inOCF = true;
-          break;
+          inOCF = true; break;
         }
         t = t.parentNode;
       }
-
       if (inOCF) {
         triggered = true;
         document.removeEventListener('touchstart', touchHandler, true);
@@ -324,7 +279,6 @@
     var navEntry = (performance && performance.getEntriesByType) ?
       performance.getEntriesByType('navigation')[0] : null;
     var isBackForward = navEntry && navEntry.type === 'back_forward';
-
     if (fromCache || isBackForward) {
       tryInitSequence(0);
       setTimeout(installWatchdog, 500);
@@ -339,10 +293,8 @@
   // Main start
   // =============================================
   function start() {
-    installAjaxTimeout(); // CRITICAL: must be first
-
+    installAjaxTimeout();
     tryInitSequence(0);
-
     var wdTries = 0;
     var wdInt = setInterval(function() {
       wdTries++;
@@ -378,27 +330,19 @@
   function initCatalogButton() {
     var btn = document.querySelector('.ds-header-catalog-button');
     if (!btn) return;
-
     function isDesktop() { return window.innerWidth >= 1200; }
-
     btn.addEventListener('click', function(e) {
       if (!isDesktop()) return;
-
       var parent = btn.parentElement;
       var catalogMenu = parent ? parent.querySelector('.ds-menu-main-catalog, .ds-menu-catalog') : null;
       var firstLink = catalogMenu ? catalogMenu.querySelector('.ds-menu-catalog-item a') : null;
-
       if (firstLink && firstLink.href) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        window.location.href = firstLink.href;
-        return;
+        e.preventDefault(); e.stopImmediatePropagation();
+        window.location.href = firstLink.href; return;
       }
-
       var anyLink = document.querySelector('.ds-menu-catalog-item a[href]');
       if (anyLink) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
+        e.preventDefault(); e.stopImmediatePropagation();
         window.location.href = anyLink.href;
       }
     }, true);

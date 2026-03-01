@@ -655,15 +655,13 @@ const OCF_PREFIX = 'ocf';
         }
       } // end values each
 
-      // FIX: сброс loading состояния перед обновлением кнопки (iOS fix)
-      that.$button[that.button]('reset');
-      console.log('[OCFilter] button reset called, updating UI');
-
       if (json.total === 0 || (that.options.params + that.getParams()).length < 1) {
         that.$button.removeAttr('onclick').addClass(that.disabledClass).html(that.options.textSelect);
+        (function(){ var _d=that.$button.data('ocf.button'); if(_d){_d.isLoading=false;} })();
       } else {
         if (that.options.searchButton || isSlider) {
           that.$button.attr('onclick', 'location = \'' + json.href + '\'').removeClass(that.disabledClass).removeAttr('disabled').html(json.button_total);
+          (function(){ var _d=that.$button.data('ocf.button'); if(_d){_d.isLoading=false;} })();
         } else {
           //that.saveWinPosition();
                   
