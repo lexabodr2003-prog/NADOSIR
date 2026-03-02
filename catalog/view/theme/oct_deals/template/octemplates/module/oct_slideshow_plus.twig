@@ -96,6 +96,7 @@
 						slidesPerView: 1,
 						spaceBetween: 0,
 						loop: true,
+						touchStartPreventDefault: false,
 						{% if autoplay_status %}
 							autoplay: {
 								delay: 5000,
@@ -139,6 +140,7 @@
 						},
 						spaceBetween: {% if slider_type == 1 %}16{% else %}0{% endif %},
 						loop: true,
+						touchStartPreventDefault: false,
 						{% if autoplay_status %}
 							autoplay: {
 								delay: 5000,
