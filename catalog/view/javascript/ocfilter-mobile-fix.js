@@ -1,18 +1,20 @@
 /**
- * OCFilter mobile fix v10.0
+ * OCFilter mobile fix v11.0
  * Fixes for: iOS Safari 15+, iOS Yandex Browser, Opera iOS, Android
  *
- * v10.0 Changes vs v9.0:
- * - CRITICAL FIX: OCFilter button onclick redirect fix for iOS
- *   On iOS Safari, dynamically added onclick via jQuery .attr('onclick','location=...')
- *   does NOT fire on tap. This version intercepts button tap and performs navigation.
- * - ADDED: installOCFilterButtonFix() - intercepts button taps and reads stored href
- * - KEPT: All v9.0 fixes (touchend->click, watchdog, BFCache, AJAX timeout)
+ * v11.0 Changes vs v10.0:
+ * - CRITICAL FIX: Replaced dangerous jQuery.fn.attr override with MutationObserver
+ *   The $.fn.attr override could break OCFilter's own attr() calls.
+ * - ADDED: MutationObserver to watch onclick attribute changes on [data-ocf="button"]
+ * - ADDED: cache:false to jQuery AJAX to prevent iOS Safari GET caching
+ * - IMPROVED: More reliable button click handler with direct jQuery binding
+ * - ADDED: Button retry mechanism - if button enabled but no href, re-trigger search
+ * - KEPT: All v10.0 fixes (touchend->click, watchdog, BFCache, AJAX timeout)
  */
 (function() {
   'use strict';
 
-  var VERSION = 'v10.0';
+  var VERSION = 'v11.0';
   var ua = navigator.userAgent;
   var isIOS = /iPad|iPhone|iPod/.test(ua) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -20,6 +22,28 @@
   var isOperaMini = /OPR\/|Opera Mini|OPiOS/.test(ua);
   var isAndroid = /Android/.test(ua);
   var isMobile = isIOS || isAndroid || window.innerWidth <= 1024;
+
+  // IMMEDIATE: Apply cache:false as soon as jQuery becomes available
+  // This must happen before OCFilter's first search() AJAX call
+  (function applyCacheNow() {
+    if (typeof jQuery !== 'undefined') {
+      jQuery.ajaxSetup({ cache: false, timeout: 15000 });
+      console.log('[OCFilter v11.0] Immediate: jQuery AJAX cache=false applied');
+    } else {
+      // Poll every 50ms - must be fast to catch early AJAX calls
+      var pollCount = 0;
+      var poll = setInterval(function() {
+        pollCount++;
+        if (typeof jQuery !== 'undefined') {
+          clearInterval(poll);
+          jQuery.ajaxSetup({ cache: false, timeout: 15000 });
+          console.log('[OCFilter v11.0] Immediate poll: jQuery AJAX cache=false applied after ' + pollCount*50 + 'ms');
+        } else if (pollCount > 200) {
+          clearInterval(poll);
+        }
+      }, 50);
+    }
+  })();
 
   console.log('[OCFilter ' + VERSION + '] Start. iOS=' + isIOS +
     ' Yandex=' + isYandexBrowser +
@@ -50,10 +74,11 @@
       '.ocf-search-btn',
       '.ocf-search-btn-static',
       '.ocf-search-btn-popover',
-      '[data-ocf="button"]',
       '.ocf-btn',
       '.ocf-collapse-trigger'
     ];
+    // NOTE: [data-ocf="button"] is excluded from this list intentionally.
+    // It's handled separately by installOCFilterButtonFix.
 
     var touchMoved = false;
     var touchStartX = 0;
@@ -90,6 +115,9 @@
       var target = e.target;
       if (!target) return;
 
+      // Don't handle [data-ocf="button"] here - handled by installOCFilterButtonFix
+      if (target.closest && target.closest('[data-ocf="button"]')) return;
+
       var ocfEl = target.closest ? target.closest(OCF_SELECTORS.join(', ')) : null;
       if (!ocfEl) return;
 
@@ -115,131 +143,201 @@
 
 
   // =============================================
-  // CRITICAL iOS FIX: OCFilter button redirect
-  // On iOS Safari, .attr('onclick', 'location=...') set by OCFilter's search()
-  // method does NOT fire on tap. This fix intercepts click/touchend on the button
-  // and manually reads its onclick string to navigate.
-  // Root cause: ocfilter.js line ~665:
-  //   that.$button.attr('onclick', 'location = \'' + json.href + '\'');
-  // iOS WebKit bug: dynamically set onclick strings are ignored for touch events.
+  // CRITICAL iOS FIX: OCFilter search button navigation
+  // 
+  // Problem: OCFilter sets onclick='location=...' via jQuery .attr()
+  // iOS Safari WKWebView sometimes ignores dynamically set onclick attributes.
+  //
+  // Solution v11.0: 
+  // 1. MutationObserver watches onclick attribute on [data-ocf="button"]
+  // 2. When onclick changes, store href in data attribute
+  // 3. touchend on button reads stored href and navigates
+  // 4. Also uses cache:false to prevent iOS GET caching
   // =============================================
   function installOCFilterButtonFix() {
     if (typeof document.addEventListener === 'undefined') return;
 
-    var lastTouchEndTime = 0;
+    var lastNavTime = 0;
 
+    // Read href from button by multiple methods
     function getButtonHref($btn) {
-      // Method 1: data attribute we set ourselves
+      // Method 1: data attribute we set via MutationObserver
       var href = $btn.data('_ocf_href');
       if (href) return href;
-      
-      // Method 2: parse onclick attribute string
-      var onclickStr = $btn.attr('onclick') || '';
+
+      // Method 2: parse onclick attribute string directly
+      var onclickStr = $btn[0] ? ($btn[0].getAttribute('onclick') || '') : '';
       if (onclickStr) {
-        var match = onclickStr.match(/location\s*=\s*['"]([^'"]+)['"]/);
+        var match = onclickStr.match(/location\s*[=:]\s*['"]([^'"]+)['"]/);
         if (match && match[1]) return match[1];
       }
-      
-      // Method 3: href attribute
+
+      // Method 3: href attribute (for <a> buttons)
       var hrefAttr = $btn.attr('href');
       if (hrefAttr && hrefAttr !== '#' && hrefAttr !== 'javascript:void(0)') return hrefAttr;
-      
+
       return null;
     }
 
-    // Monitor OCFilter button changes - store href in data attribute
-    function monitorButtonHref() {
-      if (typeof jQuery === 'undefined') return;
-      var $ = jQuery;
-      
-      // Override jQuery attr to intercept onclick='location=...' 
-      var originalAttr = $.fn.attr;
-      $.fn.attr = function() {
-        var result = originalAttr.apply(this, arguments);
-        // When setting onclick with location=...
-        if (arguments.length >= 2 && arguments[0] === 'onclick') {
-          var val = arguments[1] || '';
-          var match = val.match ? val.match(/location\s*=\s*['"]([^'"]+)['"]/): null;
-          if (match && match[1]) {
-            this.data('_ocf_href', match[1]);
-            console.log('[OCFilter v10.0] Button href stored:', match[1].slice(0, 80));
+    // Setup MutationObserver for each button to track onclick changes
+    function observeButton(btnEl) {
+      if (!btnEl || btnEl._ocf_observed) return;
+      btnEl._ocf_observed = true;
+
+      if (typeof MutationObserver === 'undefined') return;
+
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'onclick') {
+            var onclickStr = btnEl.getAttribute('onclick') || '';
+            var match = onclickStr.match(/location\s*[=:]\s*['"]([^'"]+)['"]/);
+            if (match && match[1]) {
+              jQuery(btnEl).data('_ocf_href', match[1]);
+              console.log('[OCFilter ' + VERSION + '] MutationObserver: button href stored:', match[1].slice(0, 80));
+            } else if (!onclickStr) {
+              // onclick removed - clear stored href
+              jQuery(btnEl).removeData('_ocf_href');
+              console.log('[OCFilter ' + VERSION + '] MutationObserver: onclick removed, href cleared');
+            }
           }
-        }
-        return result;
-      };
-      console.log('[OCFilter v10.0] jQuery.fn.attr override installed');
+        });
+      });
+
+      observer.observe(btnEl, {
+        attributes: true,
+        attributeFilter: ['onclick', 'disabled', 'class']
+      });
+
+      console.log('[OCFilter ' + VERSION + '] MutationObserver attached to button:', btnEl.className);
     }
 
-    // Handle button tap on iOS
-    document.addEventListener('touchend', function(e) {
-      if (Date.now() - lastTouchEndTime < 300) return; // debounce
-      
-      var target = e.target;
-      if (!target) return;
-      
-      // Find OCFilter button
-      var btn = null;
-      if (typeof jQuery !== 'undefined') {
-        var $target = jQuery(target);
-        var $btn = $target.closest('[data-ocf="button"]');
-        if ($btn.length) btn = $btn;
+    // Observe all existing and future buttons
+    function observeAllButtons() {
+      if (typeof jQuery === 'undefined') return;
+      jQuery('[data-ocf="button"]').each(function() {
+        observeButton(this);
+      });
+    }
+
+    // Also use MutationObserver to catch dynamically added buttons
+    function observeDOM() {
+      if (typeof MutationObserver === 'undefined') return;
+
+      var domObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          mutation.addedNodes && mutation.addedNodes.forEach && mutation.addedNodes.forEach(function(node) {
+            if (node.nodeType === 1) {
+              if (node.getAttribute && node.getAttribute('data-ocf') === 'button') {
+                observeButton(node);
+              }
+              var btns = node.querySelectorAll ? node.querySelectorAll('[data-ocf="button"]') : [];
+              btns.forEach && btns.forEach(function(btn) { observeButton(btn); });
+            }
+          });
+        });
+      });
+
+      domObserver.observe(document.body || document.documentElement, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    // Handle button tap/click
+    function handleButtonActivation(e, target) {
+      if (typeof jQuery === 'undefined') return false;
+
+      var $btn = jQuery(target).closest('[data-ocf="button"]');
+      if (!$btn.length) return false;
+
+      var isDisabled = $btn.hasClass('ocf-disabled') || $btn.prop('disabled');
+      if (isDisabled) {
+        console.log('[OCFilter ' + VERSION + '] Button is disabled, skip navigation');
+        return false;
       }
-      
-      if (!btn) return;
-      
-      var href = getButtonHref(btn);
-      if (!href) return;
-      
-      // Check button is not disabled/loading
-      var isDisabled = btn.hasClass('ocf-disabled') || btn.prop('disabled');
-      if (isDisabled) return;
-      
-      lastTouchEndTime = Date.now();
-      
-      console.log('[OCFilter v10.0] Button touchend -> navigate to:', href.slice(0, 80));
+
+      var href = getButtonHref($btn);
+
+      if (!href) {
+        var btnText = $btn.text().trim();
+        console.log('[OCFilter ' + VERSION + '] Button enabled but no href. Text:', btnText.slice(0, 40));
+        
+        // Try to get href from OCFilter instance params
+        try {
+          var ocfModule = jQuery('[id^="ocf-module-"]').first();
+          if (ocfModule.length) {
+            var ocfData = ocfModule.data('ocfilter');
+            if (ocfData && ocfData.options) {
+              var params = ocfData.getParams ? ocfData.getParams() : '';
+              var cfg = window['_ocf_config_1'] || {};
+              if (params && cfg.urlHost) {
+                var constructedHref = cfg.urlHost + 'index.php?route=extension/module/ocfilter/search&' + 
+                  cfg.paramsIndex + '=' + encodeURIComponent(params);
+                // Actually, we should just re-trigger the last search
+                // by triggering a click on the first selected value
+                var $firstSelected = ocfModule.find('.ocf-value.ocf-selected').first();
+                if ($firstSelected.length) {
+                  console.log('[OCFilter ' + VERSION + '] Retrying search via click on selected value');
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTimeout(function() { $firstSelected.trigger('click'); }, 50);
+                  return true;
+                }
+              }
+            }
+          }
+        } catch(err) {
+          console.warn('[OCFilter ' + VERSION + '] Retry search error:', err);
+        }
+        
+        // Button enabled but no href - let natural events handle it
+        return false;
+      }
+
+      if (Date.now() - lastNavTime < 500) {
+        console.log('[OCFilter ' + VERSION + '] Debounced navigation');
+        return true; // prevent but don't navigate
+      }
+
+      lastNavTime = Date.now();
       e.preventDefault();
       e.stopPropagation();
-      
-      // Navigate
+
+      console.log('[OCFilter ' + VERSION + '] Button activated -> navigate to:', href.slice(0, 80));
       window.location.href = href;
-      
+      return true;
+    }
+
+    // touchend on button (capture phase - runs before iOS 300ms delay)
+    document.addEventListener('touchend', function(e) {
+      var target = e.target;
+      if (!target || typeof jQuery === 'undefined') return;
+      handleButtonActivation(e, target);
     }, { passive: false, capture: true });
 
-    // Also fix click event (for desktop and some iOS cases)
+    // click on button (fallback for desktop and some iOS cases)
     document.addEventListener('click', function(e) {
       var target = e.target;
       if (!target || typeof jQuery === 'undefined') return;
-      
-      var $btn = jQuery(target).closest('[data-ocf="button"]');
-      if (!$btn.length) return;
-      
-      var href = getButtonHref($btn);
-      if (!href) return;
-      
-      var isDisabled = $btn.hasClass('ocf-disabled') || $btn.prop('disabled');
-      if (isDisabled) return;
-      
-      console.log('[OCFilter v10.0] Button click -> navigate to:', href.slice(0, 80));
-      e.preventDefault();
-      e.stopPropagation();
-      
-      window.location.href = href;
-      
+      handleButtonActivation(e, target);
     }, { capture: true });
 
-    // Start monitoring after jQuery loads
-    var monitorAttempts = 0;
-    var monitorInterval = setInterval(function() {
-      monitorAttempts++;
-      if (typeof jQuery !== 'undefined') {
-        clearInterval(monitorInterval);
-        monitorButtonHref();
-      } else if (monitorAttempts > 100) {
-        clearInterval(monitorInterval);
+    // Start observing buttons after jQuery loads
+    var observeAttempts = 0;
+    var observeInterval = setInterval(function() {
+      observeAttempts++;
+      if (typeof jQuery !== 'undefined' && document.body) {
+        clearInterval(observeInterval);
+        observeAllButtons();
+        observeDOM();
+        console.log('[OCFilter ' + VERSION + '] Button observers installed after ' + observeAttempts * 100 + 'ms');
+      } else if (observeAttempts > 100) {
+        clearInterval(observeInterval);
+        console.warn('[OCFilter ' + VERSION + '] Timeout waiting for jQuery for button observers');
       }
     }, 100);
 
-    console.log('[OCFilter v10.0] OCFilter button redirect fix installed');
+    console.log('[OCFilter ' + VERSION + '] OCFilter button navigation fix installed');
   }
 
   // =============================================
@@ -343,15 +441,19 @@
   }
 
   // =============================================
-  // Set global jQuery AJAX timeout
+  // Set global jQuery AJAX: timeout + cache:false
+  // cache:false is CRITICAL for iOS Safari which aggressively caches GET requests!
   // =============================================
   function installAjaxTimeout() {
     if (typeof jQuery === 'undefined') {
       setTimeout(installAjaxTimeout, 200);
       return;
     }
-    jQuery.ajaxSetup({ timeout: 15000 });
-    console.log('[OCFilter ' + VERSION + '] jQuery AJAX timeout=15s installed');
+    jQuery.ajaxSetup({ 
+      timeout: 15000,
+      cache: false  // CRITICAL: prevents iOS Safari GET request caching
+    });
+    console.log('[OCFilter ' + VERSION + '] jQuery AJAX timeout=15s, cache=false installed');
 
     if (isMobile) {
       jQuery(document).ajaxError(function(event, jqXHR, settings, thrownError) {
