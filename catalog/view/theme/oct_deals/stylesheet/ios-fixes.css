@@ -217,3 +217,23 @@ select {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
+
+/* ============================================================
+   11. DS-DROPDOWN-TOGGLE — клики на iPhone (главная страница)
+   iOS Safari требует cursor:pointer на div-элементах для регистрации
+   тапов. Без этого клик на .ds-dropdown-toggle игнорируется на iPhone,
+   особенно когда на странице активен Swiper (главная страница).
+   ============================================================ */
+.ds-dropdown-toggle {
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Дочерние элементы тоже не должны блокировать клики */
+.ds-dropdown-toggle > * {
+  pointer-events: none;
+}
