@@ -71,3 +71,26 @@
     order: 2;
   }
 }
+
+/* ============================================================
+   П.12 FIX: Bootstrap modal z-index выше #overlay
+   
+   ROOT CAUSE:
+   #overlay.active имеет z-index: 12001 (из темы oct_deals).
+   Когда пользователь нажимает "Войти в кабинет" внутри
+   открытого dropdown (.ds-dropdown-box.active), #overlay
+   перекрывает Bootstrap modal (z-index: 1055 по умолчанию).
+   
+   На главной странице dropdown всегда открывается с overlay,
+   поэтому modal оказывается "под" overlay и недоступен.
+   На других страницах без Swiper dropdown может не открываться
+   или overlay ведёт себя иначе.
+   
+   FIX: Повысить z-index Bootstrap modal и backdrop выше overlay.
+   ============================================================ */
+.modal {
+  z-index: 13000 !important;
+}
+.modal-backdrop {
+  z-index: 12999 !important;
+}
