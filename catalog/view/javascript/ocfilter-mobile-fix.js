@@ -1,17 +1,18 @@
 /**
- * OCFilter mobile fix v9.0
+ * OCFilter mobile fix v10.0
  * Fixes for: iOS Safari 15+, iOS Yandex Browser, Opera iOS, Android
  *
- * v9.0 Changes vs v8.0:
- * - ADDED: touchstart delegation for OCFilter items (fix 300ms delay + ghost click on iOS)
- * - ADDED: iOS-specific click fix via touchend->click polyfill for divs without href
- * - KEPT: watchdog, BFCache, visibilitychange, AJAX timeout
- * - FIXED: ocf-value-item clicks on iPhone Yandex/Opera browsers
+ * v10.0 Changes vs v9.0:
+ * - CRITICAL FIX: OCFilter button onclick redirect fix for iOS
+ *   On iOS Safari, dynamically added onclick via jQuery .attr('onclick','location=...')
+ *   does NOT fire on tap. This version intercepts button tap and performs navigation.
+ * - ADDED: installOCFilterButtonFix() - intercepts button taps and reads stored href
+ * - KEPT: All v9.0 fixes (touchend->click, watchdog, BFCache, AJAX timeout)
  */
 (function() {
   'use strict';
 
-  var VERSION = 'v9.0';
+  var VERSION = 'v10.0';
   var ua = navigator.userAgent;
   var isIOS = /iPad|iPhone|iPod/.test(ua) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -110,6 +111,135 @@
     }, { passive: false, capture: true });
 
     console.log('[OCFilter ' + VERSION + '] touchend->click polyfill installed for iOS');
+  }
+
+
+  // =============================================
+  // CRITICAL iOS FIX: OCFilter button redirect
+  // On iOS Safari, .attr('onclick', 'location=...') set by OCFilter's search()
+  // method does NOT fire on tap. This fix intercepts click/touchend on the button
+  // and manually reads its onclick string to navigate.
+  // Root cause: ocfilter.js line ~665:
+  //   that.$button.attr('onclick', 'location = \'' + json.href + '\'');
+  // iOS WebKit bug: dynamically set onclick strings are ignored for touch events.
+  // =============================================
+  function installOCFilterButtonFix() {
+    if (typeof document.addEventListener === 'undefined') return;
+
+    var lastTouchEndTime = 0;
+
+    function getButtonHref($btn) {
+      // Method 1: data attribute we set ourselves
+      var href = $btn.data('_ocf_href');
+      if (href) return href;
+      
+      // Method 2: parse onclick attribute string
+      var onclickStr = $btn.attr('onclick') || '';
+      if (onclickStr) {
+        var match = onclickStr.match(/location\s*=\s*['"]([^'"]+)['"]/);
+        if (match && match[1]) return match[1];
+      }
+      
+      // Method 3: href attribute
+      var hrefAttr = $btn.attr('href');
+      if (hrefAttr && hrefAttr !== '#' && hrefAttr !== 'javascript:void(0)') return hrefAttr;
+      
+      return null;
+    }
+
+    // Monitor OCFilter button changes - store href in data attribute
+    function monitorButtonHref() {
+      if (typeof jQuery === 'undefined') return;
+      var $ = jQuery;
+      
+      // Override jQuery attr to intercept onclick='location=...' 
+      var originalAttr = $.fn.attr;
+      $.fn.attr = function() {
+        var result = originalAttr.apply(this, arguments);
+        // When setting onclick with location=...
+        if (arguments.length >= 2 && arguments[0] === 'onclick') {
+          var val = arguments[1] || '';
+          var match = val.match ? val.match(/location\s*=\s*['"]([^'"]+)['"]/): null;
+          if (match && match[1]) {
+            this.data('_ocf_href', match[1]);
+            console.log('[OCFilter v10.0] Button href stored:', match[1].slice(0, 80));
+          }
+        }
+        return result;
+      };
+      console.log('[OCFilter v10.0] jQuery.fn.attr override installed');
+    }
+
+    // Handle button tap on iOS
+    document.addEventListener('touchend', function(e) {
+      if (Date.now() - lastTouchEndTime < 300) return; // debounce
+      
+      var target = e.target;
+      if (!target) return;
+      
+      // Find OCFilter button
+      var btn = null;
+      if (typeof jQuery !== 'undefined') {
+        var $target = jQuery(target);
+        var $btn = $target.closest('[data-ocf="button"]');
+        if ($btn.length) btn = $btn;
+      }
+      
+      if (!btn) return;
+      
+      var href = getButtonHref(btn);
+      if (!href) return;
+      
+      // Check button is not disabled/loading
+      var isDisabled = btn.hasClass('ocf-disabled') || btn.prop('disabled');
+      if (isDisabled) return;
+      
+      lastTouchEndTime = Date.now();
+      
+      console.log('[OCFilter v10.0] Button touchend -> navigate to:', href.slice(0, 80));
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Navigate
+      window.location.href = href;
+      
+    }, { passive: false, capture: true });
+
+    // Also fix click event (for desktop and some iOS cases)
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      if (!target || typeof jQuery === 'undefined') return;
+      
+      var $btn = jQuery(target).closest('[data-ocf="button"]');
+      if (!$btn.length) return;
+      
+      var href = getButtonHref($btn);
+      if (!href) return;
+      
+      var isDisabled = $btn.hasClass('ocf-disabled') || $btn.prop('disabled');
+      if (isDisabled) return;
+      
+      console.log('[OCFilter v10.0] Button click -> navigate to:', href.slice(0, 80));
+      e.preventDefault();
+      e.stopPropagation();
+      
+      window.location.href = href;
+      
+    }, { capture: true });
+
+    // Start monitoring after jQuery loads
+    var monitorAttempts = 0;
+    var monitorInterval = setInterval(function() {
+      monitorAttempts++;
+      if (typeof jQuery !== 'undefined') {
+        clearInterval(monitorInterval);
+        monitorButtonHref();
+      } else if (monitorAttempts > 100) {
+        clearInterval(monitorInterval);
+      }
+    }, 100);
+
+    console.log('[OCFilter v10.0] OCFilter button redirect fix installed');
   }
 
   // =============================================
@@ -333,6 +463,7 @@
     console.log('[OCFilter ' + VERSION + '] start() called');
     installAjaxTimeout();
     installTouchClickFix();
+    installOCFilterButtonFix();
 
     var checkTries = 0;
     var checkInterval = setInterval(function() {

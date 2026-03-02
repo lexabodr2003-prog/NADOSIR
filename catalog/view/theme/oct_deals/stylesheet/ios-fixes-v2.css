@@ -158,11 +158,60 @@ input, textarea, select {
 
 /* Safe area для iPhone X+ */
 .ds-mobile-bottom-nav {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    padding-bottom: constant(safe-area-inset-bottom, 0px);
+    /* Safe area для iPhone X+ */
+    padding-bottom: constant(safe-area-inset-bottom, 0px) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    /* Убираем возможную обрезку контента */
+    overflow: visible !important;
+    /* Минимальная высота с учётом safe area */
+    min-height: calc(69px + env(safe-area-inset-bottom, 0px)) !important;
+    /* Flex контейнер должен показывать все items */
+    align-items: center !important;
+    box-sizing: border-box !important;
+}
+
+/* Иконка Контакты — гарантируем полное отображение */
+.ds-mobile-bottom-nav-item-contacts {
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+}
+
+/* Все items нижней навигации */
+.ds-mobile-bottom-nav-item {
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+    min-height: 52px !important;
+    justify-content: center !important;
 }
 
 /* Плавная прокрутка на iOS */
 .ocf-value-list {
     -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================================
+   FIX v10.0: Иконка "Контакты" - точное исправление
+   Проблема: mask-size:cover обрезает иконку при соотношении
+   контейнера 16x20 и SVG viewBox 15x12
+   ============================================================ */
+
+/* Для иконки Контакты - используем contain вместо cover */
+.ds-mobile-bottom-nav-item-icon-contacts {
+    -webkit-mask-size: contain !important;
+    mask-size: contain !important;
+    width: 18px !important;
+    height: 15px !important;
+}
+
+/* Убираем обрезку у нижней панели навигации */
+.ds-mobile-bottom-nav {
+    overflow: visible !important;
+}
+
+/* Каждый item панели должен иметь достаточную высоту */
+.ds-mobile-bottom-nav .ds-mobile-bottom-nav-item {
+    height: auto !important;
+    min-height: 52px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
 }
