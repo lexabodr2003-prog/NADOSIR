@@ -68,6 +68,7 @@
 			<script>
 				document.addEventListener('DOMContentLoaded', function() {
 					var columnReviewsSwiper = new Swiper('#ds-column-last-reviews-{{ module }}', {
+						touchStartPreventDefault: false,
 						slidesPerView: 1,
 						spaceBetween: 0,
 						loop: true,

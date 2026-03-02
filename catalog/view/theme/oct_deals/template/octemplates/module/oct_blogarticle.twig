@@ -53,6 +53,7 @@
 			<script>
 				document.addEventListener('DOMContentLoaded', function() {
 					var blogColumnSwiper = new Swiper('#ds_blog_column_article-{{ module }}', {
+						touchStartPreventDefault: false,
 						slidesPerView: 1,
 						spaceBetween: 0,
 						loop: true,

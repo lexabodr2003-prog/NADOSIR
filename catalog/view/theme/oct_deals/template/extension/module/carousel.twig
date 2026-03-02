@@ -37,6 +37,7 @@
 	<script>
 		$(document).ready(function () {
 			var carouselSwiper = new Swiper('#ds-carousel-{{ module }}', {
+				touchStartPreventDefault: false,
 				slidesPerView: 2,
 				spaceBetween: 20,
 				autoplay: {

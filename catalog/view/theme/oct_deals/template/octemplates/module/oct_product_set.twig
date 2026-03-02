@@ -130,6 +130,7 @@ function addToCart(products) {
 {% if product_set|length > 1 %}
 document.addEventListener('DOMContentLoaded', function() {
     var productSetSwiper = new Swiper('#product-set-data', {
+        touchStartPreventDefault: false,
         slidesPerView: 1,
         spaceBetween: 0,
         loop: false,

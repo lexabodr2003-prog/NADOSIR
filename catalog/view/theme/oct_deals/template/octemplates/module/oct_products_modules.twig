@@ -182,6 +182,7 @@
             <script>
                 window.addEventListener('DOMContentLoaded', () => {
                     var columnModulesSwiper = new Swiper('#ds-column-{{ module_name }}_{{ module }}', {
+                        touchStartPreventDefault: false,
                         slidesPerView: 1,
                         spaceBetween: 0,
                         loop: true,

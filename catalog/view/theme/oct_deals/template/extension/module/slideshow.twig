@@ -20,6 +20,7 @@
 <script>
 	document.addEventListener('DOMContentLoaded', function() {
 		var slideshowSwiper = new Swiper('#slideshow{{ module }}', {
+			touchStartPreventDefault: false,
 			autoplay: {
 				delay: 5000,
 				disableOnInteraction: false
