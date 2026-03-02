@@ -448,13 +448,13 @@ $(function() {
 {% endif %}
 <script async src="{{ base}}catalog/view/theme/oct_deals/js/oct-fonts.js"></script>
 <link rel="stylesheet" href="{{ base}}catalog/view/theme/oct_deals/stylesheet/all.css"{% if oct_deals_data.minify is defined %} media="print" onload="this.media='all'"{% else %} media="all"{% endif %}>
+{# iOS Safari fix v3.0: перехват touchstart ДО Swiper — исправляет кнопку Войти на главной iOS #}
+<script src="{{ base}}catalog/view/theme/oct_deals/js/ios-dropdown-fix.js?v=3.0"></script>
 {% if footer_swiper %}
 <script src="{{ base}}catalog/view/theme/oct_deals/js/swiper/swiper.min.js" defer></script>
 {% endif %}
 {# OCFilter mobile fix: принудительная инициализация фильтра для Яндекс.Браузера на iPhone #}
 <script src="{{ base}}catalog/view/javascript/ocfilter-mobile-fix.js?v=22.0"></script>
 
-{# iOS Safari fix v2.0: touchend fallback for .ds-dropdown-toggle (no click interference) #}
-<script src="{{ base}}catalog/view/theme/oct_deals/js/ios-dropdown-fix.js?v=2.0"></script>
 </body>
 </html>
