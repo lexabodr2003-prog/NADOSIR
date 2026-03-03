@@ -1,34 +1,22 @@
 /**
- * popup-dropdown-fix.js v5.0
+ * popup-dropdown-fix.js v6.0
  *
- * ROOT CAUSES FIXED:
- *
- * 1. Bootstrap 5 "doesn't allow more than one instance per element" +
- *    iOS Safari CSS transition glitch when showing dynamically-inserted modal.
- *    FIX: Use bootstrap.Modal.getOrCreateInstance() + requestAnimationFrame.
- *
- * 2. #overlay.active (z-index:12001) covers Bootstrap modal.
- *    CSS fix in kamtek-mobile-fixes.css + explicit overlay removal here.
- *
- * 3. oct_subscribe race condition: footer.twig stores timer in
- *    window._octSubscribeTimer. We clearTimeout() it before any popup.
- *
- * 4. iOS touchstart bridge: touchstart fires octPopupLogin immediately,
- *    bypassing potential click-event swallowing inside dropdown.
+ * New approach: manual CSS-based modal display for iOS reliability.
  */
 (function () {
-  "use strict";
+  'use strict';
 
-  /* ---- helpers ---- */
   function closeAllDropdowns() {
-    var overlay = document.getElementById("overlay");
-    document.querySelectorAll(".ds-dropdown-box.active").forEach(function (d) {
-      d.classList.remove("active");
+    var overlay = document.getElementById('overlay');
+    document.querySelectorAll('.ds-dropdown-box.active').forEach(function (d) {
+      d.classList.remove('active');
     });
     if (overlay) {
-      overlay.classList.remove("active", "active-sidebar");
+      overlay.classList.remove('active', 'active-sidebar');
+      overlay.style.display = 'none';
+      setTimeout(function() { overlay.style.display = ''; }, 500);
     }
-    document.body.classList.remove("no-scroll");
+    document.body.classList.remove('no-scroll');
   }
 
   function cancelSubscribeTimer() {
@@ -39,105 +27,115 @@
   }
 
   function clearLoader() {
-    if (typeof masked === "function") masked("body", false);
-    document.querySelectorAll(".ds-loader-overlay").forEach(function (el) {
+    if (typeof masked === 'function') masked('body', false);
+    document.querySelectorAll('.ds-loader-overlay').forEach(function (el) {
       el.remove();
     });
   }
 
-  /**
-   * Show Bootstrap 5 modal reliably on iOS.
-   * Uses native bootstrap.Modal API with requestAnimationFrame
-   * to avoid iOS Safari CSS transition glitch.
-   */
-  function showModal(modalId) {
-    var el = document.getElementById(modalId.replace("#", ""));
+  function showModalManual(el) {
+    var backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop show';
+    backdrop.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:12500;';
+    document.body.appendChild(backdrop);
+
+    el.style.cssText = 'display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:13000;overflow-x:hidden;overflow-y:auto;outline:0;';
+    el.classList.add('show');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('role', 'dialog');
+    el.removeAttribute('aria-hidden');
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+
+    function doClose() {
+      el.classList.remove('show');
+      el.style.display = 'none';
+      el.setAttribute('aria-hidden', 'true');
+      el.removeAttribute('aria-modal');
+      el.removeAttribute('role');
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      if (backdrop && backdrop.parentNode) backdrop.remove();
+    }
+
+    backdrop.addEventListener('click', doClose);
+    el.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function(btn) {
+      btn.addEventListener('click', doClose);
+    });
+    console.log('[popup-fix v6] Manual modal shown: #' + el.id);
+  }
+
+  function showModalDirect(modalId) {
+    var id = modalId.replace('#', '');
+    var el = document.getElementById(id);
     if (!el) {
-      console.warn("[popup-fix v5] modal element not found:", modalId);
+      console.error('[popup-fix v6] modal #' + id + ' NOT FOUND');
       return;
     }
 
-    /* Ensure overlay is gone BEFORE Bootstrap adds its own backdrop */
+    el.classList.remove('fade');
     closeAllDropdowns();
+    document.querySelectorAll('.modal-backdrop').forEach(function(b) { b.remove(); });
 
-    /* Use native Bootstrap 5 API */
     if (window.bootstrap && window.bootstrap.Modal) {
-      /* Dispose any stale instance (leftover from previous .html() injection) */
-      var existing = window.bootstrap.Modal.getInstance(el);
-      if (existing) {
-        existing.dispose();
+      try {
+        var existing = window.bootstrap.Modal.getInstance(el);
+        if (existing) { try { existing.dispose(); } catch(e) {} }
+        var bsModal = new window.bootstrap.Modal(el, { backdrop: true, keyboard: true, focus: true });
+        bsModal.show();
+        console.log('[popup-fix v6] Bootstrap Modal.show() OK: #' + id);
+        return;
+      } catch(e) {
+        console.warn('[popup-fix v6] Bootstrap Modal failed, using manual:', e.message);
       }
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
-          /* Two rAF: first lets browser reflow, second starts transition */
-          var bsModal = new window.bootstrap.Modal(el, {
-            backdrop: true,
-            keyboard: true,
-            focus: true
-          });
-          bsModal.show();
-        });
-      });
-    } else {
-      /* Fallback: jQuery Bootstrap plugin */
-      requestAnimationFrame(function () {
-        $(el).modal("show");
-      });
     }
+
+    showModalManual(el);
   }
 
-  /* ---- patched login function ---- */
   function buildLoginFn(name) {
     return function () {
       cancelSubscribeTimer();
       closeAllDropdowns();
       clearLoader();
-      $(".modal-backdrop").remove();
+      document.querySelectorAll('.modal-backdrop').forEach(function(b) { b.remove(); });
 
-      var url = name === "octPopupLogin"
-        ? "index.php?route=octemplates/module/oct_popup_login"
-        : "index.php?route=octemplates/module/oct_otp_login";
+      var url = name === 'octPopupLogin'
+        ? 'index.php?route=octemplates/module/oct_popup_login'
+        : 'index.php?route=octemplates/module/oct_otp_login';
 
-      if (typeof masked === "function") masked("body", true);
+      if (typeof masked === 'function') masked('body', true);
 
-      $.ajax({
-        type: "post",
-        dataType: "html",
+      jQuery.ajax({
+        type: 'post',
+        dataType: 'html',
         url: url,
-        data: "",
+        data: '',
         cache: false,
         timeout: 15000,
-        headers: {
-          "X-Requested-With": "XMLHttpRequest"
-        },
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
         success: function (html) {
           clearLoader();
-
-          if (!html || html.trim() === "") {
-            console.error("[popup-fix v5] Empty AJAX response for", name);
+          if (!html || html.trim() === '') {
+            console.error('[popup-fix v6] Empty AJAX response');
             return;
           }
-
-          $(".modal-holder").html(html);
-
-          var modalId = name === "octPopupLogin" ? "loginModal" : "otpModal";
-          showModal(modalId);
-
-          if (typeof popupClose === "function") popupClose();
+          jQuery('.modal-holder').html(html);
+          var modalId = name === 'octPopupLogin' ? 'loginModal' : 'otpModal';
+          setTimeout(function() { showModalDirect(modalId); }, 50);
+          if (typeof popupClose === 'function') popupClose();
         },
         error: function (xhr, status, err) {
           clearLoader();
-          console.error("[popup-fix v5] AJAX failed:", status, err,
-            "HTTP:", xhr.status, xhr.responseText ? xhr.responseText.slice(0, 200) : "");
+          console.error('[popup-fix v6] AJAX error:', status, err, 'HTTP:', xhr.status);
         }
       });
     };
   }
 
-  /* ---- patch generic popup functions ---- */
   function patchGenericFn(name) {
     var original = window[name];
-    if (typeof original !== "function") return false;
+    if (typeof original !== 'function') return false;
     window[name] = function () {
       cancelSubscribeTimer();
       closeAllDropdowns();
@@ -146,43 +144,36 @@
     return true;
   }
 
-  /* ---- iOS touchstart bridge ---- */
   function addTouchBridge() {
     document.querySelectorAll('[onclick*="octPopupLogin"]').forEach(function (btn) {
       if (btn.dataset.touchBridgeAdded) return;
-      btn.dataset.touchBridgeAdded = "1";
-      btn.addEventListener("touchstart", function (e) {
+      btn.dataset.touchBridgeAdded = '1';
+      btn.addEventListener('touchstart', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        if (typeof window.octPopupLogin === "function") {
-          window.octPopupLogin();
-        }
+        if (typeof window.octPopupLogin === 'function') window.octPopupLogin();
       }, { passive: false });
     });
   }
 
-  /* ---- apply all patches ---- */
   function applyPatches() {
-    window.octPopupLogin = buildLoginFn("octPopupLogin");
-    window.octPopupOTPLogin = buildLoginFn("octPopupOTPLogin");
-    ["octPopupCallPhone", "octPopupCart", "octPopupFoundCheaper",
-     "octPopupProductOptions"].forEach(patchGenericFn);
+    window.octPopupLogin = buildLoginFn('octPopupLogin');
+    window.octPopupOTPLogin = buildLoginFn('octPopupOTPLogin');
+    ['octPopupCallPhone', 'octPopupCart', 'octPopupFoundCheaper',
+     'octPopupProductOptions'].forEach(patchGenericFn);
     addTouchBridge();
-    console.log("[popup-fix v5] patches applied. bootstrap.Modal=",
-      !!(window.bootstrap && window.bootstrap.Modal),
-      "subscribeTimer=", window._octSubscribeTimer);
+    console.log('[popup-fix v6] patches applied');
   }
 
-  /* ---- poll for octPopupLogin (loaded in bundle) ---- */
   var attempts = 0;
   var pollTimer = setInterval(function () {
     attempts++;
-    if (typeof octPopupLogin === "function") {
+    if (typeof octPopupLogin === 'function') {
       clearInterval(pollTimer);
       applyPatches();
     } else if (attempts >= 200) {
       clearInterval(pollTimer);
-      console.warn("[popup-fix v5] octPopupLogin not found after 10s");
+      console.warn('[popup-fix v6] octPopupLogin not found after 10s');
     }
   }, 50);
 
