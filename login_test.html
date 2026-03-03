@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login Test v2</title>
+<style>
+body{font-family:monospace;padding:10px;font-size:13px;}
+#log{background:#111;color:#0f0;padding:10px;min-height:200px;max-height:50vh;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin-bottom:10px;}
+button{padding:15px 20px;font-size:16px;margin:5px;background:#0066cc;color:#fff;border:none;border-radius:5px;}
+#modal-holder{}
+</style>
+</head>
+<body>
+<h3>Login AJAX Diagnostics v2</h3>
+<div id="log">Loading...</div>
+<button onclick="testAjax()">1. Test AJAX</button>
+<button onclick="testModal()">2. Force Show Modal</button>
+<button onclick="clearLog()">Clear</button>
+<div id="modal-holder"></div>
+
+<script src="/catalog/view/theme/oct_deals/stylesheet/css/e2a2c3fc9387fcea5173b71fa82a4eb9.js"></script>
+
+<script>
+var log = document.getElementById('log');
+function L(msg){
+  var t = new Date().toISOString().slice(11,23);
+  log.textContent += t+' '+msg+'\n';
+  log.scrollTop=log.scrollHeight;
+}
+function clearLog(){log.textContent='';}
+
+window.onerror = function(msg,src,line,col,err){
+  L('WINDOW ERROR: '+msg+' at '+src+':'+line);
+};
+
+L('=== Page ready ===');
+L('bootstrap: '+(typeof bootstrap));
+L('bootstrap.Modal: '+(typeof bootstrap !== 'undefined' ? typeof bootstrap.Modal : 'n/a'));
+L('jQuery: '+(typeof jQuery));
+L('octPopupLogin: '+(typeof octPopupLogin));
+
+function testAjax(){
+  L('--- testAjax() start ---');
+  L('octPopupLogin now: '+(typeof octPopupLogin));
+  L('window.octPopupLogin: '+(typeof window.octPopupLogin));
+  
+  jQuery.ajax({
+    type:'post',
+    dataType:'html',
+    url:'index.php?route=octemplates/module/oct_popup_login',
+    data:'',
+    cache:false,
+    timeout:15000,
+    headers:{'X-Requested-With':'XMLHttpRequest'},
+    success:function(html){
+      L('AJAX SUCCESS. len='+html.length);
+      L('has loginModal: '+(html.indexOf('loginModal')>=0));
+      L('has modal-dialog: '+(html.indexOf('modal-dialog')>=0));
+      if(html.length < 300) L('HTML: '+html);
+      
+      jQuery('.modal-holder').html(html);
+      var el = document.getElementById('loginModal');
+      L('loginModal in DOM: '+(el ? 'YES class='+el.className : 'NO'));
+    },
+    error:function(xhr,status,err){
+      L('AJAX ERROR: status='+status+' err='+err+' HTTP='+xhr.status);
+      if(xhr.responseText) L('response: '+xhr.responseText.slice(0,200));
+    }
+  });
+}
+
+function testModal(){
+  L('--- testModal() start ---');
+  var el = document.getElementById('loginModal');
+  if(!el){ L('NO loginModal - run testAjax first'); return; }
+  
+  L('el.className='+el.className);
+  el.classList.remove('fade');
+  L('after remove fade: '+el.className);
+  
+  // Remove #overlay
+  var ov = document.getElementById('overlay');
+  if(ov){ ov.classList.remove('active','active-sidebar'); ov.style.display='none'; L('overlay hidden'); }
+  
+  // Remove backdrops
+  var bds = document.querySelectorAll('.modal-backdrop');
+  L('backdrops found: '+bds.length);
+  bds.forEach(function(b){b.remove();});
+  
+  // Bootstrap API
+  if(window.bootstrap && window.bootstrap.Modal){
+    L('Using bootstrap.Modal API');
+    var existing = bootstrap.Modal.getInstance(el);
+    L('existing instance: '+(existing?'YES':'NO'));
+    if(existing){ try{existing.dispose();L('disposed');}catch(e){L('dispose err: '+e.message);} }
+    
+    try{
+      var m = new bootstrap.Modal(el,{backdrop:true,keyboard:true,focus:true});
+      m.show();
+      L('bsModal.show() called');
+      
+      setTimeout(function(){
+        L('--- After 300ms ---');
+        L('el.classList has show: '+el.classList.contains('show'));
+        L('el computed display: '+getComputedStyle(el).display);
+        L('el computed visibility: '+getComputedStyle(el).visibility);
+        L('el computed opacity: '+getComputedStyle(el).opacity);
+        L('el computed zIndex: '+getComputedStyle(el).zIndex);
+        L('body.overflow: '+getComputedStyle(document.body).overflow);
+        L('body.className: '+document.body.className);
+        var bd2=document.querySelector('.modal-backdrop');
+        L('backdrop: '+(bd2?bd2.className:'none'));
+      },300);
+    }catch(e){
+      L('bootstrap.Modal EXCEPTION: '+e.message);
+      L('Trying manual show...');
+      manualShow(el);
+    }
+  } else {
+    L('bootstrap.Modal NOT AVAILABLE - manual show');
+    manualShow(el);
+  }
+}
+
+function manualShow(el){
+  L('manualShow() called');
+  el.style.display='block';
+  el.style.zIndex='13000';
+  el.classList.add('show');
+  el.setAttribute('aria-modal','true');
+  el.removeAttribute('aria-hidden');
+  document.body.style.overflow='hidden';
+  
+  var bd=document.createElement('div');
+  bd.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:12500;';
+  document.body.appendChild(bd);
+  L('manual: done. el.display='+el.style.display);
+  
+  setTimeout(function(){
+    L('--- manual After 300ms ---');
+    L('el visible: '+el.classList.contains('show'));
+    L('computed display: '+getComputedStyle(el).display);
+    L('computed zIndex: '+getComputedStyle(el).zIndex);
+  },300);
+}
+</script>
+</body>
+</html>

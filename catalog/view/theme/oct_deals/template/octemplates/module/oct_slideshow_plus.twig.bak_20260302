@@ -1,0 +1,165 @@
+{% if oct_slideshows_plus %}
+	<div class="ds-slideshow mt-3{% if slider_with_megamenu %} menu-active{% endif %}{% if paginations_status %} with-pagination{% endif %}">
+		<div id="slideshow-plus-{{ module }}" class="ds-slideshow-items swiper position-relative{% if slider_type == 1 %} ds-slideshow-items-vertical{% endif %}">
+			{% set key = 0 %}
+			<div class="swiper-wrapper mb-5{% if slider_type == 1 %} swiper-wrapper-grid{% endif %}">
+				{% for item_slide in oct_slideshows_plus %}
+					{% set key = key + 1 %}
+					<div class="{% if not full_img %}ds-slideshow-item br-7 content-block content-border d-flex flex-column align-items-center align-self-stretch ds-slideshow-plus-item_{{ key }}{% else %}ds-slideshow-item-full-img{% endif %}{% if slider_type == 1 %} ds-slideshow-item-vertical{% endif %} swiper-slide">
+						{% if full_img and item_slide.mobile_image %}
+							<div class="ds-slideshow-plus-item-fullimg h-100">
+								<a href="{{ item_slide.link }}" title="{{ item_slide.title }}">
+									<picture>
+										<source srcset="{{ item_slide.mobile_image }}" media="(max-width: 767px)">
+										<source srcset="{{ item_slide.image }}">
+										<img class="img-fluid br-4" src="{{ item_slide.image }}" alt="{{ item_slide.title }}" {% if oct_isMobile is defined %}width="{{ item_slide.mobile_width }}" height="{{ item_slide.mobile_height }}"{% else %}width="{{ item_slide.image_width }}" height="{{ item_slide.image_height }}"{% endif %}{% if key > 1 %} loading="lazy"{% endif %}>
+									</picture>
+								</a>
+							</div>
+						{% else %}
+							{% if slider_type == 1 %}
+								<div class="ds-slideshow-item-title fsz-24 fw-700 mb-4">{{ item_slide.title }}</div>
+								<div class="ds-slideshow-item-text fsz-20 mb-4">{{ item_slide.description }}</div>
+								<a class="mt-auto" href="{{ item_slide.link }}" aria-label="{{ item_slide.button }}">
+									<img src="{{ item_slide.image }}" alt="{{ item_slide.title }}" width="{{ item_slide.image_width }}" height="{{ item_slide.image_height }}"{% if key > 1 %} loading="lazy"{% endif %} class="mt-auto">
+								</a>
+								<div class="pt-4">
+									<a href="{{ item_slide.link }}" class="button button-outline button-outline-primary br-7">
+										<span class="button-text">{{ item_slide.button }}</span>
+									</a>
+								</div>
+							{% else %}
+								<div class="w-100 h-100 d-flex flex-column flex-sm-row justify-content-between gap-4">
+									<div class="ds-slideshow-item-horizontal ds-slideshow-item-info d-flex flex-column gap-4 order-1 order-sm-0">
+										<div class="ds-slideshow-item-title fsz-24 fw-700">{{ item_slide.title }}</div>
+										<div class="ds-slideshow-item-text fsz-20">{{ item_slide.description }}</div>
+										<div class="mt-auto">
+											<a href="{{ item_slide.link }}" class="button button-outline button-outline-primary br-7">
+												<span class="button-text">{{ item_slide.button }}</span>
+											</a>
+										</div>
+									</div>
+									<a href="{{ item_slide.link }}" aria-label="{{ item_slide.button }}" class="order-0 order-sm-1">
+										<img src="{{ item_slide.image }}" alt="{{ item_slide.title }}" width="{{ item_slide.image_width }}" height="{{ item_slide.image_height }}"{% if key > 1 %} loading="lazy"{% endif %} class="d-block mx-auto">
+									</a>
+								</div>
+							{% endif %}
+							<style>
+								{% if item_slide.background_color %}
+								#slideshow-plus-{{ module }} .ds-slideshow-plus-item_{{ key }} {background-color: {{ item_slide.background_color }};}
+								{% endif %}
+								{% if item_slide.title_color %}
+								#slideshow-plus-{{ module }} .ds-slideshow-plus-item_{{ key }} .ds-slideshow-item-title {color: {{ item_slide.title_color }};}
+								{% endif %}
+								{% if item_slide.text_color %}
+								#slideshow-plus-{{ module }} .ds-slideshow-plus-item_{{ key }} .ds-slideshow-item-text {color: {{ item_slide.text_color }};}
+								{% endif %}
+								{% if item_slide.button_color and item_slide.button_background %}
+								#slideshow-plus-{{ module }} .ds-slideshow-plus-item_{{ key }} .button {border-color: {{ item_slide.button_background }};}
+								#slideshow-plus-{{ module }} .ds-slideshow-plus-item_{{ key }} .button {color: {{ item_slide.button_color }};}
+								{% endif %}
+								{% if item_slide.button_color_hover and item_slide.button_background_hover %}
+								#slideshow-plus-{{ module }} .ds-slideshow-plus-item_{{ key }} .button:hover {background-color: {{ item_slide.button_background_hover }}; border-color: {{ item_slide.button_background_hover }};}
+								#slideshow-plus-{{ module }} .ds-slideshow-plus-item_{{ key }} .button:hover {color: {{ item_slide.button_color_hover }};}
+								{% endif %}
+							</style>
+						{% endif %}
+					</div>
+				{% endfor %}
+			</div>
+			{% if paginations_status %}
+				<div class="swiper-pagination swiper-pagination-{{ module }}"></div>
+			{% endif %}
+			{% if arrows_status %}
+				<div class="swiper-button-prev swiper-button-prev-{{ module }} button button-secondary button-with-icon br-4 overflow-hidden d-flex align-items-center justify-content-center py-3 px-1">
+					<svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="4" height="6" viewBox="0 0 4 6" fill="none">
+						<path d="M0.263207 2.99938C0.263207 2.87814 0.309287 2.75688 0.402114 2.66468L2.92803 0.138767C3.11305 -0.0462558 3.41303 -0.0462558 3.59805 0.138767C3.78307 0.323791 3.78307 0.623765 3.59805 0.808788L1.40684 3L3.59805 5.19121C3.78307 5.37624 3.78307 5.67621 3.59805 5.86123C3.41303 6.04626 3.11305 6.04626 2.92803 5.86123L0.402114 3.33532C0.309287 3.24186 0.263207 3.12063 0.263207 2.99938Z" fill="#003459"/>
+					</svg>
+				</div>
+				<div class="swiper-button-next swiper-button-next-{{ module }} button button-secondary button-with-icon br-4 overflow-hidden d-flex align-items-center justify-content-center py-3 px-1">
+					<svg class="me-0" xmlns="http://www.w3.org/2000/svg" width="4" height="6" viewBox="0 0 4 6" fill="none">
+						<path d="M0.263207 2.99938C0.263207 2.87814 0.309287 2.75688 0.402114 2.66468L2.92803 0.138767C3.11305 -0.0462558 3.41303 -0.0462558 3.59805 0.138767C3.78307 0.323791 3.78307 0.623765 3.59805 0.808788L1.40684 3L3.59805 5.19121C3.78307 5.37624 3.78307 5.67621 3.59805 5.86123C3.41303 6.04626 3.11305 6.04626 2.92803 5.86123L0.402114 3.33532C0.309287 3.24186 0.263207 3.12063 0.263207 2.99938Z" fill="#003459"/>
+					</svg>
+				</div>
+			{% endif %}
+		</div>
+		<script>
+			{% if full_img and item_slide.mobile_image %}
+				window.addEventListener('DOMContentLoaded', () => {
+					{% if slider_with_megamenu %}
+						if (window.innerWidth >= 1200) {
+							slideshowPlus();
+						}
+					{% endif %}
+
+					var dsSlideshowPlusSwiper = new Swiper('#slideshow-plus-{{ module }}', {
+						slidesPerView: 1,
+						spaceBetween: 0,
+						loop: true,
+						{% if autoplay_status %}
+							autoplay: {
+								delay: 5000,
+								disableOnInteraction: false,
+							},
+						{% endif %}
+						{% if paginations_status %}
+							pagination: {
+								el: '.swiper-pagination-{{ module }}',
+								clickable: true,
+							},
+						{% endif %}
+						{% if arrows_status %}
+							navigation: {
+								nextEl: '.swiper-button-next-{{ module }}',
+								prevEl: '.swiper-button-prev-{{ module }}',
+							},
+						{% endif %}
+					});
+				});
+			{% else %}
+				window.addEventListener('DOMContentLoaded', () => {
+					{% if slider_with_megamenu %}
+						if (window.innerWidth >= 1200) {
+							slideshowPlus();
+						}
+					{% endif %}
+
+					var dsSlideshowPlusSwiper = new Swiper('#slideshow-plus-{{ module }}', {
+						slidesPerView: {% if slider_type == 1 %}1.2{% else %}1{% endif %},
+						breakpoints: {
+							1200: {
+								slidesPerView: {% if slider_type == 1 %}3.3{% else %}1{% endif %},
+							},
+							1024: {
+								slidesPerView: {% if slider_type == 1 %}2.5{% else %}1{% endif %},
+							},
+							768: {
+								slidesPerView: {% if slider_type == 1 %}1.2{% else %}1{% endif %},
+							}
+						},
+						spaceBetween: {% if slider_type == 1 %}16{% else %}0{% endif %},
+						loop: true,
+						{% if autoplay_status %}
+							autoplay: {
+								delay: 5000,
+								disableOnInteraction: false,
+							},
+						{% endif %}
+						{% if paginations_status %}
+							pagination: {
+								el: '.swiper-pagination-{{ module }}',
+								clickable: true,
+							},
+						{% endif %}
+						{% if arrows_status %}
+							navigation: {
+								nextEl: '.swiper-button-next-{{ module }}',
+								prevEl: '.swiper-button-prev-{{ module }}',
+							},
+						{% endif %}
+					});
+				});
+			{% endif %}
+		</script>
+	</div>
+{% endif %}

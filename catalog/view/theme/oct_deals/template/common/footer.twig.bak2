@@ -378,7 +378,7 @@
 <script>
 $(function() {
 	if (getOCTCookie('oct_subscribe') == 'undefined') {
-		window._octSubscribeTimer = setTimeout(function(){
+		setTimeout(function(){
 			octPopupSubscribe();
 		}, {{ oct_subscribe_form_data.seconds ? oct_subscribe_form_data.seconds : '10000' }});
 
@@ -453,8 +453,5 @@ $(function() {
 {% endif %}
 {# OCFilter mobile fix: принудительная инициализация фильтра для Яндекс.Браузера на iPhone #}
 <script src="{{ base}}catalog/view/javascript/ocfilter-mobile-fix.js?v=22.0"></script>
-{# popup-dropdown-fix: закрывает dropdown/overlay перед открытием popup modal #}
-<script src="{{ base}}catalog/view/theme/oct_deals/js/popup-dropdown-fix.js?v=7.0"></script>
-
 </body>
 </html>

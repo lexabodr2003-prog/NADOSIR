@@ -14,5 +14,4 @@ session.cookie_httponly = On
 session.gc_maxlifetime = 3600
 allow_url_fopen = On
 ;display_errors = 1
-;error_reporting = E_ALL
-sendmail_from = info@kamtek.pro
+;error_reporting = E_ALLsendmail_from = info@kamtek.pro
