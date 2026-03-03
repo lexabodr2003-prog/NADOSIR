@@ -1,129 +1,104 @@
 /**
- * popup-dropdown-fix.js v2.0
+ * popup-dropdown-fix.js v3.0
  *
  * ROOT CAUSES FIXED:
  *
  * 1. z-index conflict:
- *    #overlay.active has z-index:12001 (oct_deals theme).
- *    CSS fix in kamtek-mobile-fixes.css raises modal z-index to 13000.
+ *    #overlay.active z-index:12001 hides Bootstrap modal (z-index:1055).
+ *    CSS fix in kamtek-mobile-fixes.css raises modal to 13000.
  *
- * 2. oct_subscribe race condition (main bug on homepage first visit):
- *    On first visit, footer.twig schedules octPopupSubscribe() via setTimeout.
- *    If user taps login button before the timer fires, both AJAX requests run.
- *    octPopupSubscribe() replaces .modal-holder content, overwriting loginModal HTML.
- *    FIX: Cancel the subscribe timer when any popup is opened.
+ * 2. oct_subscribe race condition - the REAL bug on homepage first visit:
+ *    footer.twig runs: window._octSubscribeTimer = setTimeout(octPopupSubscribe, N)
+ *    BEFORE main.min.js loads. v2.0 tried to intercept window.setTimeout but
+ *    the timer was already created before our script loaded - did not work.
+ *    v3.0 FIX: footer.twig now saves timer as window._octSubscribeTimer.
+ *    We simply call clearTimeout(window._octSubscribeTimer) when user opens login.
  *
  * 3. Missing error handler in octPopupLogin:
- *    If AJAX fails, masked("body", false) is never called → infinite loader.
- *    FIX: Wrap original function and add error/complete handler.
+ *    On AJAX failure masked spinner never removed -> infinite loader.
  *
- * 4. Dropdown stays open while modal loads:
- *    Close all dropdowns before any popup opens to prevent overlay blocking modal.
+ * 4. Dropdown must be closed before modal opens (overlay z-index conflict).
  */
 (function () {
   "use strict";
 
-  // ── Utility: close all dropdowns ─────────────────────────────
   function closeAllDropdowns() {
     var overlay = document.getElementById("overlay");
-    var dropdowns = document.querySelectorAll(".ds-dropdown-box.active");
-    dropdowns.forEach(function (d) { d.classList.remove("active"); });
-    if (overlay) { overlay.classList.remove("active"); }
+    document.querySelectorAll(".ds-dropdown-box.active").forEach(function (d) {
+      d.classList.remove("active");
+    });
+    if (overlay) overlay.classList.remove("active");
   }
-
-  // ── Cancel subscribe timer ────────────────────────────────────
-  // The subscribe auto-popup timer id is stored here after we intercept it.
-  var _subscribeTimerId = null;
 
   function cancelSubscribeTimer() {
-    if (_subscribeTimerId !== null) {
-      clearTimeout(_subscribeTimerId);
-      _subscribeTimerId = null;
-      console.log("[popup-fix] subscribe timer cancelled");
+    if (window._octSubscribeTimer) {
+      clearTimeout(window._octSubscribeTimer);
+      window._octSubscribeTimer = null;
+      console.log("[popup-fix v3] subscribe timer cancelled");
     }
   }
 
-  // Intercept setTimeout to catch the oct_subscribe timer.
-  // The timer is scheduled via: setTimeout(function(){ octPopupSubscribe(); }, N)
-  // We detect it by checking if the callback string contains "octPopupSubscribe".
-  var _origSetTimeout = window.setTimeout;
-  window.setTimeout = function (fn, delay) {
-    var fnStr = (typeof fn === "function") ? fn.toString() : String(fn);
-    var id = _origSetTimeout.apply(window, arguments);
-    if (fnStr.indexOf("octPopupSubscribe") !== -1) {
-      _subscribeTimerId = id;
-      console.log("[popup-fix] caught subscribe timer id=" + id + " delay=" + delay);
-    }
-    return id;
-  };
-
-  // ── Patch a popup function ────────────────────────────────────
-  function patchPopupFn(name) {
+  function patchLoginFn(name) {
     var original = window[name];
     if (typeof original !== "function") return false;
 
-    if (name === "octPopupLogin" || name === "octPopupOTPLogin") {
-      // Full replacement with error handler + subscribe cancel
-      window[name] = function () {
-        cancelSubscribeTimer();
-        closeAllDropdowns();
-        // Remove existing loader and backdrop before starting
-        window.masked && masked("body", false);
-        $(".modal-backdrop").remove();
-        masked("body", true);
-        $.ajax({
-          type: "post",
-          dataType: "html",
-          url: name === "octPopupLogin"
-            ? "index.php?route=octemplates/module/oct_popup_login"
-            : "index.php?route=octemplates/module/oct_otp_login",
-          data: "",
-          cache: false,
-          success: function (e) {
-            masked("body", false);
-            $(".modal-holder").html(e);
-            var modalId = name === "octPopupLogin" ? "#loginModal" : "#otpModal";
-            $(modalId).modal("show");
-            window.popupClose && popupClose();
-          },
-          error: function (xhr, status, err) {
-            masked("body", false);
-            console.error("[popup-fix] " + name + " AJAX error:", status, err);
-          }
-        });
-      };
-    } else {
-      // Generic patch: cancel subscribe + close dropdowns
-      window[name] = function () {
-        cancelSubscribeTimer();
-        closeAllDropdowns();
-        return original.apply(this, arguments);
-      };
-    }
+    window[name] = function () {
+      cancelSubscribeTimer();
+      closeAllDropdowns();
+      if (typeof masked === "function") masked("body", false);
+      $(".modal-backdrop").remove();
+      masked("body", true);
+      $.ajax({
+        type: "post",
+        dataType: "html",
+        url: name === "octPopupLogin"
+          ? "index.php?route=octemplates/module/oct_popup_login"
+          : "index.php?route=octemplates/module/oct_otp_login",
+        data: "",
+        cache: false,
+        success: function (html) {
+          masked("body", false);
+          $(".modal-holder").html(html);
+          $(name === "octPopupLogin" ? "#loginModal" : "#otpModal").modal("show");
+          if (typeof popupClose === "function") popupClose();
+        },
+        error: function (xhr, status, err) {
+          masked("body", false);
+          console.error("[popup-fix v3] " + name + " failed:", status, err);
+        }
+      });
+    };
     return true;
   }
 
-  var POPUP_FNS = [
-    "octPopupLogin", "octPopupOTPLogin", "octPopupCallPhone",
-    "octPopupCart", "octPopupSubscribe", "octPopupFoundCheaper",
-    "octPopupProductOptions"
-  ];
-
-  function applyPatches() {
-    POPUP_FNS.forEach(function (name) { patchPopupFn(name); });
-    console.log("[popup-fix] v2.0 patches applied");
+  function patchGenericFn(name) {
+    var original = window[name];
+    if (typeof original !== "function") return false;
+    window[name] = function () {
+      cancelSubscribeTimer();
+      closeAllDropdowns();
+      return original.apply(this, arguments);
+    };
+    return true;
   }
 
-  // Wait for octPopupLogin to be defined (it lives in main.min.js loaded via footer scripts)
+  function applyPatches() {
+    patchLoginFn("octPopupLogin");
+    patchLoginFn("octPopupOTPLogin");
+    ["octPopupCallPhone", "octPopupCart", "octPopupFoundCheaper",
+     "octPopupProductOptions"].forEach(patchGenericFn);
+    console.log("[popup-fix v3] patches applied. subscribeTimer=", window._octSubscribeTimer);
+  }
+
   var attempts = 0;
-  var timer = setInterval(function () {
+  var pollTimer = setInterval(function () {
     attempts++;
     if (typeof octPopupLogin === "function") {
+      clearInterval(pollTimer);
       applyPatches();
-      clearInterval(timer);
-    } else if (attempts > 100) {
-      clearInterval(timer);
-      console.warn("[popup-fix] octPopupLogin not found after 5s");
+    } else if (attempts >= 100) {
+      clearInterval(pollTimer);
+      console.warn("[popup-fix v3] octPopupLogin not found after 5s");
     }
   }, 50);
 
