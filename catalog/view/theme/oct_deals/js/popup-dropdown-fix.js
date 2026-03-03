@@ -1,7 +1,9 @@
 /**
- * popup-dropdown-fix.js v6.0
+ * popup-dropdown-fix.js v6.1
  *
- * New approach: manual CSS-based modal display for iOS reliability.
+ * Manual CSS-based modal display for iOS reliability.
+ * Fixed: use individual style properties instead of cssText
+ * to preserve Bootstrap CSS variables and modal-dialog layout.
  */
 (function () {
   'use strict';
@@ -34,12 +36,21 @@
   }
 
   function showModalManual(el) {
+    // Создаём backdrop
     var backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop show';
-    backdrop.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:12500;';
+    backdrop.style.position = 'fixed';
+    backdrop.style.top = '0';
+    backdrop.style.left = '0';
+    backdrop.style.width = '100%';
+    backdrop.style.height = '100%';
+    backdrop.style.background = 'rgba(0,0,0,0.5)';
+    backdrop.style.zIndex = '12500';
     document.body.appendChild(backdrop);
 
-    el.style.cssText = 'display:block;position:fixed;top:0;left:0;width:100%;height:100%;z-index:13000;overflow-x:hidden;overflow-y:auto;outline:0;';
+    // Показываем modal - только необходимые свойства
+    el.style.display = 'block';
+    el.style.zIndex = '13000';
     el.classList.add('show');
     el.setAttribute('aria-modal', 'true');
     el.setAttribute('role', 'dialog');
@@ -50,6 +61,7 @@
     function doClose() {
       el.classList.remove('show');
       el.style.display = 'none';
+      el.style.zIndex = '';
       el.setAttribute('aria-hidden', 'true');
       el.removeAttribute('aria-modal');
       el.removeAttribute('role');
@@ -62,34 +74,41 @@
     el.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function(btn) {
       btn.addEventListener('click', doClose);
     });
-    console.log('[popup-fix v6] Manual modal shown: #' + el.id);
+    console.log('[popup-fix v6.1] Manual modal shown: #' + el.id);
   }
 
   function showModalDirect(modalId) {
     var id = modalId.replace('#', '');
     var el = document.getElementById(id);
     if (!el) {
-      console.error('[popup-fix v6] modal #' + id + ' NOT FOUND');
+      console.error('[popup-fix v6.1] modal #' + id + ' NOT FOUND in DOM');
       return;
     }
 
+    // Убираем fade анимацию (вызывает проблемы на iOS)
     el.classList.remove('fade');
     closeAllDropdowns();
     document.querySelectorAll('.modal-backdrop').forEach(function(b) { b.remove(); });
 
+    // Пробуем Bootstrap API
     if (window.bootstrap && window.bootstrap.Modal) {
       try {
         var existing = window.bootstrap.Modal.getInstance(el);
         if (existing) { try { existing.dispose(); } catch(e) {} }
-        var bsModal = new window.bootstrap.Modal(el, { backdrop: true, keyboard: true, focus: true });
+        var bsModal = new window.bootstrap.Modal(el, {
+          backdrop: true,
+          keyboard: true,
+          focus: true
+        });
         bsModal.show();
-        console.log('[popup-fix v6] Bootstrap Modal.show() OK: #' + id);
+        console.log('[popup-fix v6.1] Bootstrap Modal.show() OK: #' + id);
         return;
       } catch(e) {
-        console.warn('[popup-fix v6] Bootstrap Modal failed, using manual:', e.message);
+        console.warn('[popup-fix v6.1] Bootstrap Modal failed, using manual:', e.message);
       }
     }
 
+    // Фолбэк: ручное управление
     showModalManual(el);
   }
 
@@ -117,7 +136,7 @@
         success: function (html) {
           clearLoader();
           if (!html || html.trim() === '') {
-            console.error('[popup-fix v6] Empty AJAX response');
+            console.error('[popup-fix v6.1] Empty AJAX response for', name);
             return;
           }
           jQuery('.modal-holder').html(html);
@@ -127,7 +146,7 @@
         },
         error: function (xhr, status, err) {
           clearLoader();
-          console.error('[popup-fix v6] AJAX error:', status, err, 'HTTP:', xhr.status);
+          console.error('[popup-fix v6.1] AJAX error:', status, err, 'HTTP:', xhr.status);
         }
       });
     };
@@ -162,7 +181,7 @@
     ['octPopupCallPhone', 'octPopupCart', 'octPopupFoundCheaper',
      'octPopupProductOptions'].forEach(patchGenericFn);
     addTouchBridge();
-    console.log('[popup-fix v6] patches applied');
+    console.log('[popup-fix v6.1] patches applied');
   }
 
   var attempts = 0;
@@ -173,7 +192,7 @@
       applyPatches();
     } else if (attempts >= 200) {
       clearInterval(pollTimer);
-      console.warn('[popup-fix v6] octPopupLogin not found after 10s');
+      console.warn('[popup-fix v6.1] octPopupLogin not found after 10s');
     }
   }, 50);
 
